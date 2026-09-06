@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\TeamType;
+use App\Models\Concerns\BelongsToShop;
 use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,9 +11,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Team extends Model
 {
-    use BelongsToTenant;
+    use BelongsToShop, BelongsToTenant;
 
-    protected $fillable = ['name', 'type', 'leader_user_id', 'parent_id', 'permissions'];
+    protected $fillable = ['shop_id', 'name', 'type', 'leader_user_id', 'parent_id', 'permissions'];
 
     protected function casts(): array
     {

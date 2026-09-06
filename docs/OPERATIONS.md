@@ -7,8 +7,10 @@ End-to-end ops for humans and agents. Tech contract: [PROJECT_CONTRACT.md](./PRO
 ```text
 Landing / ads → Lead ingest → Sale tác nghiệp (4.1)
   → Chốt đơn → Kho đăng đơn (5.1) → Vận chuyển
-  → Kế toán đối soát (6.1) → Báo cáo / CEO
+    → Kế toán đối soát (6.1) → Báo cáo / CEO
 ```
+
+Mọi lead/đơn/kho/SP gắn `shop_id` (cửa hàng đang chọn hoặc shop của campaign/landing). Đổi cửa hàng bằng ShopSwitcher trên header — màn hình vận hành chỉ thấy data shop hiện tại. So sánh đa shop: `/admin/shops/overview` (TLC / TLH / doanh số / MKT / tồn).
 
 ## Marketing — Landing connection (2.4.1)
 

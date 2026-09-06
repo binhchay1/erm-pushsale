@@ -6,6 +6,7 @@ use App\Enums\OrgLevel;
 use App\Enums\UserRole;
 use App\Models\Company;
 use App\Models\User;
+use App\Services\Shops\ShopProvisioningService;
 use App\Support\TenantEmail;
 use App\Support\TenantManager;
 use Illuminate\Support\Facades\DB;
@@ -63,6 +64,8 @@ class CompanyProvisioningService
             $owner->ensurePreferences();
             $company->update(['owner_user_id' => $owner->id]);
 
+            app(ShopProvisioningService::class)->ensureDefaultShop($company);
+
             return [
                 'company' => $company,
                 'owner' => $owner,
@@ -99,6 +102,10 @@ class CompanyProvisioningService
         ]);
 
         $admin->ensurePreferences();
+
+        $defaultShop = app(ShopProvisioningService::class)->ensureDefaultShop($company);
+        $defaultShop->users()->syncWithoutDetaching([$admin->id]);
+        $admin->forceFill(['default_shop_id' => $defaultShop->id])->save();
 
         return ['admin' => $admin, 'default_password' => $password];
     }

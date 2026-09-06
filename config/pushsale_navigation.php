@@ -24,6 +24,19 @@ return array (
             'url' => '/admin/company/subscription-history',
             'code' => '1.1.2',
           ),
+          2 => 
+          array (
+            'title' => '1.1.3 Quản lý cửa hàng',
+            'url' => '/admin/shops',
+            'code' => '1.1.3',
+          ),
+          3 => 
+          array (
+            'title' => '1.1.4 Tổng quan cửa hàng',
+            'url' => '/admin/shops/overview',
+            'code' => '1.1.4',
+            'area' => 'reports',
+          ),
         ),
       ),
       1 => 

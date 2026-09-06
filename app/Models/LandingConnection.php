@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToShop;
 use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,10 +12,10 @@ use Illuminate\Support\Str;
 
 class LandingConnection extends Model
 {
-    use BelongsToTenant, SoftDeletes;
+    use BelongsToShop, BelongsToTenant, SoftDeletes;
 
     protected $fillable = [
-        'company_id', 'marketing_source_id', 'name', 'marketer_user_id', 'connection_type',
+        'company_id', 'shop_id', 'marketing_source_id', 'name', 'marketer_user_id', 'connection_type',
         'ad_channel', 'allocation_method', 'budget_type', 'budget_amount', 'budget_start_date', 'budget_end_date',
         'public_token', 'success_url', 'manual_import',
         'is_approved', 'is_active', 'metadata', 'approved_by_user_id', 'approved_at',

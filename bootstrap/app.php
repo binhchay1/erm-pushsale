@@ -9,6 +9,7 @@ use App\Http\Middleware\EnsurePlatformAdmin;
 use App\Http\Middleware\EnsureUserHasRole;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\SetLocale;
+use App\Http\Middleware\SetCurrentShop;
 use App\Http\Middleware\SetTenant;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
@@ -57,6 +58,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => EnsureUserHasRole::class,
             'tenant' => SetTenant::class,
+            'shop' => SetCurrentShop::class,
             'platform' => EnsurePlatformAdmin::class,
             'permissions' => EnforcePermissions::class,
         ]);

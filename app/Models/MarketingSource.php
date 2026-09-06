@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\CampaignLeadAllocation;
+use App\Models\Concerns\BelongsToShop;
 use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,7 +13,7 @@ use Illuminate\Support\Str;
 
 class MarketingSource extends Model
 {
-    use BelongsToTenant;
+    use BelongsToShop, BelongsToTenant;
 
     protected static function booted(): void
     {
@@ -30,7 +31,7 @@ class MarketingSource extends Model
     }
 
     protected $fillable = [
-        'company_id', 'parent_id', 'name', 'product_id', 'marketer_user_id', 'created_by_user_id', 'ad_channel',
+        'company_id', 'shop_id', 'parent_id', 'name', 'product_id', 'marketer_user_id', 'created_by_user_id', 'ad_channel',
         'utm_source', 'utm_campaign', 'webhook_token', 'budget', 'interactions', 'contacts',
         'is_active', 'is_approved', 'lead_allocation', 'js_tracking_enabled', 'approved_by_user_id', 'approved_at',
         'rejected_by_user_id', 'rejected_at', 'rejection_reason',

@@ -11,6 +11,8 @@ use App\Http\Controllers\Admin\Company\ElectronicInvoiceConfigController;
 use App\Http\Controllers\Admin\Company\SubscriptionHistoryController;
 use App\Http\Controllers\Admin\CompanyProfileController;
 use App\Http\Controllers\Admin\CompanySettingsController;
+use App\Http\Controllers\Admin\ShopController;
+use App\Http\Controllers\Admin\ShopOverviewController;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
@@ -23,6 +25,13 @@ Route::get('company/subscription-history', [SubscriptionHistoryController::class
 Route::post('company/subscription-history/records', [SubscriptionHistoryController::class, 'store'])->name('company.subscription-history.store');
 Route::match(['put', 'patch'], 'company/subscription-history/records/{record}', [SubscriptionHistoryController::class, 'update'])->whereNumber('record')->name('company.subscription-history.update');
 Route::delete('company/subscription-history/records/{record}', [SubscriptionHistoryController::class, 'destroy'])->whereNumber('record')->name('company.subscription-history.destroy');
+
+// 1.1.3 / 1.1.4 Cửa hàng + tổng quan đa shop
+Route::get('shops/overview', ShopOverviewController::class)->name('shops.overview');
+Route::get('shops', [ShopController::class, 'index'])->name('shops.index');
+Route::post('shops', [ShopController::class, 'store'])->name('shops.store');
+Route::match(['put', 'patch'], 'shops/{shop}', [ShopController::class, 'update'])->whereNumber('shop')->name('shops.update');
+Route::delete('shops/{shop}', [ShopController::class, 'destroy'])->whereNumber('shop')->name('shops.destroy');
 
 // 1.14.1 Danh sách cấu hình hóa đơn điện tử
 Route::get('unit/electronic-invoice-configs', [ElectronicInvoiceConfigController::class, 'index'])->name('unit.electronic-invoice-configs');

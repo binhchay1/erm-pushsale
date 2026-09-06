@@ -27,6 +27,7 @@
 | Deploy | `docs/DEPLOY.md` |
 | Index docs | `docs/README.md` |
 | CSS orphan | `resources/css/_archive/` (không import lại) |
+| Multi-shop | `app/Models/Shop.php`, `BelongsToShop`, `SetCurrentShop`, `ShopSwitcher`, `/admin/shops` |
 
 ## 2. Đặt tên theo menu
 

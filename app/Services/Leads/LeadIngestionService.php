@@ -13,6 +13,7 @@ use App\Events\SaleWorkspaceChanged;
 use App\Integrations\IntegrationDriverFactory;
 use App\Jobs\Leads\FinalizeLandingLeadJob;
 use App\Jobs\Leads\FinalizeLandingSupplementPacketJob;
+use App\Models\LandingConnection;
 use App\Models\LandingSession;
 use App\Models\LeadIngestion;
 use App\Models\MarketingSource;
@@ -603,6 +604,7 @@ class LeadIngestionService
                 'status' => LeadIngestionStatus::Processed,
                 'packet_type' => $packetType,
                 'counts_as_lead' => false,
+                'shop_id' => $lead->shop_id ?: $campaign->shop_id,
                 'customer_name' => $normalized['customer_name'] ?? $lead->customer_name,
                 'customer_phone' => $lead->customer_phone,
                 'product_interest' => $normalized['product_interest'] ?? null,
@@ -733,6 +735,7 @@ class LeadIngestionService
                 'status' => LeadIngestionStatus::Processed,
                 'packet_type' => $packetType,
                 'counts_as_lead' => false,
+                'shop_id' => $order->shop_id ?: $campaign->shop_id,
                 'customer_name' => $normalized['customer_name'] ?? $order->customer_name,
                 'customer_phone' => $order->customer_phone,
                 'product_interest' => $normalized['product_interest'] ?? null,
@@ -908,6 +911,7 @@ class LeadIngestionService
                 'status' => LeadIngestionStatus::NeedsReview,
                 'packet_type' => LeadPacketType::LateUpsell,
                 'counts_as_lead' => false,
+                'shop_id' => $relatedOrder->shop_id ?: $campaign->shop_id,
                 'customer_name' => $normalized['customer_name'] ?? $relatedOrder->customer_name,
                 'customer_phone' => $relatedOrder->customer_phone,
                 'product_interest' => $normalized['product_interest'] ?? null,
@@ -1771,6 +1775,11 @@ class LeadIngestionService
                 'status' => $status,
                 'packet_type' => LeadPacketType::Lead,
                 'counts_as_lead' => ! $duplicateOrder,
+                'shop_id' => $campaign?->shop_id
+                    ?: ($landingConnectionId
+                        ? LandingConnection::query()->withoutGlobalScopes()->whereKey($landingConnectionId)->value('shop_id')
+                        : null)
+                    ?: app(\App\Support\TenantManager::class)->shopId(),
                 'customer_name' => $normalized['customer_name'],
                 'customer_phone' => $normalized['customer_phone'],
                 'product_interest' => $normalized['product_interest'],
@@ -2106,6 +2115,7 @@ class LeadIngestionService
             'status' => LeadIngestionStatus::Failed,
             'packet_type' => $packetType,
             'counts_as_lead' => $countsAsLead,
+            'shop_id' => app(\App\Support\TenantManager::class)->shopId(),
             'payload' => $payload,
             'error_message' => $message,
             'processed_at' => now(),

@@ -18,8 +18,20 @@ Living contract. Agent conventions: root `AGENTS.md`. Docs index: `docs/README.m
 | Sidebar + L3 | `AppSidebar.jsx` + `usePushsaleSidebarMenu.js` + `pushsale-sidebar-canonical-contract.css` |
 | Ops table cells | `components/operations/cells/OpsTableCells.jsx` + `OrderLineBreakdown.jsx` |
 | Orphan CSS | `resources/css/_archive/` (not loaded) |
+| Multi-shop | `shops` + `BelongsToShop` / `ShopScope` + `SetCurrentShop` + `ShopSwitcher` |
 
 Do **not** create `CONTEXT_HANDOFF_V*` / versioned UI docs / HTML templates under `docs/`. Update this file, `AGENTS.md`, or the slim set in `docs/README.md`.
+
+## 0a. Multi-shop (Company → Shop)
+
+- **Company** = tenant (`company_id`, `TenantManager`, `BelongsToTenant`).
+- **Shop** = đơn vị vận hành trong company (`shops`, `shop_id` trên orders/leads/warehouses/products/teams/marketing_sources/landing_connections).
+- Middleware stack: `auth` → `tenant` → `shop` → `permissions`. Session key `current_shop_id`.
+- `ShopSwitcher` trong `AppHeader`; đổi shop → `POST /shop/current`.
+- Trang so sánh: `/admin/shops/overview` (bypass `ShopScope`). CRUD: `/admin/shops` (menu 1.1.3 / 1.1.4).
+- **TLC** = closed contacts / contacts. **TLH** = appointment orders (`next_operation_at`) / contacts.
+- Không shop-scope: shipping partners, work shifts, phone blacklist, AppSetting, users org chart.
+- `EcommerceShopConnection.shop_id` / Pancake = ID sàn ngoài, **không** phải org Shop.
 
 ## 0b. Route & menu naming
 

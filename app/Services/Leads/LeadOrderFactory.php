@@ -93,6 +93,10 @@ class LeadOrderFactory
         $order = Order::query()->create([
             // Mã đơn chỉ được cấp khi sale chốt đơn thành công.
             'order_code' => null,
+            'shop_id' => $lead->shop_id
+                ?: $landingConnection?->shop_id
+                ?: $source->shop_id
+                ?: app(\App\Support\TenantManager::class)->shopId(),
             'sale_user_id' => $saleUser?->id,
             'marketer_user_id' => $source->marketer_user_id,
             'marketing_source_id' => $source->id,

@@ -13,13 +13,14 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['company_id', 'name', 'email', 'password', 'role', 'is_owner', 'is_platform_admin', 'is_active', 'avatar_path', 'phone', 'job_title', 'team_id', 'manager_user_id', 'created_by_user_id', 'is_team_leader', 'org_level', 'permissions'])]
+#[Fillable(['company_id', 'default_shop_id', 'name', 'email', 'password', 'role', 'is_owner', 'is_platform_admin', 'is_active', 'avatar_path', 'phone', 'job_title', 'team_id', 'manager_user_id', 'created_by_user_id', 'is_team_leader', 'org_level', 'permissions'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -200,6 +201,16 @@ class User extends Authenticatable
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
+    }
+
+    public function defaultShop(): BelongsTo
+    {
+        return $this->belongsTo(Shop::class, 'default_shop_id');
+    }
+
+    public function shops(): BelongsToMany
+    {
+        return $this->belongsToMany(Shop::class)->withTimestamps();
     }
 
     public function manager(): BelongsTo

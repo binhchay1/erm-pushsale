@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Casts\LegacyLeadPacketType;
 use App\Enums\LeadIngestionStatus;
+use App\Models\Concerns\BelongsToShop;
 use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -12,9 +13,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class LeadIngestion extends Model
 {
-    use BelongsToTenant;
+    use BelongsToShop, BelongsToTenant;
 
     protected $fillable = [
+        'shop_id',
         'platform',
         'external_id',
         'status',

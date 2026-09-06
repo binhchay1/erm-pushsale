@@ -12,6 +12,7 @@
  */
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\CurrentShopController;
 use App\Http\Controllers\CustomerInteractions\CustomerDataViewHistoryController;
 use App\Http\Controllers\CustomerInteractions\CustomerInternalMessageController;
 use App\Http\Controllers\CustomerInteractions\CustomerProfileBulkActionController;
@@ -33,7 +34,7 @@ use App\Http\Controllers\Testing\StagingTestController;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
 
-Broadcast::routes(['middleware' => ['web', 'auth', 'tenant']]);
+Broadcast::routes(['middleware' => ['web', 'auth', 'tenant', 'shop']]);
 
 /*
 |--------------------------------------------------------------------------
@@ -73,7 +74,7 @@ Route::middleware('guest')->group(function (): void {
     Route::post('login', [LoginController::class, 'store']);
 });
 
-Route::middleware(['auth', 'tenant', 'permissions'])->group(function (): void {
+Route::middleware(['auth', 'tenant', 'shop', 'permissions'])->group(function (): void {
     Route::post('logout', [LoginController::class, 'destroy'])->name('logout');
 
     /*
@@ -81,6 +82,7 @@ Route::middleware(['auth', 'tenant', 'permissions'])->group(function (): void {
     | Dùng chung cho mọi vai trò
     |----------------------------------------------------------------------
     */
+    Route::post('shop/current', CurrentShopController::class)->name('shop.current');
     Route::get('org-chart', [OrgChartController::class, 'index'])->name('org-chart.index');
 
     // Địa giới hành chính cho ô chọn Tỉnh/Huyện/Xã (cascading).

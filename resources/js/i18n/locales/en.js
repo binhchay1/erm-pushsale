@@ -7,6 +7,7 @@ export default {
         create: 'Create',
         search: 'Search',
         filter: 'Filter',
+        apply: 'Apply',
         export: 'Export',
         loading: 'Loading…',
         no_data: 'No data',

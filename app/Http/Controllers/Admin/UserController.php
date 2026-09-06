@@ -173,6 +173,14 @@ class UserController extends Controller
         $user = User::query()->create($data);
         $this->syncOperationalProfile($user, $profileData);
 
+        $shopId = app(\App\Support\TenantManager::class)->shopId() ?: $user->company?->shops()->where('is_default', true)->value('id');
+        if ($shopId) {
+            $user->shops()->syncWithoutDetaching([(int) $shopId]);
+            if (! $user->default_shop_id) {
+                $user->forceFill(['default_shop_id' => (int) $shopId])->save();
+            }
+        }
+
         ActivityLogger::log(
             ActivityLogger::USER_CREATED,
             $user,

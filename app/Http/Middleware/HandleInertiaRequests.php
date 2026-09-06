@@ -5,6 +5,8 @@ namespace App\Http\Middleware;
 use App\Models\UserNotification;
 use App\Services\LabelRegistry;
 use App\Services\NavigationService;
+use App\Services\Shops\ShopProvisioningService;
+use App\Support\TenantManager;
 use App\Support\UiShell;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -50,6 +52,8 @@ class HandleInertiaRequests extends Middleware
                 ->count();
         }
 
+        $shopPayload = $this->shopPayload($user);
+
         return [
             ...parent::share($request),
             'locale' => app()->getLocale(),
@@ -79,8 +83,12 @@ class HandleInertiaRequests extends Middleware
                     'avatar_url' => $user->avatarUrl(),
                     'initials' => $user->initials(),
                     'org_level_label' => $user->orgLevelLabel(),
+                    'shops' => $shopPayload['shops'],
+                    'current_shop' => $shopPayload['current_shop'],
                 ] : null,
             ],
+            'shops' => $shopPayload['shops'],
+            'current_shop' => $shopPayload['current_shop'],
             'navigation' => app(NavigationService::class)->forUser($user),
             'preferences' => $preferences,
             'brand' => array_merge(config('saleops.brand'), [
@@ -104,5 +112,30 @@ class HandleInertiaRequests extends Middleware
             'notifications' => $notifications,
             'notificationsUnread' => $notificationsUnread,
         ];
+    }
+
+    /**
+     * @return array{shops: list<array<string,mixed>>, current_shop: array<string,mixed>|null}
+     */
+    private function shopPayload(?\App\Models\User $user): array
+    {
+        if (! $user || ! $user->company_id) {
+            return ['shops' => [], 'current_shop' => null];
+        }
+
+        try {
+            $provisioning = app(ShopProvisioningService::class);
+            $shops = $provisioning->accessibleShopsFor($user);
+            $currentId = app(TenantManager::class)->shopId();
+            $current = collect($shops)->first(fn ($shop) => (int) $shop->id === (int) $currentId);
+
+            return [
+                'shops' => array_map(fn ($shop) => $shop->toFrontendArray(), $shops),
+                'current_shop' => $current?->toFrontendArray(),
+            ];
+        } catch (\Throwable) {
+            // Migration chưa chạy / bảng shops chưa có — không phá shell.
+            return ['shops' => [], 'current_shop' => null];
+        }
     }
 }

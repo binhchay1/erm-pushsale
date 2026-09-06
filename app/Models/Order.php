@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Data\ReportFilterData;
+use App\Models\Concerns\BelongsToShop;
 use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -12,10 +13,10 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Order extends Model
 {
-    use BelongsToTenant;
+    use BelongsToShop, BelongsToTenant;
 
     protected $fillable = [
-        'order_code', 'sale_user_id', 'marketer_user_id', 'team_id', 'marketing_source_id', 'landing_connection_id', 'landing_connection_source_id',
+        'shop_id', 'order_code', 'sale_user_id', 'marketer_user_id', 'team_id', 'marketing_source_id', 'landing_connection_id', 'landing_connection_source_id',
         'warehouse_id', 'product_id', 'customer_name', 'customer_phone', 'phone_carrier',
         'customer_note', 'sale_operation_note', 'shipping_address', 'shipping_address_2', 'receiver_name', 'receiver_phone', 'shipping_notes', 'accounting_notes',
         'internal_recon_note', 'shipping_geo', 'data_arrived_at', 'landing_upsell_hold_until', 'landing_upsell_locked',

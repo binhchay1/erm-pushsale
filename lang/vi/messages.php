@@ -73,6 +73,14 @@ return [
         'owner_title' => 'Chủ sở hữu doanh nghiệp',
         'invalid_email_suffix' => 'Email phải kết thúc bằng :suffix theo định danh doanh nghiệp.',
     ],
+    'shops' => [
+        'default_name' => 'Cửa hàng chính',
+        'created' => 'Đã tạo cửa hàng.',
+        'updated' => 'Đã cập nhật cửa hàng.',
+        'deleted' => 'Đã xóa cửa hàng.',
+        'cannot_delete_default' => 'Không thể xóa cửa hàng mặc định.',
+        'cannot_delete_with_orders' => 'Cửa hàng đã có đơn — không thể xóa.',
+    ],
     'platform' => [
         'company_created' => 'Đã tạo doanh nghiệp và tài khoản admin tổng.',
         'company_updated' => 'Đã cập nhật thông tin doanh nghiệp.',

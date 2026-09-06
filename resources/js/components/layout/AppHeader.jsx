@@ -3,6 +3,7 @@ import { Link, usePage } from '@inertiajs/react';
 import { LanguageToggle } from '@/components/layout/LanguageToggle';
 import { NotificationBell } from '@/components/layout/NotificationBell';
 import { PageInfoButton } from '@/components/layout/PageInfoButton';
+import { ShopSwitcher } from '@/components/layout/ShopSwitcher';
 import { UserMenu } from '@/components/layout/UserMenu';
 
 function currentUserTitle(user, brand) {
@@ -54,6 +55,7 @@ export function AppHeader({ onToggleSidebar }) {
 
             <div className="pushsale-header-tools">
                 <PageInfoButton className="is-header" />
+                <ShopSwitcher pushsaleStyle />
                 <LanguageToggle pushsaleStyle />
                 <NotificationBell pushsaleStyle />
                 <span className="pushsale-header-icon" aria-hidden="true" title="Thông báo hệ thống">

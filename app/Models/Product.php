@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToShop;
 use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,9 +11,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Product extends Model
 {
-    use BelongsToTenant;
+    use BelongsToShop, BelongsToTenant;
 
-    protected $fillable = ['parent_id', 'name', 'type', 'sku', 'unit', 'unit_price', 'cost_price', 'vat_percent', 'vat_code', 'barcode', 'weight_grams', 'length_cm', 'width_cm', 'height_cm', 'warehouse_location', 'is_active', 'available_marketing', 'available_sale', 'available_care', 'marketing_team_ids', 'marketing_user_ids', 'sale_team_ids', 'sale_user_ids', 'care_team_ids', 'care_user_ids'];
+    protected $fillable = ['shop_id', 'parent_id', 'name', 'type', 'sku', 'unit', 'unit_price', 'cost_price', 'vat_percent', 'vat_code', 'barcode', 'weight_grams', 'length_cm', 'width_cm', 'height_cm', 'warehouse_location', 'is_active', 'available_marketing', 'available_sale', 'available_care', 'marketing_team_ids', 'marketing_user_ids', 'sale_team_ids', 'sale_user_ids', 'care_team_ids', 'care_user_ids'];
 
     protected $attributes = ['type' => 'product'];
 

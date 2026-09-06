@@ -3,17 +3,27 @@
 namespace App\Support;
 
 /**
- * Giữ "công ty hiện tại" cho vòng đời request/job.
+ * Giữ "công ty hiện tại" + "cửa hàng hiện tại" cho vòng đời request/job.
  *
- * - hasContext = true + id != null  → mọi truy vấn Eloquent t\u1ef1 l\u1ecdc theo company_id n\u00e0y.
- * - hasContext = true + id == null  → super admin n\u1ec1n t\u1ea3ng: th\u1ea5y to\u00e0n b\u1ed9 (kh\u00f4ng l\u1ecdc).
- * - hasContext = false              → lu\u1ed3ng h\u1ec7 th\u1ed1ng (console/webhook tr\u01b0\u1edbc khi resolve) \u2014 kh\u00f4ng l\u1ecdc, kh\u00f4ng t\u1ef1 g\u00e1n.
+ * Company:
+ * - hasContext = true + id != null  → Eloquent lọc theo company_id.
+ * - hasContext = true + id == null  → platform: thấy toàn bộ (không lọc).
+ * - hasContext = false              → console/webhook trước khi resolve — không lọc, không tự gán.
+ *
+ * Shop (chỉ khi model dùng BelongsToShop):
+ * - hasShopContext = true + shopId != null → lọc theo shop_id.
+ * - hasShopContext = true + shopId == null → all shops trong company.
+ * - hasShopContext = false → không lọc shop.
  */
 class TenantManager
 {
     private ?int $companyId = null;
 
     private bool $hasContext = false;
+
+    private ?int $shopId = null;
+
+    private bool $hasShopContext = false;
 
     public function set(?int $companyId): void
     {
@@ -25,6 +35,7 @@ class TenantManager
     {
         $this->companyId = null;
         $this->hasContext = false;
+        $this->clearShop();
     }
 
     public function id(): ?int
@@ -37,9 +48,29 @@ class TenantManager
         return $this->hasContext;
     }
 
+    public function setShop(?int $shopId): void
+    {
+        $this->shopId = $shopId;
+        $this->hasShopContext = true;
+    }
+
+    public function clearShop(): void
+    {
+        $this->shopId = null;
+        $this->hasShopContext = false;
+    }
+
+    public function shopId(): ?int
+    {
+        return $this->shopId;
+    }
+
+    public function hasShopContext(): bool
+    {
+        return $this->hasShopContext;
+    }
+
     /**
-     * Ch\u1ea1y callback trong b\u1ed1i c\u1ea3nh c\u1ee7a m\u1ed9t c\u00f4ng ty, sau \u0111\u00f3 kh\u00f4i ph\u1ee5c b\u1ed1i c\u1ea3nh c\u0169.
-     *
      * @template T
      *
      * @param  callable():T  $callback
@@ -49,14 +80,41 @@ class TenantManager
     {
         $prevId = $this->companyId;
         $prevHas = $this->hasContext;
+        $prevShopId = $this->shopId;
+        $prevShopHas = $this->hasShopContext;
 
         $this->set($companyId);
+        // Đổi company → reset shop context để tránh dính shop của company cũ.
+        $this->clearShop();
 
         try {
             return $callback();
         } finally {
             $this->companyId = $prevId;
             $this->hasContext = $prevHas;
+            $this->shopId = $prevShopId;
+            $this->hasShopContext = $prevShopHas;
+        }
+    }
+
+    /**
+     * @template T
+     *
+     * @param  callable():T  $callback
+     * @return T
+     */
+    public function forShop(?int $shopId, callable $callback)
+    {
+        $prevId = $this->shopId;
+        $prevHas = $this->hasShopContext;
+
+        $this->setShop($shopId);
+
+        try {
+            return $callback();
+        } finally {
+            $this->shopId = $prevId;
+            $this->hasShopContext = $prevHas;
         }
     }
 }

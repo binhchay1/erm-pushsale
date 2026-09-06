@@ -41,6 +41,8 @@ final class PermissionMap
         'admin.warehouses.' => 'warehouse:full',
         'admin.warehouse-inventories.' => 'warehouse:full',
         'admin.warehouse.' => 'warehouse:full',
+        'admin.shops.' => 'hr:full',
+        'admin.shops' => 'hr:full',
         'admin.accounting' => 'accounting:full',
         'admin.leads.' => 'leads:full',
         'admin.leads' => 'leads:full',

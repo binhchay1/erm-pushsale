@@ -73,6 +73,14 @@ return [
         'owner_title' => 'Company owner',
         'invalid_email_suffix' => 'Email must end with :suffix per company identity rules.',
     ],
+    'shops' => [
+        'default_name' => 'Main shop',
+        'created' => 'Shop created.',
+        'updated' => 'Shop updated.',
+        'deleted' => 'Shop deleted.',
+        'cannot_delete_default' => 'Cannot delete the default shop.',
+        'cannot_delete_with_orders' => 'Shop already has orders — cannot delete.',
+    ],
     'platform' => [
         'company_created' => 'Company and owner admin account created.',
         'company_updated' => 'Company details updated.',

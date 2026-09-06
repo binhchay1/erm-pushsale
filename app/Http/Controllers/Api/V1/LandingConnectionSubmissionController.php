@@ -245,6 +245,9 @@ class LandingConnectionSubmissionController extends Controller
         $lead = LeadIngestion::query()->create([
             'platform' => $platform,
             'external_id' => $externalId,
+            'shop_id' => $connection->shop_id
+                ?: $connection->marketingSource?->shop_id
+                ?: app(\App\Support\TenantManager::class)->shopId(),
             'status' => LeadIngestionStatus::NeedsReview,
             'packet_type' => $isSupplemental ? LeadPacketType::Upsell : LeadPacketType::Lead,
             'counts_as_lead' => ! $isSupplemental,

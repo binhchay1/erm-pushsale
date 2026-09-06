@@ -7,6 +7,7 @@ export default {
         create: 'Tạo mới',
         search: 'Tìm kiếm',
         filter: 'Lọc',
+        apply: 'Áp dụng',
         export: 'Xuất',
         loading: 'Đang tải…',
         no_data: 'Không có dữ liệu',
