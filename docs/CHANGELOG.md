@@ -4,6 +4,13 @@ Mới nhất trước. Chi tiết living: [PROJECT_CONTRACT.md](./PROJECT_CONTRA
 
 ---
 
+## 2026-09-06 — Sửa lỗi 500 tạo kho, trang thiếu template, sổ địa chỉ 2 cấp 2025
+
+- **Tạo kho lỗi 500**: form gửi `sort_order` rỗng → `null` vào cột NOT NULL. `WarehouseRequest::prepareForValidation` quy `sort_order`/`use_two_level_address` về giá trị mặc định.
+- **Trang không có giao diện** (`/admin/warehouse/movement-history` — mã 5.3.3 và mọi trang Pushsale chưa có template HTML): `BusinessPage` render bảng fallback từ `display_columns` thay vì báo "Chưa có nội dung template". Header cột lấy nhãn từ `columns` khi `display_columns` không khai báo `label`.
+- **Sổ địa chỉ**: kho mới mặc định dùng địa chỉ 2 cấp chuẩn 01/07/2025 (Tỉnh/TP → Phường/Xã), không còn hiện đơn vị cấp huyện cũ kiểu "Thành phố Việt Trì". Ô Quận/Huyện chỉ bắt buộc ở chế độ 3 cấp cũ; bộ lọc danh sách kho không trộn quận/huyện cũ với phường/xã 2025. `ShippingAddressHelper` lấy phường/xã làm district cho kho 2 cấp thay vì rơi về district mặc định trong config (sai tỉnh).
+- Lỗi tiềm ẩn phát hiện khi mở lại test smoke: `RevenueBonusRule` gọi `TenantManager::companyId()` không tồn tại (nay dùng trait `BelongsToTenant`), `ShippingOrderController::printLabel/syncStatus/calculateFee` ném RuntimeException thành 500 (nay trả 422), `LeadIngestion.packet_type` vỡ với dữ liệu cũ `base/main/upsale` (cast `LegacyLeadPacketType`), `sys_getloadavg()` không tồn tại trên Windows, `FIELD()` MySQL-only trong `ProductController` và dashboard marketing.
+
 ## 2026-08-19 — FB 19/8: upsell badge, 4.2 trùng/xóa/phân bổ, cuộn bảng, combo Ladi
 
 - Badge **upsell chờ xử lý** là gói đến sau cửa sổ tự gộp, chờ Admin/chia số duyệt — không phải đơn đang chờ nhận upsale trong 15 phút. Tooltip/cờ phân biệt cửa sổ tự gộp và upsell đến muộn.

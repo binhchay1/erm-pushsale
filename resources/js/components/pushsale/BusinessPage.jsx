@@ -317,7 +317,11 @@ function PushsaleRows({ schema, rows, onEdit, onDelete, selectedRecordIds, onTog
 }
 
 function PushsaleFallbackGrid(props) {
-    const columns = props.schema.display_columns ?? props.schema.columns ?? [];
+    // `display_columns` trong config/pushsale_pages.php thường chỉ có key/format,
+    // nhãn cột nằm ở `columns` → ghép lại để header không rỗng.
+    const labelByKey = new Map((props.schema.columns ?? []).map((column) => [column.key, column.label]));
+    const columns = (props.schema.display_columns ?? props.schema.columns ?? [])
+        .map((column) => ({ ...column, label: column.label ?? labelByKey.get(column.key) ?? column.key }));
     return (
         <div className="pushsale-grid-shell">
             <table className="table table-bordered table-striped pushsale-grid">
@@ -1569,8 +1573,8 @@ function TemplateHost({ templateHtml = '', schema, rows, pagination, routeUrl, f
             {chartAnchors.map((anchor, index) => createPortal(<TrendMetricChart row={rows[index]} />, anchor, `trend-${index}`))}
             {loginUsersAnchor && createPortal(<LoginUserQuickFilters users={filterOptions?.loginUsers ?? filterOptions?.users ?? []} routeUrl={routeUrl} />, loginUsersAnchor)}
             {rankingAnchor && createPortal(<SalesRankingCards rows={rows} />, rankingAnchor)}
-            {gridEnabled && !rowAnchor && templateHtml && <div className="pushsale-template-fallback"><PushsaleFallbackGrid {...rowProps} pagination={pagination} routeUrl={routeUrl} /></div>}
-            {!templateHtml && <div className="pushsale-template-loading"><i className="fa fa-spinner fa-spin" /> Chưa có nội dung template cho mã {schema.code}.</div>}
+            {gridEnabled && !rowAnchor && <div className="pushsale-template-fallback"><PushsaleFallbackGrid {...rowProps} pagination={pagination} routeUrl={routeUrl} /></div>}
+            {!templateHtml && !gridEnabled && <div className="pushsale-template-empty">{DEFAULT_TABLE_EMPTY_MESSAGE}</div>}
         </>
     );
 }

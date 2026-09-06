@@ -129,8 +129,17 @@ class ShippingOrderController extends Controller
 
     public function syncStatus(Request $request, Order $order, CreateShipmentService $service, ShippingOrderService $presenter): JsonResponse
     {
-        $provider = $request->string('provider')->toString() ?: null;
-        $service->sync($order, $provider);
+        try {
+            $provider = $request->string('provider')->toString() ?: null;
+            $service->sync($order, $provider);
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            return response()->json([
+                'success' => false,
+                'message' => $exception->getMessage() ?: __('messages.shipping_actions.status_sync_failed'),
+            ], 422);
+        }
 
         return response()->json(array_merge(
             ['success' => true, 'message' => __('messages.shipping_actions.status_synced')],
@@ -140,9 +149,18 @@ class ShippingOrderController extends Controller
 
     public function calculateFee(Request $request, Order $order, CreateShipmentService $service): JsonResponse
     {
-        $provider = $request->string('provider')->toString() ?: null;
+        try {
+            $provider = $request->string('provider')->toString() ?: null;
 
-        return response()->json($service->calculateFee($order->fresh(['items', 'warehouse']), $provider));
+            return response()->json($service->calculateFee($order->fresh(['items', 'warehouse']), $provider));
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            return response()->json([
+                'success' => false,
+                'message' => $exception->getMessage() ?: __('messages.shipping_actions.fee_failed'),
+            ], 422);
+        }
     }
 
     public function cancelShipment(Request $request, Order $order, CreateShipmentService $service, ShippingOrderService $presenter): JsonResponse
@@ -172,8 +190,17 @@ class ShippingOrderController extends Controller
 
     public function printLabel(Request $request, Order $order, CreateShipmentService $service): Response|JsonResponse
     {
-        $provider = $request->string('provider')->toString() ?: null;
-        $result = $service->printLabel($order, $provider);
+        try {
+            $provider = $request->string('provider')->toString() ?: null;
+            $result = $service->printLabel($order, $provider);
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            return response()->json([
+                'success' => false,
+                'message' => $exception->getMessage() ?: __('messages.shipping_actions.label_failed'),
+            ], 422);
+        }
 
         if (! ($result['success'] ?? false) || empty($result['binary'])) {
             return response()->json([

@@ -6,7 +6,7 @@ import AppLayout from '@/layouts/AppLayout';
 import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
 import { PushsaleSelect } from '@/components/pushsale/PushsaleSelect';
-import { AddressSelect, oldDistrictOptions, oldProvinceOptions, oldWardOptions, newProvinceOptions, newWardOptions, combinedProvinceOptions } from '@/components/pushsale/PushsaleAddressSelect';
+import { AddressSelect, combinedProvinceOptions } from '@/components/pushsale/PushsaleAddressSelect';
 import { useConfirm } from '@/hooks/use-confirm';
 
 const emptyLocations = {
@@ -48,7 +48,8 @@ const emptyWarehouse = {
     pick_district: '',
     pick_ward: '',
     address: '',
-    use_two_level_address: false,
+    // Từ 01/07/2025 Việt Nam bỏ cấp quận/huyện → kho mới mặc định dùng sổ địa chỉ 2 cấp.
+    use_two_level_address: true,
     manager_user_id: '',
     sender_registration_name: '',
     sender_print_note: '',
@@ -142,7 +143,7 @@ function WarehouseForm({ form, managers, locations, editing, onSubmit, onAppendP
                                 form.setData('pick_ward', '');
                             }}
                         />
-                        <span>Sử dụng địa chỉ 2 cấp</span>
+                        <span title="Chuẩn hành chính từ 01/07/2025: Tỉnh/TP → Phường/Xã, không còn quận/huyện. Bỏ chọn để nhập theo đơn vị hành chính cũ.">Sử dụng địa chỉ 2 cấp (chuẩn 2025)</span>
                     </span>
                 </label>
                 <label><span>Số ĐT quản kho</span><input className="form-control" value={form.data.phone ?? ''} onChange={(event) => form.setData('phone', event.target.value)} /></label>
@@ -150,7 +151,7 @@ function WarehouseForm({ form, managers, locations, editing, onSubmit, onAppendP
                 <label><span>Tỉnh/TP <b>(*)</b></span><AddressSelect type="province" mode={provinceOptionsMode} locations={locations} value={form.data.pick_province ?? ''} onChange={(value) => { form.setData('pick_province', value); form.setData('pick_district', ''); form.setData('pick_ward', ''); }} placeholder="--Chọn Tỉnh/TP" /></label>
                 <label><span>Đăng đơn người gửi</span><input className="form-control" value={form.data.sender_registration_name ?? ''} onChange={(event) => form.setData('sender_registration_name', event.target.value)} /></label>
 
-                <label><span>Quận/Huyện <b>(*)</b></span><AddressSelect type="district" locations={locations} province={form.data.pick_province ?? ''} value={form.data.pick_district ?? ''} onChange={(value) => { form.setData('pick_district', value); form.setData('pick_ward', ''); }} placeholder={twoLevelMode ? 'Địa chỉ 2 cấp 2025' : '--Quận/Huyện--'} disabled={districtDisabled} /></label>
+                <label><span>Quận/Huyện {twoLevelMode ? <i className="ps-field-hint">(không áp dụng)</i> : <b>(*)</b>}</span><AddressSelect type="district" locations={locations} province={form.data.pick_province ?? ''} value={form.data.pick_district ?? ''} onChange={(value) => { form.setData('pick_district', value); form.setData('pick_ward', ''); }} placeholder={twoLevelMode ? 'Địa chỉ 2 cấp — bỏ cấp quận/huyện' : '--Quận/Huyện (đơn vị cũ trước 01/07/2025)--'} disabled={districtDisabled} /></label>
                 <label className="ps-textarea-label"><span>In đơn người gửi</span><textarea className="form-control" value={form.data.sender_print_note ?? ''} onChange={(event) => form.setData('sender_print_note', event.target.value)} placeholder="Thông tin người gửi khi in đơn" /></label>
 
                 <label><span>Phường/Xã <b>(*)</b></span><AddressSelect type="ward" mode={twoLevelMode ? 'new2025' : 'old'} locations={locations} province={form.data.pick_province ?? ''} district={form.data.pick_district ?? ''} value={form.data.pick_ward ?? ''} onChange={(value) => form.setData('pick_ward', value)} placeholder={twoLevelMode ? '--Chọn Phường/Xã 2025--' : '--Phường/Xã--'} disabled={wardDisabled} /></label>
@@ -267,13 +268,9 @@ export default function WarehouseIndex({ warehouses, filters = {}, managers = []
         if (fromProps.length) return fromProps;
         return combinedProvinceOptions(locations, province);
     }, [locations, province, provinces]);
-    const filterDistrictOptions = useMemo(() => {
-        if (!province || province === 'Địa chỉ 2 cấp 2025') return toChoiceOptions(districts, district);
-        const oldOptions = oldDistrictOptions(locations, province, district);
-        const newOptions = newWardOptions(locations, province, district);
-        if (oldOptions.length || newOptions.length) return oldOptions.length ? oldOptions : newOptions;
-        return toChoiceOptions(districts, district);
-    }, [district, districts, locations, province]);
+    // Bộ lọc chỉ liệt kê giá trị đang có trên kho (controller đã lọc theo tỉnh đang chọn),
+    // không trộn sổ quận/huyện cũ với phường/xã 2025.
+    const filterDistrictOptions = useMemo(() => toChoiceOptions(districts, district), [district, districts]);
     const managerOptions = useMemo(() => toChoiceOptions(managers, manager), [managers, manager]);
 
     const ensureLocations = async () => {

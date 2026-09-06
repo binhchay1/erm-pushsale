@@ -66,7 +66,8 @@ class SystemHealthSnapshotService
             }
         }
 
-        $load = sys_getloadavg() ?: [0, 0, 0];
+        // sys_getloadavg() không tồn tại trên Windows và có thể bị disable_functions chặn.
+        $load = (function_exists('sys_getloadavg') ? sys_getloadavg() : null) ?: [0, 0, 0];
         $cores = $this->cpuCores();
 
         return [

@@ -112,6 +112,12 @@ class MarketingDashboardRawPacketStore
     /** @param Collection<int|string,string> $channels @return Collection<int,object> */
     private function liveAggregates(MarketingDashboardFilterData $filter, Collection $channels, mixed $from, mixed $to): Collection
     {
+        // Truy vấn gộp packet dùng hàm riêng của MySQL (CONCAT/LEFT/JSON_UNQUOTE/REGEXP_REPLACE/GREATEST).
+        // Trên driver khác (sqlite khi chạy test) trả rỗng thay vì để dashboard vỡ thành lỗi 500.
+        if (! in_array(DB::connection()->getDriverName(), ['mysql', 'mariadb'], true)) {
+            return collect();
+        }
+
         $base = DB::table('inbound_events as ie')
             ->join('landing_connection_sources as lcs', function ($join): void {
                 $join->on('ie.channel', '=', DB::raw("CONCAT('landing-connection:', lcs.landing_connection_id, ':source:', lcs.id)"));

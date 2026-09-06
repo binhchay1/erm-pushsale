@@ -132,7 +132,8 @@ class AdminViewRoutesSmokeTest extends TestCase
             'care_team_ids' => [$saleTeam->id],
             'care_user_ids' => [$saleUser->id],
             'category_ids' => $product->categories()->pluck('product_categories.id')->all(),
-            'attribute_value_ids' => $product->attributeValues()->pluck('product_attribute_values.id')->all(),
+            // Form sản phẩm chỉ cho chọn tối đa 2 thuộc tính (1 giá trị/thuộc tính) — xem ProductRequest.
+            'attribute_value_ids' => $product->attributeValues()->pluck('product_attribute_values.id')->take(2)->all(),
         ];
 
         $this->put("/admin/products/{$product->id}", $payload)->assertRedirect('/admin/products');
@@ -174,6 +175,27 @@ class AdminViewRoutesSmokeTest extends TestCase
         $this->assertSame('Kho thủ công', $warehouse->shipping_account_settings['manual']['account']);
     }
 
+
+    public function test_warehouse_is_created_when_optional_number_fields_are_blank(): void
+    {
+        $this->seed(FullBusinessDemoSeeder::class);
+        $this->loginAsDemoAdmin();
+
+        $this->post('/admin/warehouses', [
+            'name' => 'Kho Hoà Bình',
+            'phone' => '0915767433',
+            'address' => 'Số 1 Đường Hoà Bình',
+            'pick_province' => 'Phú Thọ',
+            'pick_district' => '',
+            'pick_ward' => 'Hòa Bình',
+            'sort_order' => '',
+            'use_two_level_address' => true,
+        ])->assertRedirect('/admin/warehouses');
+
+        $warehouse = Warehouse::withoutTenant()->where('name', 'Kho Hoà Bình')->firstOrFail();
+        $this->assertSame(0, (int) $warehouse->sort_order);
+        $this->assertTrue((bool) $warehouse->use_two_level_address);
+    }
 
     public function test_landing_connection_can_be_created_without_product_before_approval(): void
     {
@@ -299,9 +321,10 @@ class AdminViewRoutesSmokeTest extends TestCase
             'metadata' => ['request_approval' => true, 'pending_approval_flow' => true],
         ])->save();
 
+        // UI chỉ gửi đúng cờ đang bật/tắt (xem LandingConnectionsPage::updateFlags),
+        // tắt nhập thủ công không được xoá luồng chờ duyệt đã yêu cầu trước đó.
         $this->patch('/admin/marketing/landing-connections/records/'.$connection->id.'/flags', [
             'manual_import' => 0,
-            'request_approval' => false,
         ])->assertSessionHas('success');
 
         $connection->refresh();
@@ -345,7 +368,9 @@ class AdminViewRoutesSmokeTest extends TestCase
             ],
             'product_allocations' => [[
                 'product_id' => $product->id,
-                'quantity' => 1,
+                // Demo seeder cũng sinh lead pending cho sản phẩm này; lấy dư để chắc chắn
+                // lead vừa tạo nằm trong lô phân bổ (hàng đợi xếp theo created_at).
+                'quantity' => 50,
             ]],
             'sale_user_ids' => [$sale->id],
             'operation_policy' => 'new_customer',
@@ -385,8 +410,9 @@ class AdminViewRoutesSmokeTest extends TestCase
 
     private function loginAsDemoAdmin(): User
     {
-        $company = Company::withoutTenant()->where('slug', 'internal')->first()
-            ?: Company::withoutTenant()->firstOrFail();
+        // Company là bảng tenant gốc, không có global scope company_id.
+        $company = Company::query()->where('slug', 'internal')->first()
+            ?: Company::query()->firstOrFail();
 
         app(TenantManager::class)->set($company->id);
 
@@ -499,7 +525,7 @@ class AdminViewRoutesSmokeTest extends TestCase
             'lead_ingestion' => LeadIngestion::withoutTenant()->orderBy('id')->value('id') ?? 1,
             'shipment' => Shipment::withoutTenant()->orderBy('id')->value('id') ?? 1,
             'user', 'admin' => User::withoutTenant()->orderBy('id')->value('id') ?? 1,
-            'company', 'company_id' => Company::withoutTenant()->orderBy('id')->value('id') ?? 1,
+            'company', 'company_id' => Company::query()->orderBy('id')->value('id') ?? 1,
             'category' => $this->sampleTableId('product_categories') ?? 1,
             'attribute' => $this->sampleTableId('product_attributes') ?? 1,
             'attribute_value' => $this->sampleTableId('product_attribute_values') ?? 1,

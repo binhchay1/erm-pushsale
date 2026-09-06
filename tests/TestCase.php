@@ -15,10 +15,14 @@ abstract class TestCase extends BaseTestCase
         parent::setUp();
 
         // Tránh Horizon/Redis khi máy dev không có extension phpredis.
+        // Các job hardcode `onConnection('redis')` nên phải vô hiệu hoá cả connection này,
+        // không chỉ queue.default (Queue::fake không chặn được job đẩy sau khi commit transaction).
         config([
             'queue.default' => 'sync',
+            'queue.connections.redis' => ['driver' => 'null'],
             'broadcasting.default' => 'null',
             'cache.default' => 'array',
+            'horizon.enabled' => false,
         ]);
         Queue::fake();
 

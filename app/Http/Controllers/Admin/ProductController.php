@@ -680,14 +680,14 @@ class ProductController extends Controller
             return [];
         }
 
-        return Team::query()
+        $existing = Team::query()
             ->whereIn('id', $ids)
             ->where('type', $type->value)
-            ->orderByRaw('FIELD(id, '.implode(',', $ids).')')
             ->pluck('id')
-            ->map(fn ($id) => (int) $id)
-            ->values()
+            ->map(fn ($id): int => (int) $id)
             ->all();
+
+        return $this->keepInputOrder($ids, $existing);
     }
 
     /** @param list<int> $teamIds @return list<int> */
@@ -708,12 +708,21 @@ class ProductController extends Controller
             $query->whereIn('team_id', $teamIds);
         }
 
-        return $query
-            ->orderByRaw('FIELD(id, '.implode(',', $ids).')')
-            ->pluck('id')
-            ->map(fn ($id) => (int) $id)
-            ->values()
-            ->all();
+        $existing = $query->pluck('id')->map(fn ($id): int => (int) $id)->all();
+
+        return $this->keepInputOrder($ids, $existing);
+    }
+
+    /**
+     * Giữ đúng thứ tự người dùng chọn mà không cần FIELD() (hàm riêng của MySQL).
+     *
+     * @param  list<int>  $ids
+     * @param  list<int>  $existing
+     * @return list<int>
+     */
+    private function keepInputOrder(array $ids, array $existing): array
+    {
+        return array_values(array_filter($ids, fn (int $id): bool => in_array($id, $existing, true)));
     }
 
     /** @return list<int> */

@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
+use App\Casts\LegacyLeadPacketType;
 use App\Enums\LeadIngestionStatus;
-use App\Enums\LeadPacketType;
 use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -51,7 +51,7 @@ class LeadIngestion extends Model
             'phone_lock_conflict' => 'boolean',
             'counts_as_lead' => 'boolean',
             'status' => LeadIngestionStatus::class,
-            'packet_type' => LeadPacketType::class,
+            'packet_type' => LegacyLeadPacketType::class,
         ];
     }
 

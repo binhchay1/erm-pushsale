@@ -1533,6 +1533,12 @@ html body.pushsale-app-body .ps-warehouse-form-grid .ps-checkbox-row .ps-checkbo
     font-weight: 400 !important;
 }
 
+html body.pushsale-app-body .ps-warehouse-form-grid .ps-field-hint {
+    color: #8a94a6 !important;
+    font-style: italic !important;
+    font-weight: 400 !important;
+}
+
 html body.pushsale-app-body .ps-warehouse-form-grid .ps-checkbox-row input[type="checkbox"] {
     width: 16px !important;
     height: 16px !important;

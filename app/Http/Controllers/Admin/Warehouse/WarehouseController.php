@@ -271,47 +271,6 @@ class WarehouseController extends Controller
         return $query->distinct()->orderBy('pick_district')->pluck('pick_district')->values()->all();
     }
 
-    /** @return list<string> */
-    protected function provinceOptions(?array $locations = null): array
-    {
-        $locations ??= $this->locationOptions();
-        $known = array_map(fn (array $item): string => (string) $item['name'], $locations['old']['provinces'] ?? []);
-        $current = array_map(fn (array $item): string => (string) $item['name'], $locations['new2025']['provinces'] ?? []);
-
-        $fromData = Warehouse::query()
-            ->whereNotNull('pick_province')
-            ->where('pick_province', '!=', '')
-            ->distinct()
-            ->orderBy('pick_province')
-            ->pluck('pick_province')
-            ->all();
-
-        return array_values(array_unique(array_filter(array_merge([
-            'Địa chỉ 2 cấp 2025',
-        ], $current, $known, $fromData))));
-    }
-
-    /** @return list<string> */
-    protected function districtOptions(string $province = '', ?array $locations = null): array
-    {
-        $locations ??= $this->locationOptions();
-        $fromAddressBook = $province !== ''
-            ? array_map(fn (array $item): string => (string) $item['name'], $locations['old']['districts'][$province] ?? [])
-            : [];
-        $from2025Wards = $province !== ''
-            ? array_map(fn (array $item): string => (string) $item['name'], $locations['new2025']['wards'][$province] ?? [])
-            : [];
-
-        $query = Warehouse::query()->whereNotNull('pick_district')->where('pick_district', '!=', '');
-        if ($province !== '') {
-            $query->where('pick_province', $province);
-        }
-
-        $fromData = $query->distinct()->orderBy('pick_district')->pluck('pick_district')->all();
-
-        return array_values(array_unique(array_filter(array_merge($fromAddressBook, $from2025Wards, $fromData))));
-    }
-
     /** @return array<string,mixed> */
     protected function locationOptions(): array
     {

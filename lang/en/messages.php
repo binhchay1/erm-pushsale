@@ -181,6 +181,8 @@ return [
         'status_synced' => 'Status synced from the carrier.',
         'waybill_cancelled' => 'Waybill cancelled.',
         'label_failed' => 'Could not print label.',
+        'status_sync_failed' => 'Could not sync status from the carrier.',
+        'fee_failed' => 'Could not calculate the shipping fee.',
         'netship_not_ready' => 'NetShip is disabled or missing an access token.',
         'netship_create_failed' => 'Could not create a waybill via NetShip.',
         'netship_sync_failed' => 'Could not sync status from NetShip.',

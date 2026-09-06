@@ -2,15 +2,15 @@
 
 namespace App\Models\Pushsale;
 
+use App\Models\Concerns\BelongsToTenant;
 use App\Models\User;
-use App\Models\Scopes\TenantScope;
-use App\Support\TenantManager;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 final class RevenueBonusRule extends Model
 {
+    use BelongsToTenant;
     use HasFactory;
 
     protected $fillable = [
@@ -38,17 +38,6 @@ final class RevenueBonusRule extends Model
         'locked' => 'boolean',
         'sort_order' => 'integer',
     ];
-
-    protected static function booted(): void
-    {
-        static::addGlobalScope(new TenantScope());
-
-        static::creating(function (self $model): void {
-            if (! $model->company_id) {
-                $model->company_id = app(TenantManager::class)->companyId();
-            }
-        });
-    }
 
     public function updatedBy(): BelongsTo
     {

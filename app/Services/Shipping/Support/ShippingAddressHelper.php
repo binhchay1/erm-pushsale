@@ -36,9 +36,12 @@ class ShippingAddressHelper
             'pick_name' => $warehouse?->name ?? config('shipping_partners.pickup.name'),
             'pick_tel' => $warehouse?->phone ?? config('shipping_partners.pickup.tel'),
             'pick_address' => $warehouse?->address ?? config('shipping_partners.pickup.address'),
-            'pick_province' => $warehouse?->pick_province ?? config('shipping_partners.pickup.province'),
-            'pick_district' => $warehouse?->pick_district ?? config('shipping_partners.pickup.district'),
-            'pick_ward' => $warehouse?->pick_ward ?? config('shipping_partners.pickup.ward'),
+            'pick_province' => $warehouse?->pick_province ?: config('shipping_partners.pickup.province'),
+            // Kho dùng địa chỉ 2 cấp 2025 không còn quận/huyện: đẩy phường/xã xuống ô district
+            // thay vì rơi về district mặc định trong config (sai tỉnh → hãng vận chuyển từ chối đơn).
+            'pick_district' => $warehouse?->pick_district
+                ?: ($warehouse?->pick_ward ?: config('shipping_partners.pickup.district')),
+            'pick_ward' => $warehouse?->pick_ward ?: config('shipping_partners.pickup.ward'),
             'pick_address_id' => $warehouse?->ghtk_pick_address_id ?? ($creds['pick_address_id'] ?? null),
         ];
     }

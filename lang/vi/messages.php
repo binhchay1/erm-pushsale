@@ -181,6 +181,8 @@ return [
         'status_synced' => 'Đã đồng bộ trạng thái từ hãng vận chuyển.',
         'waybill_cancelled' => 'Đã hủy vận đơn.',
         'label_failed' => 'Không in được nhãn.',
+        'status_sync_failed' => 'Không đồng bộ được trạng thái từ hãng vận chuyển.',
+        'fee_failed' => 'Không tính được phí vận chuyển.',
         'netship_not_ready' => 'NetShip chưa bật hoặc thiếu access token.',
         'netship_create_failed' => 'Không tạo được vận đơn qua NetShip.',
         'netship_sync_failed' => 'Không đồng bộ được trạng thái từ NetShip.',

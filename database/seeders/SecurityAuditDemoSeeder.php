@@ -23,7 +23,8 @@ class SecurityAuditDemoSeeder extends Seeder
             ->delete();
 
         $users = User::query()
-            ->orderByRaw("FIELD(role, 'admin', 'sales', 'marketing', 'warehouse', 'accounting', 'allocator')")
+            // CASE thay cho FIELD() để seeder chạy được cả trên sqlite (test) lẫn mysql.
+            ->orderByRaw("case role when 'admin' then 0 when 'sales' then 1 when 'marketing' then 2 when 'warehouse' then 3 when 'accounting' then 4 when 'allocator' then 5 else 6 end")
             ->orderBy('id')
             ->limit(24)
             ->get()
