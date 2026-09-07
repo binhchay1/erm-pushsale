@@ -27,13 +27,20 @@ mkdir -p "/home/${DEPLOY_USER}/backups"
 ln -sfn "$BACKUP_ROOT" "/home/${DEPLOY_USER}/backups/erm-pushsale"
 chown -h "${DEPLOY_USER}:${DEPLOY_USER}" "/home/${DEPLOY_USER}/backups/erm-pushsale" || true
 
-echo "=== 3. Laravel scheduler cron ==="
+echo "=== 3. Laravel scheduler cron + packages ==="
+apt-get install -y cron
+systemctl enable --now cron
 cat >/etc/cron.d/erm-pushsale-scheduler <<EOF
 SHELL=/bin/bash
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 * * * * * ${DEPLOY_USER} cd ${APP_DIR} && /usr/bin/php artisan schedule:run >> ${APP_DIR}/storage/logs/scheduler.log 2>&1
 EOF
 chmod 644 /etc/cron.d/erm-pushsale-scheduler
+
+# Ensure Laravel storage dirs exist
+sudo -u www-data mkdir -p "${APP_DIR}/storage/app/public" "${APP_DIR}/storage/framework/cache" "${APP_DIR}/storage/framework/sessions" "${APP_DIR}/storage/framework/views" "${APP_DIR}/storage/logs" || true
+chown -R deploy:www-data "${APP_DIR}/storage" || true
+chmod -R ug+rwX "${APP_DIR}/storage" || true
 
 echo "=== 4. Reverb bind localhost only (stop public :8080) ==="
 REVERB_CONF=/etc/supervisor/conf.d/pushsale-reverb.conf

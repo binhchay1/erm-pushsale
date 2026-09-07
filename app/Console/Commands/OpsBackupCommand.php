@@ -57,8 +57,11 @@ class OpsBackupCommand extends Command
 
             if (! $this->option('skip-files')) {
                 $filesArchive = "{$dir}/storage-app.tar.gz";
-                $this->backupStorageApp($filesArchive);
-                $meta['files']['storage_app'] = $this->fileMeta($filesArchive);
+                if ($this->backupStorageApp($filesArchive)) {
+                    $meta['files']['storage_app'] = $this->fileMeta($filesArchive);
+                } else {
+                    $meta['files']['storage_app'] = ['path' => null, 'skipped' => true];
+                }
             }
 
             // Capture non-secret env flags for restore checklist (never dump secrets).
@@ -77,6 +80,10 @@ class OpsBackupCommand extends Command
 
             $this->info('Backup OK.');
             foreach ($meta['files'] as $name => $info) {
+                if (! empty($info['skipped'])) {
+                    $this->line("  {$name}: skipped");
+                    continue;
+                }
                 $this->line(sprintf('  %s: %s (%s)', $name, $info['path'], $info['size_human']));
             }
 
@@ -223,13 +230,13 @@ class OpsBackupCommand extends Command
         }
     }
 
-    private function backupStorageApp(string $archivePath): void
+    private function backupStorageApp(string $archivePath): bool
     {
         $src = storage_path('app');
         if (! is_dir($src)) {
             $this->warn('storage/app missing — skip files');
 
-            return;
+            return false;
         }
 
         $cmd = sprintf(
@@ -243,6 +250,8 @@ class OpsBackupCommand extends Command
             throw new \RuntimeException("tar storage/app failed (exit {$exit})");
         }
         @chmod($archivePath, 0640);
+
+        return true;
     }
 
     /**
