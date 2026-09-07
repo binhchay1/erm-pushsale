@@ -41,16 +41,22 @@ Schedule::command('reports:warm-snapshots --queue')
     ->onOneServer();
 
 // Kiểm tra metadata/checksum hằng ngày, không tự sửa để tránh che lỗi vận hành.
-// Chạy trước cửa sổ mysqldump ~02:00.
+// Chạy trước cửa sổ backup DB ~02:00.
 Schedule::command('reports:verify-facts --days=14 --queue')
     ->dailyAt('01:20')
     ->timezone(config('reporting.timezone'))
     ->withoutOverlapping(60)
     ->onOneServer();
 
+// Local DR backup: DB + storage/app (retention trong command). Cần cron schedule:run.
+Schedule::command('ops:backup')
+    ->dailyAt('02:00')
+    ->timezone(config('reporting.timezone'))
+    ->withoutOverlapping(180)
+    ->onOneServer();
 
 // Archive theo NĂM (*_YYYY), không theo tháng — tránh nhân bảng khi data còn nhỏ.
-// Lịch 03/01 04:30: tránh đụng mysqldump 02:00 hàng ngày trên server.
+// Lịch 03/01 04:30: tránh đụng backup 02:00 hàng ngày trên server.
 Schedule::command('reports:archive-month --queue')
     ->yearlyOn(1, 3, '04:30')
     ->timezone(config('reporting.timezone'))
