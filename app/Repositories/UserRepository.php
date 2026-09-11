@@ -46,20 +46,39 @@ class UserRepository
     }
 
     /**
-     * Trưởng kho / leader bộ phận kho — người có quyền ký duyệt nhập xuất.
+     * Người có quyền ký duyệt nhập/xuất kho.
+     * Ưu tiên trưởng kho; nếu chưa có user kho thì fallback admin / platform admin
+     * để form nhập tồn không bị dropdown trống trên môi trường mới.
      *
      * @return list<array{id: int, name: string}>
      */
     public function warehouseApprovers(): array
     {
-        return User::query()
+        $map = fn (User $u) => ['id' => (int) $u->id, 'name' => (string) $u->name];
+
+        $leaders = User::query()
             ->where('role', UserRole::Warehouse)
             ->where(function ($q) {
                 $q->where('is_team_leader', true)->orWhere('org_level', OrgLevel::Head);
             })
             ->orderBy('name')
             ->get(['id', 'name'])
-            ->map(fn (User $u) => ['id' => $u->id, 'name' => $u->name])
+            ->map($map)
+            ->values()
+            ->all();
+
+        if ($leaders !== []) {
+            return $leaders;
+        }
+
+        return User::query()
+            ->where(function ($q) {
+                $q->where('role', UserRole::Admin)
+                    ->orWhere('is_platform_admin', true);
+            })
+            ->orderBy('name')
+            ->get(['id', 'name'])
+            ->map($map)
             ->values()
             ->all();
     }
