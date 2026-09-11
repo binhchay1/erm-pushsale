@@ -178,6 +178,7 @@ export default function ShippingLabelPrint({
     grouped = [],
     counts = {},
     featureFlags = {},
+    notice = null,
     backUrl = '/admin/warehouse/operations',
     actionApiBase = '/admin/warehouse/orders',
     shippingApiBase = '/admin/shipping/orders',
@@ -570,10 +571,11 @@ export default function ShippingLabelPrint({
     return (
         <AppLayout activeMenuCode={activeMenuCode}>
             <Head title={profile.title} />
-            <section className={`ps-print-page ps-print-ui-${profile.ui}`} data-page-code={activeMenuCode}>
+            <section className={`ps-print-page ps-print-ui-${profile.ui || 'default'}`} data-page-code={activeMenuCode}>
                 <div className="ps-print-page-bar no-print">
                     <div>
                         <h2>{profile.title}</h2>
+                        {notice ? <div className="ps-print-alert" role="alert">{notice}</div> : null}
                         <div className="text-muted">
                             Chọn
                             {' '}

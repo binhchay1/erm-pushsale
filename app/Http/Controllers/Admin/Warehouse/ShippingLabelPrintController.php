@@ -15,16 +15,40 @@ class ShippingLabelPrintController extends Controller
     public function show(Request $request, string $profile, ShippingLabelPrintService $service): Response
     {
         $ids = $this->parseIds($request);
-        $payload = $service->buildPage($profile, $ids, $request->user());
         $backUrl = $this->backUrl($request);
-
-        return Inertia::render('Admin/Warehouse/ShippingLabelPrint', array_merge($payload, [
+        $shell = [
             'backUrl' => $backUrl,
             'shippingApiBase' => $this->shippingApiBase($request),
             'actionApiBase' => $this->actionApiBase($request),
             'activeMenuCode' => $request->routeIs('accounting.*') ? '6.1' : '5.1',
             'printUrl' => $this->printBase($request).'/'.$profile,
-        ]));
+        ];
+
+        try {
+            $payload = $service->buildPage($profile, $ids, $request->user());
+        } catch (\Illuminate\Validation\ValidationException $exception) {
+            $message = collect($exception->errors())->flatten()->first() ?: 'Không in được nhãn.';
+            $safeProfile = config("shipping_print_profiles.profiles.{$profile}");
+
+            return Inertia::render('Admin/Warehouse/ShippingLabelPrint', array_merge([
+                'profile' => is_array($safeProfile) ? [
+                    'key' => $safeProfile['key'] ?? $profile,
+                    'title' => $safeProfile['title'] ?? $profile,
+                    'tone' => $safeProfile['tone'] ?? 'success',
+                ] : ['key' => $profile, 'title' => $profile, 'tone' => 'success'],
+                'printButtons' => $service->fabButtons(),
+                'defaults' => [],
+                'featureFlags' => [],
+                'labels' => [],
+                'unmatched' => [],
+                'grouped' => [],
+                'counts' => ['selected' => 0, 'printable' => 0, 'unmatched' => 0],
+                'actor' => $request->user()?->only(['id', 'name']),
+                'notice' => $message,
+            ], $shell));
+        }
+
+        return Inertia::render('Admin/Warehouse/ShippingLabelPrint', array_merge($payload, $shell));
     }
 
     public function markPrinted(Request $request, ShippingLabelPrintService $service): JsonResponse

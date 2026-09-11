@@ -47,13 +47,13 @@ class OrderClosingPrerequisiteTest extends TestCase
     {
         $company = Company::query()->create([
             'name' => 'Co',
-            'code' => 'co-'.uniqid(),
-            'is_active' => true,
+            'slug' => 'co-'.uniqid(),
+            'status' => Company::STATUS_ACTIVE,
         ]);
         $shop = Shop::query()->create([
             'company_id' => $company->id,
             'name' => 'Main',
-            'code' => 'main',
+            'code' => 'main-'.uniqid(),
             'is_active' => true,
         ]);
         $admin = User::query()->create([

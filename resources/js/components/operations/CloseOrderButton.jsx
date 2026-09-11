@@ -53,6 +53,10 @@ export function CloseOrderButton({ order, disabled, actionBaseUrl = '/sales' }) 
     const warnings = order.stockWarnings ?? [];
 
     const submit = () => {
+        if (!order.warehouseId) {
+            toast.error(t('operations.sale_order.warehouse_required'));
+            return;
+        }
         if (hasInsufficientStock && !confirmInsufficient) {
             setConfirmInsufficient(true);
             return;
@@ -61,7 +65,7 @@ export function CloseOrderButton({ order, disabled, actionBaseUrl = '/sales' }) 
         setProcessing(true);
         router.post(
             `${actionBaseUrl}/orders/${order.id}/close`,
-            { confirm_insufficient_stock: confirmInsufficient, warehouse_id: order.warehouseId || undefined },
+            { confirm_insufficient_stock: confirmInsufficient, warehouse_id: order.warehouseId },
             {
                 preserveScroll: true,
                 onSuccess: () => {

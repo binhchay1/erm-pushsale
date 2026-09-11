@@ -51,13 +51,14 @@ class MissingShippingConfigBehaviorTest extends TestCase
         $admin = $this->makeAdmin();
         $order = $this->makeOpenOrder($admin);
 
-        $response = $this->actingAs($admin)->post("/admin/sales/orders/{$order->id}/close", [
-            'warehouse_id' => Warehouse::query()->value('id'),
+        $response = $this->actingAs($admin)->from('/admin/dashboard')->post("/admin/sales/orders/{$order->id}/close", [
+            'warehouse_id' => $order->warehouse_id,
             'shipping_provider' => null,
             'confirm_insufficient_stock' => true,
         ]);
 
-        $response->assertRedirect();
+        $response->assertRedirect('/admin/dashboard');
+        $response->assertSessionHasNoErrors();
         $this->assertNotNull($order->fresh()->closed_at);
     }
 
@@ -65,8 +66,8 @@ class MissingShippingConfigBehaviorTest extends TestCase
     {
         $company = Company::query()->create([
             'name' => 'E2E Co',
-            'code' => 'e2e-'.uniqid(),
-            'is_active' => true,
+            'slug' => 'e2e-'.uniqid(),
+            'status' => Company::STATUS_ACTIVE,
         ]);
 
         return User::query()->create([
@@ -89,6 +90,7 @@ class MissingShippingConfigBehaviorTest extends TestCase
         $order->update([
             'closed_at' => now(),
             'shipping_provider' => null,
+            'inventory_deducted_at' => now(),
         ]);
 
         return $order->fresh();
@@ -130,6 +132,7 @@ class MissingShippingConfigBehaviorTest extends TestCase
         ]);
 
         $order->items()->create([
+            'company_id' => $admin->company_id,
             'product_id' => $product->id,
             'product_name' => $product->name,
             'quantity' => 1,

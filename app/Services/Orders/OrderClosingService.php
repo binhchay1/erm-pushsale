@@ -59,7 +59,13 @@ class OrderClosingService
         }
 
         // Không cho chốt khi chưa có dòng SP hoặc toàn bộ SL = 0.
-        if ($order->items()->where('quantity', '>', 0)->doesntExist()) {
+        // Bỏ TenantScope để không ẩn dòng item legacy thiếu company_id (vẫn theo order_id).
+        $hasSellableQty = $order->items()
+            ->withoutGlobalScope(\App\Models\Scopes\TenantScope::class)
+            ->where('quantity', '>', 0)
+            ->exists();
+
+        if (! $hasSellableQty) {
             throw ValidationException::withMessages([
                 'order' => __('messages.sale_ops.close_requires_quantity'),
             ]);
@@ -86,7 +92,7 @@ class OrderClosingService
         $this->inventory->assertCanClose($order, $confirmInsufficient);
         $this->landingUpsell->lockFromSaleAction($order);
 
-        return DB::transaction(function () use ($order, $payload, $actor) {
+        return DB::transaction(function () use ($order, $payload, $actor, $warehouseId) {
             $before = $this->history->snapshot($order);
             $amountToCollect = (int) ($payload['amount_to_collect']
                 ?? max(0, (int) $order->total - (int) $order->deposit));
