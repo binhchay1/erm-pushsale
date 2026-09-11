@@ -42,7 +42,13 @@ class NetShipApiClient extends AbstractCarrierHttpClient
     public function createOrder(array $payload, ?int $orderId = null): array
     {
         return $this->normalizeCreateResponse(
-            $this->requestJson('POST', '/api/third-party/order', json: $payload, action: 'create_order', orderId: $orderId)
+            $this->requestJson(
+                'POST',
+                '/api/third-party/order',
+                json: $this->wrapOrderPayload($payload),
+                action: 'create_order',
+                orderId: $orderId,
+            )
         );
     }
 
@@ -52,7 +58,37 @@ class NetShipApiClient extends AbstractCarrierHttpClient
      */
     public function estimateFee(array $payload, ?int $orderId = null): array
     {
-        return $this->requestJson('POST', '/api/third-party/order/estimate-fee', json: $payload, action: 'estimate_fee', orderId: $orderId);
+        return $this->requestJson(
+            'POST',
+            '/api/third-party/order/estimate-fee',
+            json: $this->wrapOrderPayload($payload),
+            action: 'estimate_fee',
+            orderId: $orderId,
+        );
+    }
+
+    /**
+     * NetShip bind body vào struct `myRequest` và bắt buộc ShopID (ID shop trên trang cá nhân NetShip).
+     *
+     * @param  array<string, mixed>  $payload
+     * @return array{myRequest: array<string, mixed>}
+     */
+    private function wrapOrderPayload(array $payload): array
+    {
+        $creds = $this->credentials->credentials('netship')['credentials'];
+        $shopId = $payload['ShopID']
+            ?? $payload['shopId']
+            ?? $payload['shop_id']
+            ?? $creds['shop_id']
+            ?? $creds['ShopID']
+            ?? null;
+
+        if ($shopId !== null && $shopId !== '') {
+            $payload['ShopID'] = is_numeric($shopId) ? (int) $shopId : $shopId;
+        }
+        unset($payload['shopId'], $payload['shop_id']);
+
+        return ['myRequest' => $payload];
     }
 
     /** @return array<string, mixed> */

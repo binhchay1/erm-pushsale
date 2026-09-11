@@ -304,6 +304,15 @@ export function ShippingPartnerCard({ provider }) {
                             invalid={Boolean(errorFor('token', 'credentials.token'))}
                         />
                     </Field>
+                    <Field label={L('shop_id')} required error={errorFor('shop_id', 'credentials.shop_id')}>
+                        <TextInput
+                            required
+                            value={credential('shop_id')}
+                            onChange={(value) => setCredential('shop_id', value)}
+                            placeholder={P('netship_shop_id')}
+                            invalid={Boolean(errorFor('shop_id', 'credentials.shop_id'))}
+                        />
+                    </Field>
                     <Field label={L('api_base_url')}>
                         <TextInput
                             value={credential('base_url')}

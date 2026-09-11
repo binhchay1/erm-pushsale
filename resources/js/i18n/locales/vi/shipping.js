@@ -174,6 +174,7 @@ export default {
         },
         placeholders: {
             paste_netship_token: 'Dán access token NetShip',
+            netship_shop_id: 'VD: 530 — ID trên Trang cá nhân NetShip',
             product_type_optional: 'Không bắt buộc — mặc định: Sức khỏe',
             vnpost_account: 'Ghi chú để biết đang sử dụng tài khoản VNPOST nào',
             vnpost_contract: 'Mã hợp đồng của khách hàng với VnPost',
@@ -184,7 +185,7 @@ export default {
         },
         help: {
             netship: [
-                'Bắt buộc: bật “Sử dụng kết nối này” + Access token, rồi Lưu.',
+                'Bắt buộc: bật “Sử dụng kết nối này” + Access token + Shop ID (ID trang cá nhân NetShip), rồi Lưu.',
                 'API Base URL để mặc định https://netship.vn (sandbox: https://test.netship.vn).',
                 'Khi tạo tài khoản / lấy access token trên NetShip, copy URL webhook bên trên (:url) dán vào ô URL callback trên trang đó.',
                 'Ba trường còn lại là default tùy chọn khi tạo đơn — không điền vẫn dùng mặc định hệ thống.',

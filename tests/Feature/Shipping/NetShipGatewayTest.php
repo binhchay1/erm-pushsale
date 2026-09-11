@@ -37,6 +37,7 @@ class NetShipGatewayTest extends TestCase
             'integration_mode' => 'gateway',
             'credentials' => [
                 'token' => 'test-netship-token',
+                'shop_id' => 530,
                 'base_url' => 'https://test.netship.vn',
             ],
         ]);
@@ -138,8 +139,9 @@ class NetShipGatewayTest extends TestCase
 
         Http::assertSent(fn (Request $request) => str_contains($request->url(), '/api/third-party/order')
             && $request->method() === 'POST'
-            && ($request['carrierCode'] ?? null) === 'VTP'
-            && ($request['customerCode'] ?? null) === 'NS-ORDER-001');
+            && data_get($request->data(), 'myRequest.carrierCode') === 'VTP'
+            && data_get($request->data(), 'myRequest.customerCode') === 'NS-ORDER-001'
+            && (int) data_get($request->data(), 'myRequest.ShopID') === 530);
     }
 
     public function test_webhook_matches_by_customer_code_without_overwriting_business_provider(): void

@@ -174,6 +174,7 @@ export default {
         },
         placeholders: {
             paste_netship_token: 'Paste NetShip access token',
+            netship_shop_id: 'e.g. 530 — ID on NetShip profile page',
             product_type_optional: 'Optional — default: Health',
             vnpost_account: 'Note which VNPOST account is in use',
             vnpost_contract: 'Customer contract code with VN Post',
@@ -184,7 +185,7 @@ export default {
         },
         help: {
             netship: [
-                'Required: enable “Use this connection” + Access token, then Save.',
+                'Required: enable “Use this connection” + Access token + Shop ID (NetShip profile ID), then Save.',
                 'API Base URL defaults to https://netship.vn (sandbox: https://test.netship.vn).',
                 'When creating an account / getting an access token on NetShip, copy the webhook URL above (:url) and paste it into the callback URL field on that page.',
                 'The other fields are optional create-order defaults — leave blank to use system defaults.',

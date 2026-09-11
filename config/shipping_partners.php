@@ -233,6 +233,12 @@ return [
                     'required' => true,
                     'default' => env('NETSHIP_TOKEN'),
                 ],
+                'shop_id' => [
+                    'label' => 'Shop ID (NetShip)',
+                    'secret' => false,
+                    'required' => true,
+                    'default' => env('NETSHIP_SHOP_ID'),
+                ],
                 'base_url' => [
                     'label' => 'API Base URL',
                     'secret' => false,

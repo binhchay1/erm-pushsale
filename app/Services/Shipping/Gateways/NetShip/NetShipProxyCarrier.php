@@ -229,7 +229,13 @@ class NetShipProxyCarrier extends AbstractShippingCarrier
             $productName = 'Hang hoa';
         }
 
+        $shopId = $creds['shop_id'] ?? $creds['ShopID'] ?? null;
+        if ($shopId === null || $shopId === '') {
+            throw new RuntimeException(__('messages.shipping_actions.netship_shop_id_required'));
+        }
+
         return [
+            'ShopID' => is_numeric($shopId) ? (int) $shopId : $shopId,
             'customerCode' => $this->customerCode($order),
             'carrierCode' => $this->netshipCarrierCode,
             'senderName' => $pickup['pick_name'],
