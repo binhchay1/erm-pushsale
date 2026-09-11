@@ -8,12 +8,14 @@ final class ClearDemoSeedDataCommand extends Command
 {
     protected $signature = 'data:clear-demo-seed {--force : Skip confirmation prompt}';
 
-    protected $description = 'Xoa toan bo du lieu demo — chi giu tai khoan superadmin (alias cua data:clear-all-keep-accounts)';
+    protected $description = 'Xoa toan bo du lieu — chi giu tai khoan superadmin';
 
     public function handle(): int
     {
         return $this->call('data:clear-all-keep-accounts', [
             '--force' => $this->option('force'),
+            '--only-superadmin' => true,
+            '--flush-sessions' => true,
         ]);
     }
 }

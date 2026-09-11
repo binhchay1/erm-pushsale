@@ -1,0 +1,114 @@
+/**
+ * Global cursor contract — pointer only on interactive controls.
+ * Tables / static text stay default; inputs use text caret.
+ * Loaded near the end of the Pushsale CSS cascade.
+ */
+
+html body.pushsale-app-body,
+html body.pushsale-app-body .content-wrapper,
+html body.pushsale-app-body .pushsale-page,
+html body.pushsale-app-body .ps-page-shell,
+html body.pushsale-app-body .ps-page-shell__body {
+    cursor: default;
+}
+
+/* Text entry */
+html body.pushsale-app-body input:not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="image"]):not([type="range"]):not([type="color"]),
+html body.pushsale-app-body textarea,
+html body.pushsale-app-body [contenteditable="true"] {
+    cursor: text !important;
+}
+
+html body.pushsale-app-body input:disabled,
+html body.pushsale-app-body textarea:disabled,
+html body.pushsale-app-body select:disabled,
+html body.pushsale-app-body button:disabled,
+html body.pushsale-app-body .btn:disabled,
+html body.pushsale-app-body .btn.disabled,
+html body.pushsale-app-body [aria-disabled="true"] {
+    cursor: not-allowed !important;
+}
+
+/* Clickable controls */
+html body.pushsale-app-body a[href],
+html body.pushsale-app-body button:not(:disabled),
+html body.pushsale-app-body .btn:not(:disabled):not(.disabled),
+html body.pushsale-app-body [role="button"]:not([aria-disabled="true"]),
+html body.pushsale-app-body [role="link"],
+html body.pushsale-app-body [role="menuitem"],
+html body.pushsale-app-body [role="tab"],
+html body.pushsale-app-body [role="option"],
+html body.pushsale-app-body [role="switch"],
+html body.pushsale-app-body summary,
+html body.pushsale-app-body label[for],
+html body.pushsale-app-body select:not(:disabled),
+html body.pushsale-app-body input[type="checkbox"]:not(:disabled),
+html body.pushsale-app-body input[type="radio"]:not(:disabled),
+html body.pushsale-app-body input[type="file"]:not(:disabled),
+html body.pushsale-app-body input[type="button"]:not(:disabled),
+html body.pushsale-app-body input[type="submit"]:not(:disabled),
+html body.pushsale-app-body input[type="reset"]:not(:disabled),
+html body.pushsale-app-body input[type="range"]:not(:disabled),
+html body.pushsale-app-body input[type="color"]:not(:disabled),
+html body.pushsale-app-body .ps-select__control,
+html body.pushsale-app-body button.ps-select__control,
+html body.pushsale-app-body .ps-select__option,
+html body.pushsale-app-body .ps-product-search-select button,
+html body.pushsale-app-body .ps-ddl,
+html body.pushsale-app-body .ps-file-chooser,
+html body.pushsale-app-body .btn-icon:not(:disabled),
+html body.pushsale-app-body .ps-voucher-excel-link,
+html body.pushsale-app-body .ps-voucher-col-apply,
+html body.pushsale-app-body .pagination a,
+html body.pushsale-app-body .pagination button {
+    cursor: pointer !important;
+}
+
+/* Tables: default arrow — only real controls inside keep pointer */
+html body.pushsale-app-body table,
+html body.pushsale-app-body table thead,
+html body.pushsale-app-body table tbody,
+html body.pushsale-app-body table tfoot,
+html body.pushsale-app-body table tr,
+html body.pushsale-app-body table th,
+html body.pushsale-app-body table td,
+html body.pushsale-app-body .table,
+html body.pushsale-app-body .pushsale-data-table,
+html body.pushsale-app-body [data-pushsale-table='true'],
+html body.pushsale-app-body .tableFixHead,
+html body.pushsale-app-body .dragscroll1 {
+    cursor: default !important;
+}
+
+html body.pushsale-app-body table a[href],
+html body.pushsale-app-body table button:not(:disabled),
+html body.pushsale-app-body table .btn:not(:disabled):not(.disabled),
+html body.pushsale-app-body table [role="button"]:not([aria-disabled="true"]),
+html body.pushsale-app-body table input[type="checkbox"]:not(:disabled),
+html body.pushsale-app-body table input[type="radio"]:not(:disabled),
+html body.pushsale-app-body table label[for],
+html body.pushsale-app-body table .btn-icon:not(:disabled),
+html body.pushsale-app-body table .ps-voucher-col-apply,
+html body.pushsale-app-body table select:not(:disabled),
+html body.pushsale-app-body tr.is-clickable,
+html body.pushsale-app-body tr[role="button"],
+html body.pushsale-app-body tr[data-href],
+html body.pushsale-app-body tr[data-clickable="true"] {
+    cursor: pointer !important;
+}
+
+html body.pushsale-app-body table input:not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+html body.pushsale-app-body table textarea {
+    cursor: text !important;
+}
+
+/* Static labels / notice text */
+html body.pushsale-app-body .h-label,
+html body.pushsale-app-body .h-text,
+html body.pushsale-app-body .notice,
+html body.pushsale-app-body .ps-voucher-entry-notice,
+html body.pushsale-app-body .ps-voucher-entry-logs,
+html body.pushsale-app-body .ps-page-header__title,
+html body.pushsale-app-body .ps-page-header__subtitle {
+    cursor: default !important;
+}
