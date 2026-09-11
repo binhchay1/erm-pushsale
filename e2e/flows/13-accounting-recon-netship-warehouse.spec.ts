@@ -126,7 +126,7 @@ test.describe('13 — Kế toán đối soát + NetShip + Kho', () => {
         await page.goto('/admin/accounting', { waitUntil: 'domcontentloaded' });
         await waitUiReady(page);
 
-        await clickFabByTooltip(page, /Cập nhật nhiều đơn theo mã|theo mã (đơn|SaleOps|ERM|pushsale)/i);
+        await clickFabByTooltip(page, /Cập nhật nhiều đơn theo mã/i);
 
         await expect(page).toHaveURL(/update-by-code/, { timeout: 20_000 });
         await waitUiReady(page);
