@@ -57,12 +57,11 @@ export async function fillAndCloseNewSaleOrder(page: Page, customer: {
         throw new Error('Không có kho trong dropdown — cần ít nhất 1 warehouse.');
     }
 
-    // Product: if table empty, pick base product (may auto-add when no variants)
-    const productRows = dialog.locator('table.ps-order-product-table tbody tr').filter({
-        hasNot: dialog.locator('.ps-empty-products'),
-    });
-    const hasLine = (await productRows.count()) > 0
-        && !(await dialog.locator('.ps-empty-products').isVisible().catch(() => false));
+    // Product: only real line rows (qty input), not footer totals / empty placeholder.
+    const emptyHint = dialog.locator('.ps-empty-products');
+    const qtyInputs = dialog.locator('table.ps-order-product-table tbody tr input.form-control.text-center');
+    const hasLine = (await qtyInputs.count()) > 0
+        && !(await emptyHint.isVisible().catch(() => false));
 
     if (!hasLine) {
         const base = dialog.locator('.ps-order-product-picker .ps-select').first();
@@ -79,12 +78,17 @@ export async function fillAndCloseNewSaleOrder(page: Page, customer: {
             const vOpt = variant.locator('button.ps-select__option').filter({ hasNotText: /^--/ }).first();
             if (await vOpt.isVisible().catch(() => false)) await vOpt.click();
         }
+
+        await expect(qtyInputs.first()).toBeVisible({ timeout: 10_000 });
     }
 
-    const qty = dialog.locator('table.ps-order-product-table tbody tr').first().locator('input.form-control.text-center');
-    if (await qty.count()) {
-        await qty.fill('1');
-    }
+    const qty = dialog.locator('table.ps-order-product-table tbody tr input.form-control.text-center').first();
+    await expect(qty).toBeVisible({ timeout: 10_000 });
+    await qty.click();
+    await qty.fill('1');
+    await qty.dispatchEvent('input');
+    await qty.dispatchEvent('change');
+    await expect(qty).toHaveValue('1');
 
     const closeBtn = dialog.locator('.ps-order-actions button.btn-primary').filter({ hasText: 'Chốt đơn' });
     await expect(closeBtn).toBeEnabled();

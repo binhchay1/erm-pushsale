@@ -121,6 +121,16 @@ class ManualLeadController extends Controller
             $order = $this->orderEditor->update($order, $request->user(), $details);
 
             if ($request->boolean('close_order')) {
+                $sellable = $order->items()
+                    ->withoutGlobalScope(\App\Models\Scopes\TenantScope::class)
+                    ->where('quantity', '>', 0)
+                    ->exists();
+                if (! $sellable) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'items' => __('messages.sale_ops.close_requires_quantity'),
+                    ]);
+                }
+
                 $this->orderClosing->close($order, $request->user(), [
                     'warehouse_id' => $validated['warehouse_id'] ?? null,
                     'shipping_provider' => $validated['shipping_provider'] ?? null,

@@ -156,20 +156,24 @@ class LeadOrderFactory
             ->values();
         $products = Product::query()
             ->whereIn('id', $productIds)
-            ->get(['id', 'type', 'cost_price'])
+            ->get(['id', 'name', 'type', 'cost_price'])
             ->keyBy('id');
         $comboCosts = $this->comboCosts($productIds);
         $rows = [];
 
         foreach ($items as $item) {
+            $productId = filled($item['product_id'] ?? null) ? (int) $item['product_id'] : null;
+            $product = $productId ? $products->get($productId) : null;
+
             $rawName = trim((string) ($item['product_name'] ?? $item['name'] ?? ''));
+            if ($rawName === '' && $product) {
+                $rawName = (string) $product->name;
+            }
             $name = LandingProductLabel::sanitizeName($rawName);
             if ($name === null) {
                 continue;
             }
 
-            $productId = filled($item['product_id'] ?? null) ? (int) $item['product_id'] : null;
-            $product = $productId ? $products->get($productId) : null;
             $costPrice = $product
                 ? max(0, (int) ($product->cost_price ?: ($comboCosts[$productId] ?? 0)))
                 : 0;
