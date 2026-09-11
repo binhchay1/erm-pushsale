@@ -63,17 +63,16 @@ test.describe('13 — Kế toán đối soát + NetShip + Kho', () => {
 
         const dialog = page.getByRole('dialog').filter({ hasText: /Cập nhật đối soát theo mã đơn/i });
         await expect(dialog).toBeVisible({ timeout: 15_000 });
-        await expect(dialog.locator('.ps-recon-bycode-dialog, [data-slot="dialog-content"]').first()).toBeVisible();
         await expect(dialog.locator('table.tb-sp, table.ps-recon-tb-sp').first()).toBeVisible();
         await expect(dialog.locator('textarea').first()).toBeVisible();
         await expect(dialog.locator('select').first()).toBeVisible();
         await expect(dialog.getByText(/Đơn vị GH là: Giao hàng tiết kiệm/i)).toBeVisible();
         await expect(dialog.getByRole('button', { name: /Cập nhật đối soát/i })).toBeVisible();
 
-        await dialog.locator('button.ps-recon-guide-toggle, button').filter({ hasText: /Xem hướng dẫn/i }).first().click();
-        await expect(dialog.getByText(/Tối đa 5\.000 mã đơn/i)).toBeVisible();
+        await dialog.locator('button.ps-recon-guide-toggle').filter({ hasText: /Xem hướng dẫn/i }).click();
+        await expect(dialog.locator('.huong-dan .notice, .notice').getByText(/Tối đa 5\.000 mã đơn/i)).toBeVisible();
 
-        await dialog.locator('button.ps-recon-close, .ps-recon-close').first().click();
+        await dialog.locator('button.ps-recon-close').click();
         await expect(dialog).toBeHidden({ timeout: 10_000 });
     });
 
@@ -94,13 +93,17 @@ test.describe('13 — Kế toán đối soát + NetShip + Kho', () => {
         await expect(dialog.getByRole('button', { name: /2\.\s*Đối soát/i })).toBeVisible();
         await expect(dialog.locator('.ps-recon-excel-history, .ps-recon-excel-main').first()).toBeVisible();
 
-        await dialog.locator('button.ps-recon-guide-toggle, button').filter({ hasText: /Xem hướng dẫn/i }).first().click();
-        await expect(dialog.getByText(/cột mã đơn là bắt buộc/i)).toBeVisible();
+        await dialog.locator('button.ps-recon-guide-toggle').filter({ hasText: /Xem hướng dẫn/i }).click();
+        await expect(dialog.locator('.huong-dan .notice, .notice').getByText(/cột mã đơn là bắt buộc/i)).toBeVisible();
+        // Close guide so layout matches default sample for upload interaction
+        await dialog.locator('button.ps-recon-guide-toggle').filter({ hasText: /Xem hướng dẫn/i }).click();
 
         const fileInput = dialog.locator('input[type="file"]');
         await expect(fileInput).toBeAttached();
         await fileInput.setInputFiles(RECON_XLS);
-        await dialog.getByRole('button', { name: /^Upload$/i }).click();
+        const uploadBtn = dialog.locator('button').filter({ hasText: /\bUpload\b/i }).first();
+        await expect(uploadBtn).toBeVisible({ timeout: 10_000 });
+        await uploadBtn.click();
 
         const totalStat = dialog.locator('tr.smd0 td').nth(1);
         const toast = page.locator('[data-sonner-toast]');
@@ -130,7 +133,7 @@ test.describe('13 — Kế toán đối soát + NetShip + Kho', () => {
         await expect(page.locator('.ps-wh-bulk-page, .ps-wh-bulk-body').first()).toBeVisible({ timeout: 15_000 });
         await expect(page.locator('textarea.ps-wh-bulk-codes, textarea').first()).toBeVisible();
         await expect(page.getByRole('button', { name: /Thực hiện/i })).toBeVisible();
-        await expect(page.getByText(/Chỉ dẫn|Ghi chú/i).first()).toBeVisible();
+        await expect(page.locator('.ps-wh-bulk-notice, .notice').first()).toBeVisible();
     });
 
     test('kho 5.1: FAB đăng đơn không 500', async ({ page }) => {
@@ -162,8 +165,12 @@ test.describe('13 — Kế toán đối soát + NetShip + Kho', () => {
         await expect(page).not.toHaveURL(/\/login/);
         await expect(page.locator('body')).not.toContainText(/Server Error|Whoops|SQLSTATE/i);
 
-        const importBtn = page.locator('button, a, label').filter({ hasText: /Import Excel/i }).first();
-        const exportBtn = page.locator('button, a, label').filter({ hasText: /Xuất Excel/i }).first();
+        const importBtn = page.locator('.ps-voucher-entry-excel-btn, button.ps-voucher-entry-excel-btn, label.ps-voucher-entry-excel-btn')
+            .filter({ hasText: /Import Excel/i })
+            .first();
+        const exportBtn = page.locator('.ps-voucher-entry-excel-btn, button.ps-voucher-entry-excel-btn, label.ps-voucher-entry-excel-btn')
+            .filter({ hasText: /Xuất Excel/i })
+            .first();
         await expect(importBtn).toBeVisible({ timeout: 20_000 });
         await expect(exportBtn).toBeVisible({ timeout: 10_000 });
 
