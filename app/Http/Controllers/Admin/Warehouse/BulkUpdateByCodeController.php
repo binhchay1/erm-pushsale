@@ -21,8 +21,10 @@ class BulkUpdateByCodeController extends Controller
         $executeUrl = $this->executeUrl($request);
         $initialCodes = trim((string) $request->query('codes', ''));
 
+        $appName = (string) (config('saleops.brand.name') ?: config('app.name') ?: 'SaleOps');
+
         return Inertia::render('Admin/Warehouse/BulkUpdateByCode', [
-            'pageTitle' => 'Cập nhật contact theo mã pushsale',
+            'pageTitle' => 'Cập nhật contact theo mã '.$appName,
             'activeMenuCode' => $this->menuCode($request),
             'backUrl' => $backUrl,
             'executeUrl' => $executeUrl,

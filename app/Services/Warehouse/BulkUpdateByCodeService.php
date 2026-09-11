@@ -23,7 +23,7 @@ class BulkUpdateByCodeService
         'DANG_DON' => 'Đăng đơn',
         'HUY_DANG_DON' => 'Hủy đăng đơn',
         'HUY_DANG_DON_WITHOUT_API' => 'Hủy đăng đơn (without API)',
-        'DOI_MA_DON_PUSHSALE' => 'Đổi mã đơn Pushsale',
+        'DOI_MA_DON_PUSHSALE' => 'Đổi mã đơn hệ thống',
         'CAP_NHAT_TT_CARE_DON' => 'Cập nhật trạng thái care đơn',
     ];
 

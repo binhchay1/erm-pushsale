@@ -121,12 +121,12 @@ test.describe('13 — Kế toán đối soát + NetShip + Kho', () => {
         });
     });
 
-    test('FAB → trang cập nhật theo mã Pushsale', async ({ page }) => {
+    test('FAB → trang cập nhật theo mã đơn', async ({ page }) => {
         await loginAs(page, DEMO.admin);
         await page.goto('/admin/accounting', { waitUntil: 'domcontentloaded' });
         await waitUiReady(page);
 
-        await clickFabByTooltip(page, /Cập nhật nhiều đơn theo mã Pushsale|theo mã pushsale/i);
+        await clickFabByTooltip(page, /Cập nhật nhiều đơn theo mã|theo mã (đơn|SaleOps|ERM|pushsale)/i);
 
         await expect(page).toHaveURL(/update-by-code/, { timeout: 20_000 });
         await waitUiReady(page);
