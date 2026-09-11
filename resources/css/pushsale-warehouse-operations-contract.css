@@ -1,9 +1,9 @@
 /**
- * Thủ kho tác nghiệp (menu 5.1) — Pushsale parity contract.
+ * Thá»§ kho tÃ¡c nghiá»p (menu 5.1) â Pushsale parity contract.
  * Scoped to .ps-wh-page / .ps-wh-legacy-page. Does not touch sidebar/header chrome.
  */
 
-/* Status tab color squares — exact Pushsale levels */
+/* Status tab color squares â exact Pushsale levels */
 html body.pushsale-app-body .ps-wh-page .dm-tac-nghiep .flag,
 html body.pushsale-app-body .ps-wh-legacy-page .dm-tac-nghiep .flag {
     background-color: #c1e2f4 !important;
@@ -163,7 +163,7 @@ html body.pushsale-app-body .ps-wh-page .ps-order-products-section.is-upsale-sec
     padding-top: 4px !important;
 }
 
-/* Advanced filter grid under PageHeader sibling — full width, đúng số cột */
+/* Advanced filter grid under PageHeader sibling â full width, ÄÃºng sá» cá»t */
 html body.pushsale-app-body .ps-wh-page .ps-page-extra-filters .ps-wh-filter-body,
 html body.pushsale-app-body .ps-wh-page .ps-wh-filter-body,
 html body.pushsale-app-body .ps-acc-page .ps-page-extra-filters .ps-wh-filter-body {
@@ -234,7 +234,7 @@ html body.pushsale-app-body .ps-wh-page .ps-wh-filter-cell .form-control {
     width: 100% !important;
 }
 
-/* FAB tones (layout/alignment finalized at file end — Pushsale sample parity) */
+/* FAB tones (layout/alignment finalized at file end â Pushsale sample parity) */
 html body.pushsale-app-body .action-container.ps-wh-floating-actions .n-button.fam-primary {
     background: #0585e5 !important;
 }
@@ -636,7 +636,7 @@ html body.pushsale-app-body .ps-wh-page .ps-wh-table-shell {
 }
 
 
-/* Care note textarea: ears + hover like Sale TN cần */
+/* Care note textarea: ears + hover like Sale TN cáº§n */
 html body.pushsale-app-body .ps-wh-page .ps-care-note-mof,
 html body.pushsale-app-body .ps-wh-legacy-table .ps-care-note-mof {
     clear: both;
@@ -693,7 +693,7 @@ html body.pushsale-app-body .ps-wh-legacy-table .c-care-body {
     overflow: visible !important;
 }
 
-/* Care dialog — table field layout like Pushsale */
+/* Care dialog â table field layout like Pushsale */
 html body.pushsale-app-body .ps-wh-care-dialog .ps-wh-care-table {
     border-collapse: collapse;
     width: 100%;
@@ -1036,7 +1036,7 @@ html body.pushsale-app-body .ps-ttgh-boxed-control .ps-ttgh-check {
     }
 }
 
-/* Responsive completion contract — warehouse operations and TTGH dialogs. */
+/* Responsive completion contract â warehouse operations and TTGH dialogs. */
 @media (max-width: 767px) {
     html body.pushsale-app-body .ps-wh-page .ps-wh-filter-row-main,
     html body.pushsale-app-body .ps-wh-page .ps-wh-filter-row-five,
@@ -1103,7 +1103,7 @@ html body.pushsale-app-body .ps-ttgh-boxed-control .ps-ttgh-check {
 }
 
 
-/* v140 — real mobile contract for Thủ kho/Kế toán tác nghiệp (5.1 / 6.1).
+/* v140 â real mobile contract for Thá»§ kho/Káº¿ toÃ¡n tÃ¡c nghiá»p (5.1 / 6.1).
  * Both routes use WarehouseFilterPanel + WarehouseOrderTable, so fix the shared
  * contract instead of per-page one-off styles. */
 html body.pushsale-app-body .ps-wh-page,
@@ -1140,7 +1140,7 @@ html body.pushsale-app-body .ps-page-extra-filters[data-page-code="6.1"] .ps-wh-
 
 html body.pushsale-app-body .ps-wh-page .ps-wh-status-row,
 html body.pushsale-app-body .ps-acc-page .ps-wh-status-row {
-    /* Horizontal inset comes from unified gutter / .ps-acc-page padding — keep overflow only. */
+    /* Horizontal inset comes from unified gutter / .ps-acc-page padding â keep overflow only. */
     overflow: hidden !important;
 }
 
@@ -1242,7 +1242,7 @@ html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table td:nth-child(14) { w
 html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table th.c-recon,
 html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table td:nth-child(15) { width: 72px !important; min-width: 72px !important; }
 
-/* Accounting 6.1 — column order matches Pushsale htmk1 (ĐSNB early, split money, customer last) */
+/* Accounting 6.1 â column order matches Pushsale htmk1 (ÄSNB early, split money, customer last) */
 html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table th.c-recon,
 html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table td.c-recon-body { width: 72px !important; min-width: 72px !important; }
 html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table th.c-products,
@@ -1327,7 +1327,7 @@ html body.pushsale-app-body .ps-acc-page .ps-acc-recon-empty {
 }
 
 /* -------------------------------------------------------------------------
-   FAB alignment � Pushsale sample parity (htmk1 ~4998-5011).
+   FAB alignment ï¿½ Pushsale sample parity (htmk1 ~4998-5011).
    Flex column + consistent left edge; hamburger shares left/center with
    first column of icon-row buttons (50px under 60px via margin-left: 5px).
    Loads last among final-contract warehouse CSS so it wins over shared/
@@ -1440,8 +1440,8 @@ html body.pushsale-app-body .ps-acc-page .action-container.ps-wh-floating-action
     border: 0 !important;
     border-radius: 50% !important;
     aspect-ratio: 1 / 1 !important;
-    clip-path: none !important;
-    overflow: visible !important;
+    clip-path: circle(50%) !important;
+    overflow: hidden !important;
     color: #fff !important;
     line-height: 1 !important;
     text-align: center !important;

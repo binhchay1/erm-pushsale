@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
     Dialog,
     DialogContent,
@@ -37,7 +36,7 @@ export function ConfirmDialog({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-md ps-confirm-dialog-surface ps-confirm-dialog" showClose={false}>
+            <DialogContent className="sm:max-w-md ps-dialog-surface ps-confirm-dialog-surface ps-confirm-dialog" showClose={false}>
                 <DialogHeader>
                     <DialogTitle>{title ?? t('confirm_dialog.title')}</DialogTitle>
                     <DialogDescription className="sr-only">
@@ -54,19 +53,21 @@ export function ConfirmDialog({
                         </div>
                     </div>
                 </div>
-                <DialogFooter className="gap-2 sm:gap-0">
+                <DialogFooter className="ps-dialog-footer gap-2 sm:gap-0">
                     {!isAlert ? (
-                        <Button type="button" variant="outline" onClick={() => onOpenChange?.(false)}>
+                        <button type="button" className="btn btn-default btn-sm" onClick={() => onOpenChange?.(false)}>
                             {cancelLabel ?? t('confirm_dialog.cancel_label')}
-                        </Button>
+                        </button>
                     ) : null}
-                    <Button
+                    <button
                         type="button"
-                        variant={isDanger ? 'destructive' : 'default'}
+                        className={`btn btn-sm ${isDanger ? 'btn-danger' : 'btn-primary'}`}
                         onClick={handleConfirm}
                     >
+                        <i className={`fa ${isDanger ? 'fa-check' : 'fa-check'}`} aria-hidden="true" />
+                        {' '}
                         {confirmLabel ?? t('common.confirm')}
-                    </Button>
+                    </button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

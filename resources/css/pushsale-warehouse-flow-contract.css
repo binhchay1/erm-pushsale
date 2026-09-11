@@ -778,22 +778,25 @@ html body.pushsale-app-body .pushsale-page[data-page-code="5.3.1"] .box-body {
 
 /* React voucher entry form (5.3.1) — sample CapNhatPhieuXuatNhapKho row/col rhythm */
 .pushsale-page.ps-voucher-entry-page .ps-page-shell__body {
-    padding-top: 12px;
+    /* Page already uses --ps-header-x; keep body flush with title. */
+    padding-top: 12px !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
 }
 
 .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-body {
     display: block;
-    max-width: var(--ps-voucher-width, 1200px);
+    max-width: none;
     width: 100%;
-    margin: 0 auto;
-    padding: 4px 14px 28px;
+    margin: 0;
+    padding: 4px 0 28px;
     box-sizing: border-box;
 }
 
 .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-error {
-    max-width: var(--ps-voucher-width, 1200px);
-    margin: 0 auto 10px;
-    padding: 0 14px;
+    max-width: none;
+    margin: 0 0 10px;
+    padding: 0;
 }
 
 .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-row {

@@ -1,5 +1,5 @@
 /*
- * V102 — final shared page chrome contract.
+ * V102 â€” final shared page chrome contract.
  * Purpose: every captured Pushsale template and every React page must use one
  * visual structure: fixed blue app header, then a white page header with title
  * left / search actions right, then filter row/body. This file loads last and
@@ -463,7 +463,7 @@ html body.pushsale-app-body .ps-page-header .ps-header-close-icon .fa {
     }
 }
 
-/* V105 — hard guard for the page title whitespace shown on product/legacy pages. */
+/* V105 â€” hard guard for the page title whitespace shown on product/legacy pages. */
 html body.pushsale-app-body .ps-page-viewport > .ps-adminlte-page:first-child,
 html body.pushsale-app-body .ps-page-viewport > .pushsale-page:first-child {
     margin-top: 0 !important;
@@ -539,7 +539,7 @@ html body.pushsale-app-body .ps-products-page .ps-product-status-toggle input[ty
     opacity: .55 !important;
 }
 
-/* V109 — server QA sweep: remove the global white band under the blue header.
+/* V109 â€” server QA sweep: remove the global white band under the blue header.
  * A later legacy menu contract made .content-wrapper relative + margin-top: 50px,
  * so every page started with an empty area. The admin sidebar is an overlay in
  * this product, therefore content must stay fixed below the header and start at
@@ -595,7 +595,7 @@ html body.pushsale-app-body .ps-adminlte-page .m-header-wrap:first-child {
     min-height: 0 !important;
 }
 
-/* V109 — product page filter contract. Keep the title/search line compact,
+/* V109 â€” product page filter contract. Keep the title/search line compact,
  * then place sort/status/category/marketing in the first filter row and
  * sale/care in the second row, matching the Pushsale table pages. */
 html body.pushsale-app-body .ps-products-page .m-header.ps-product-header,
@@ -644,7 +644,7 @@ html body.pushsale-app-body .ps-products-page .ps-product-search input {
     width: 100% !important;
 }
 
-/* V109 — submenu level-2 hover moved to pushsale-sidebar-canonical-contract.css. */
+/* V109 â€” submenu level-2 hover moved to pushsale-sidebar-canonical-contract.css. */
 
 @media (max-width: 1180px) {
     html body.pushsale-app-body .ps-products-page .ps-product-header {
@@ -659,7 +659,7 @@ html body.pushsale-app-body .ps-products-page .ps-product-search input {
     }
 }
 
-/* V111 — common Pushsale select contract + product page alignment. */
+/* V111 â€” common Pushsale select contract + product page alignment. */
 html body.pushsale-app-body select.form-control,
 html body.pushsale-app-body .ps-select__control {
     height: 31px !important;
@@ -921,7 +921,7 @@ html body.pushsale-app-body .ps-products-page .ps-product-table {
 }
 
 
-/* V113 — submenu hover moved to pushsale-sidebar-canonical-contract.css. */
+/* V113 â€” submenu hover moved to pushsale-sidebar-canonical-contract.css. */
 
 html body.pushsale-app-body select,
 html body.pushsale-app-body select.form-control,
@@ -966,7 +966,7 @@ html body.pushsale-app-body .ps-select__control:focus > .fa {
     color: #666 !important;
 }
 
-/* V114 — warehouse operations filter/status alignment contract. */
+/* V114 â€” warehouse operations filter/status alignment contract. */
 html body.pushsale-app-body .ps-wh-legacy-page .ps-wh-search-header,
 html body.pushsale-app-body .ps-wh-legacy-page .ps-wh-search-header .m-header {
     width: 100% !important;
@@ -1156,8 +1156,8 @@ html body.pushsale-app-body .ps-wh-legacy-page .ps-wh-date-range.ps-date-range-c
 
 html body.pushsale-app-body .ps-wh-legacy-page .ps-wh-status-row.ttgh-acc,
 html body.pushsale-app-body .ps-wh-legacy-page .ps-wh-status-row.row {
-    width: calc(100% - 48px) !important;
-    margin: 12px 24px 14px !important;
+    width: calc(100% - (2 * var(--ps-header-x, 14px))) !important;
+    margin: 12px var(--ps-header-x, 14px) 14px !important;
     padding: 9px 0 2px !important;
     border: 0 !important;
     border-bottom: 1px solid #e2e6ea !important;
@@ -1199,9 +1199,9 @@ html body.pushsale-app-body .ps-wh-legacy-page .ps-wh-status-row .dm-tac-nghiep.
 html body.pushsale-app-body .ps-wh-legacy-page .ps-wh-table-shell,
 html body.pushsale-app-body .ps-wh-legacy-page .ps-wh-table-scroll,
 html body.pushsale-app-body .ps-wh-legacy-page .ps-wh-table-wrap {
-    width: calc(100% - 48px) !important;
-    margin-left: 24px !important;
-    margin-right: 24px !important;
+    width: calc(100% - (2 * var(--ps-header-x, 14px))) !important;
+    margin-left: var(--ps-header-x, 14px) !important;
+    margin-right: var(--ps-header-x, 14px) !important;
 }
 
 @media (max-width: 1600px) {
@@ -1547,7 +1547,7 @@ html body.pushsale-app-body .ps-warehouse-form-grid .ps-checkbox-row input[type=
     flex: 0 0 auto !important;
 }
 
-/* Dialog select: bỏ viền/đổ bóng dày, đồng bộ input text. */
+/* Dialog select: bá»� viá»�n/Ä‘á»• bÃ³ng dÃ y, Ä‘á»“ng bá»™ input text. */
 html body.pushsale-app-body .ps-warehouse-dialog .ps-select__control,
 html body.pushsale-app-body .ps-warehouse-form-grid .ps-select__control,
 html body.pushsale-app-body .ps-dialog-surface .ps-select__control,
@@ -2290,7 +2290,7 @@ html body.pushsale-app-body .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2:hover 
     -webkit-text-fill-color: #fff !important;
 }
 
-/* v119 — final menu hover + shared Pushsale header/filter contract. */
+/* v119 â€” final menu hover + shared Pushsale header/filter contract. */
 html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2:hover,
 html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2:hover > a.a2.pushsale-menu-link,
 html body.pushsale-app-body .pushsale-main-sidebar .sidebar-menu.ul1 .treeview-menu.ul2 > li.li2:hover > button.a2.pushsale-menu-link,
@@ -2634,7 +2634,7 @@ html body.pushsale-app-body .sidebar-menu.ul1 li.li1 ul.ul2 > li.li2 > a:hover::
     display: none !important;
 }
 
-/* V122 final sidebar hover override — last rule wins. */
+/* V122 final sidebar hover override â€” last rule wins. */
 html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2:hover,
 html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2:hover > a.a2,
 html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 > li.li1 > ul.ul2 > li.li2:hover > button.a2,
@@ -2672,12 +2672,11 @@ html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 > li.l
     box-shadow: none !important;
 }
 
-/* Accounting/Warehouse ops: table left edge must match status chips.
- * .ps-acc-page padding is the shared gutter — do not double-indent the table. */
-html body.pushsale-app-body .ps-acc-page.ps-wh-legacy-page {
-    padding-left: 24px !important;
-    padding-right: 24px !important;
-    padding-top: 10px !important;
+/* Ops pages: status chips + table share PageHeader title gutter (--ps-header-x). */
+html body.pushsale-app-body .ps-acc-page.ps-wh-legacy-page,
+html body.pushsale-app-body .ps-wh-page.ps-wh-legacy-page {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
 }
 
 html body.pushsale-app-body .ps-acc-page.ps-wh-legacy-page .ps-wh-status-row,
@@ -2685,21 +2684,15 @@ html body.pushsale-app-body .ps-acc-page.ps-wh-legacy-page .ps-wh-status-row.ttg
 html body.pushsale-app-body .ps-acc-page.ps-wh-legacy-page .ps-wh-status-row.row,
 html body.pushsale-app-body .ps-acc-page.ps-wh-legacy-page .ps-wh-table-shell,
 html body.pushsale-app-body .ps-acc-page.ps-wh-legacy-page .tableFixHead,
-html body.pushsale-app-body .ps-acc-page.ps-wh-legacy-page .pushsale-pagination {
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-}
-
-/* Warehouse 5.1: keep status + table on the same 24px gutter */
-html body.pushsale-app-body .ps-wh-page.ps-wh-legacy-page:not(.ps-acc-page) .ps-wh-status-row,
-html body.pushsale-app-body .ps-wh-page.ps-wh-legacy-page:not(.ps-acc-page) .ps-wh-status-row.ttgh-acc,
-html body.pushsale-app-body .ps-wh-page.ps-wh-legacy-page:not(.ps-acc-page) .ps-wh-table-shell {
-    margin-left: 24px !important;
-    margin-right: 24px !important;
-    width: calc(100% - 48px) !important;
-    max-width: calc(100% - 48px) !important;
+html body.pushsale-app-body .ps-acc-page.ps-wh-legacy-page .pushsale-pagination,
+html body.pushsale-app-body .ps-wh-page.ps-wh-legacy-page .ps-wh-status-row,
+html body.pushsale-app-body .ps-wh-page.ps-wh-legacy-page .ps-wh-status-row.ttgh-acc,
+html body.pushsale-app-body .ps-wh-page.ps-wh-legacy-page .ps-wh-table-shell,
+html body.pushsale-app-body .ps-wh-page.ps-wh-legacy-page .tableFixHead,
+html body.pushsale-app-body .ps-wh-page.ps-wh-legacy-page .pushsale-pagination {
+    margin-left: var(--ps-header-x, 14px) !important;
+    margin-right: var(--ps-header-x, 14px) !important;
+    width: calc(100% - (2 * var(--ps-header-x, 14px))) !important;
+    max-width: calc(100% - (2 * var(--ps-header-x, 14px))) !important;
     box-sizing: border-box !important;
 }

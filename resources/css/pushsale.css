@@ -7686,7 +7686,7 @@ body.pushsale-app-body .pushsale-wrapper .text-destructive {
 /* Buttons/select/input contract for custom pages. */
 body.pushsale-app-body .pushsale-wrapper [data-slot='button'],
 body.pushsale-app-body .pushsale-wrapper button.ps-action,
-body.pushsale-app-body .pushsale-wrapper button:not(.a1):not(.a2):not(.pushsale-sidebar-toggle):not(.pushsale-dialog-close):not(.pslc-source-name):not(.pslc-actions button):not(.pslc-api-line button):not(.pslc-remove):not(.pssp-provider-menu button) {
+body.pushsale-app-body .pushsale-wrapper button:not(.a1):not(.a2):not(.pushsale-sidebar-toggle):not(.pushsale-dialog-close):not(.pslc-source-name):not(.pslc-actions button):not(.pslc-api-line button):not(.pslc-remove):not(.pssp-provider-menu button):not(.n-button):not(.main-action):not(.ps-wh-action-button):not(.ps-wh-main-action):not(.btn-icon):not(.aoh) {
     min-height: 30px !important;
     border-radius: 2px !important;
     font-size: 12px !important;

@@ -1,5 +1,6 @@
 import { Head, router, usePage } from '@inertiajs/react';
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { toast } from 'sonner';
 
 import { ProductSearchSelect } from '@/components/filters/ProductSearchSelect';
 import { PushsalePageShell } from '@/components/layout/PushsalePageShell';
@@ -112,7 +113,7 @@ export default function VoucherEntry({
     pageRuntimeError = null,
 }) {
     const t = useT();
-    const { ask, alert } = useConfirm();
+    const { ask } = useConfirm();
     const page = usePage();
     const authUser = page.props?.auth?.user;
     const importInputRef = useRef(null);
@@ -160,10 +161,11 @@ export default function VoucherEntry({
     const [pendingProductId, setPendingProductId] = useState('');
     const [status, setStatus] = useState(voucher?.status || 'draft');
     const [voucherId, setVoucherId] = useState(voucher?.id || null);
-    const [error, setError] = useState(pageRuntimeError || '');
     const [busy, setBusy] = useState(false);
     const [boostBelow, setBoostBelow] = useState(0);
     const [boostAdd, setBoostAdd] = useState(1000);
+
+    useEffect(() => { if (pageRuntimeError) toast.error(pageRuntimeError); }, [pageRuntimeError]);
 
     const isConfirmed = status === 'confirmed';
     const title = voucherId
@@ -202,7 +204,7 @@ export default function VoucherEntry({
         if (!id) return;
         const product = productById.get(id);
         if (!product) {
-            setError(t('operations.voucher_entry.product_required'));
+            toast.error(t('operations.voucher_entry.product_required'));
             return;
         }
         setLines((prev) => [
@@ -217,8 +219,7 @@ export default function VoucherEntry({
             },
         ]);
         setPendingProductId('');
-        setError('');
-    };
+        };
 
     const buildPayload = () => {
         const code = String(form.code || '').trim() || `${typePrefix(form.type)}-${Date.now()}`;
@@ -277,7 +278,7 @@ export default function VoucherEntry({
     const persistDraft = async () => {
         const localError = validateLocal();
         if (localError) {
-            setError(localError);
+            toast.error(localError);
             throw new Error(localError);
         }
         const payload = buildPayload();
@@ -291,11 +292,10 @@ export default function VoucherEntry({
 
     const saveDraft = async () => {
         setBusy(true);
-        setError('');
         try {
             await persistDraft();
         } catch (exception) {
-            setError(exception.message);
+            toast.error(exception.message);
         } finally {
             setBusy(false);
         }
@@ -309,7 +309,6 @@ export default function VoucherEntry({
         if (!ok) return;
 
         setBusy(true);
-        setError('');
         try {
             let currentId = voucherId;
             if (!isConfirmed) {
@@ -322,7 +321,7 @@ export default function VoucherEntry({
             const body = await requestJson(`${routeUrl}/records/${currentId}/complete`, 'POST');
             applyVoucherResponse(body);
         } catch (exception) {
-            setError(exception.message);
+            toast.error(exception.message);
         } finally {
             setBusy(false);
         }
@@ -349,12 +348,11 @@ export default function VoucherEntry({
         });
         if (!ok) return;
         setBusy(true);
-        setError('');
         try {
             await requestJson(`${routeUrl}/records/${voucherId}`, 'DELETE');
             router.visit('/admin/warehouse/vouchers');
         } catch (exception) {
-            setError(exception.message);
+            toast.error(exception.message);
             setBusy(false);
         }
     };
@@ -392,7 +390,6 @@ export default function VoucherEntry({
         event.target.value = '';
         if (!file) return;
         setBusy(true);
-        setError('');
         try {
             const formData = new FormData();
             formData.append('file', file);
@@ -412,7 +409,7 @@ export default function VoucherEntry({
                 })));
             }
         } catch (exception) {
-            setError(exception.message);
+            toast.error(exception.message);
         } finally {
             setBusy(false);
         }
@@ -420,7 +417,7 @@ export default function VoucherEntry({
 
     const runBoostStock = async () => {
         if (!form.warehouse_id) {
-            setError(t('operations.voucher_entry.warehouse_required'));
+            toast.error(t('operations.voucher_entry.warehouse_required'));
             return;
         }
         const ok = await ask({
@@ -429,17 +426,15 @@ export default function VoucherEntry({
         });
         if (!ok) return;
         setBusy(true);
-        setError('');
         try {
             const body = await requestJson(`${routeUrl}/tester/boost-stock`, 'POST', {
                 warehouse_id: Number(form.warehouse_id),
                 below_quantity: Number(boostBelow) || 0,
                 add_quantity: Number(boostAdd) || 1,
             });
-            setError('');
-            await alert({ message: body.message || t('operations.voucher_entry.boost_done') });
+            toast.success(body.message || t('operations.voucher_entry.boost_done'));
         } catch (exception) {
-            setError(exception.message);
+            toast.error(exception.message);
         } finally {
             setBusy(false);
         }
@@ -447,7 +442,7 @@ export default function VoucherEntry({
 
     const runResetStock = async () => {
         if (!form.warehouse_id) {
-            setError(t('operations.voucher_entry.warehouse_required'));
+            toast.error(t('operations.voucher_entry.warehouse_required'));
             return;
         }
         const ok = await ask({
@@ -456,14 +451,13 @@ export default function VoucherEntry({
         });
         if (!ok) return;
         setBusy(true);
-        setError('');
         try {
             const body = await requestJson(`${routeUrl}/tester/reset-stock`, 'POST', {
                 warehouse_id: Number(form.warehouse_id),
             });
-            await alert({ message: body.message || t('operations.voucher_entry.reset_done') });
+            toast.success(body.message || t('operations.voucher_entry.reset_done'));
         } catch (exception) {
-            setError(exception.message);
+            toast.error(exception.message);
         } finally {
             setBusy(false);
         }
@@ -489,12 +483,6 @@ export default function VoucherEntry({
                         </button>
                     )}
                 >
-                    {error ? (
-                        <div className="pushsale-error-banner ps-voucher-entry-error">
-                            <i className="fa fa-exclamation-triangle" /> {error}
-                        </div>
-                    ) : null}
-
                     <div className="ps-voucher-entry-body box-body">
                         <div className="ps-voucher-entry-row">
                             <div className="ps-voucher-entry-col ps-voucher-entry-col--2 form-group">

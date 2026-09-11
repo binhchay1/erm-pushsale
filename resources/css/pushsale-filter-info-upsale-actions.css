@@ -247,8 +247,8 @@ html body.pushsale-app-body .ps-wh-floating-actions .ps-wh-action-button {
     border: 0 !important;
     border-radius: 50% !important;
     aspect-ratio: 1 / 1 !important;
-    clip-path: none !important;
-    overflow: visible !important;
+    clip-path: circle(50%) !important;
+    overflow: hidden !important;
     color: #fff !important;
     opacity: 1 !important;
     filter: none !important;

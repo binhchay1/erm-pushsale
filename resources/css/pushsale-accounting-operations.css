@@ -2,8 +2,8 @@
    Scope: /admin/accounting only. Align accounting operation UI with sale/warehouse Pushsale tables. */
 
 html body.pushsale-app-body .ps-acc-page {
-    /* Shared horizontal gutter with status chips + table (unified contract reinforces). */
-    padding: 10px 24px 20px !important;
+    /* Horizontal gutter comes from --ps-header-x on status/table (page-header contract). */
+    padding: 8px 0 20px !important;
     background: #fff !important;
     min-height: auto !important;
 }

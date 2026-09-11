@@ -625,6 +625,16 @@ html body.pushsale-app-body button.ps-create-order-fab {
     width: 56px !important;
 }
 
+/* Warehouse / accounting hamburger FAB cluster — force circle even if generic button radius wins */
+html body.pushsale-app-body .pushsale-wrapper .action-container.ps-wh-floating-actions button.n-button,
+html body.pushsale-app-body .pushsale-wrapper .action-container.ps-wh-floating-actions button.main-action,
+html body.pushsale-app-body .pushsale-wrapper .action-container.ps-wh-floating-actions button.ps-wh-action-button,
+html body.pushsale-app-body .pushsale-wrapper .action-container.ps-wh-floating-actions button.ps-wh-main-action {
+    border-radius: 50% !important;
+    clip-path: circle(50%) !important;
+    overflow: hidden !important;
+}
+
 /* Responsive completion contract — shared operation controls/dialog tables. */
 @media (max-width: 767px) {
     html body.pushsale-app-body .ps-operation-history-dialog.ps-customer-dialog.ps-dialog-surface,

@@ -172,21 +172,26 @@ export default function Inventory({ report, filterOptions = {}, intakeUrl, expor
                                     <td className="text-center" />
                                     <td className="text-center"><input type="checkbox" readOnly checked={Boolean(row.isDiscontinued)} /></td>
                                     <td className="text-center" />
-                                    <td className="text-center ps-row-actions">
-                                        <button
-                                            type="button"
-                                            onClick={async () => {
-                                                const ok = await ask({
-                                                    description: `Xóa dòng tồn kho ${row.productName}?`,
-                                                    confirmLabel: 'Xóa',
-                                                    variant: 'destructive',
-                                                });
-                                                if (!ok) return;
-                                                router.delete(`/admin/warehouse-inventories/${row.id}`, { preserveScroll: true });
-                                            }}
-                                        >
-                                            <i className="fa fa-trash" />
-                                        </button>
+                                    <td className="text-center ps-row-actions-cell">
+                                        <span className="ps-row-actions">
+                                            <button
+                                                type="button"
+                                                className="btn-icon"
+                                                title="Xóa"
+                                                aria-label="Xóa"
+                                                onClick={async () => {
+                                                    const ok = await ask({
+                                                        description: `Xóa dòng tồn kho ${row.productName}?`,
+                                                        confirmLabel: 'Xóa',
+                                                        variant: 'destructive',
+                                                    });
+                                                    if (!ok) return;
+                                                    router.delete(`/admin/warehouse-inventories/${row.id}`, { preserveScroll: true });
+                                                }}
+                                            >
+                                                <i className="fa fa-trash" />
+                                            </button>
+                                        </span>
                                     </td>
                                 </tr>
                             )) : (

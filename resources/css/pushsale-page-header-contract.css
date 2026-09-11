@@ -1286,6 +1286,7 @@ html body.pushsale-app-body .ps-acc-page,
 html body.pushsale-app-body .ps-customer-profile-page,
 html body.pushsale-app-body .ps-sales-leader-report,
 html body.pushsale-app-body .ps-operation-conversion-report,
+html body.pushsale-app-body .ps-inventory-page,
 html body.pushsale-app-body .pushsale-page[data-page-code^="4.6"] {
     padding-left: 0 !important;
     padding-right: 0 !important;
