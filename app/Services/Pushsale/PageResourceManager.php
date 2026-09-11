@@ -229,6 +229,10 @@ class PageResourceManager
             $payload['component_items'] = $this->normalizeComboItems($payload['component_items']);
         }
 
+        if (($definition['special'] ?? null) === 'warehouse_voucher' && array_key_exists('type', $payload)) {
+            $payload['type'] = $this->normalizeWarehouseVoucherType($payload['type']);
+        }
+
         if (array_key_exists('quantity', $payload) && array_key_exists('unit_price', $payload)) {
             $payload['total'] = (int) round(((float) $payload['quantity']) * ((int) $payload['unit_price']));
         }
@@ -277,7 +281,10 @@ class PageResourceManager
     /** @param array<string, mixed> $definition @param array<string, mixed> $validated @return array<string, mixed> */
     private function modelAttributes(array $definition, array $validated): array
     {
-        $relationFields = ['category_ids', 'attribute_value_ids', 'component_product_ids', 'component_items', 'product_id', 'document_quantity', 'quantity', 'unit_cost', 'batch_code', 'expiry_date', 'location_code'];
+        $relationFields = [
+            'category_ids', 'attribute_value_ids', 'component_product_ids', 'component_items',
+            'product_id', 'document_quantity', 'quantity', 'unit_cost', 'batch_code', 'expiry_date', 'location_code', 'lines',
+        ];
         if (($definition['special'] ?? null) !== 'warehouse_voucher') {
             $relationFields = ['category_ids', 'attribute_value_ids', 'component_product_ids', 'component_items'];
         }
@@ -416,86 +423,425 @@ class PageResourceManager
         return $validated;
     }
 
-    /** @param array<string, mixed> $validated */
+    /**
+     * Lưu phiếu nháp nhiều dòng — chưa đụng tồn kho.
+     *
+     * @param  array<string, mixed>  $validated
+     */
     private function createWarehouseVoucher(array $validated, ?User $actor): WarehouseVoucher
     {
         if (! $actor) {
             throw ValidationException::withMessages(['user' => 'Không xác định được người thao tác.']);
         }
 
-        $quantity = abs((int) ($validated['quantity'] ?? 0));
-        if ($quantity < 1) {
-            throw ValidationException::withMessages(['quantity' => 'Số lượng nhập/xuất phải lớn hơn 0.']);
-        }
+        $type = $this->normalizeWarehouseVoucherType($validated['type'] ?? null);
+        $lines = $this->normalizeWarehouseVoucherLines($validated);
+        $this->assertWarehouseVoucherLines($lines);
 
-        return DB::transaction(function () use ($validated, $actor, $quantity): WarehouseVoucher {
+        return DB::transaction(function () use ($validated, $actor, $type, $lines): WarehouseVoucher {
             $voucher = WarehouseVoucher::query()->create([
-                'warehouse_id' => $validated['warehouse_id'],
-                'code' => $validated['code'],
-                'type' => $validated['type'],
+                'warehouse_id' => (int) $validated['warehouse_id'],
+                'code' => (string) $validated['code'],
+                'type' => $type,
                 'document_date' => $validated['document_date'] ?? now()->toDateString(),
+                'partner' => $validated['partner'] ?? null,
                 'note' => $validated['note'] ?? null,
-                'status' => 'confirmed',
-                'approved_by_user_id' => $actor->id,
+                'status' => 'draft',
                 'created_by_user_id' => $actor->id,
                 'updated_by_user_id' => $actor->id,
             ]);
 
-            WarehouseVoucherLine::query()->create([
-                'warehouse_voucher_id' => $voucher->id,
-                'product_id' => $validated['product_id'],
-                'document_quantity' => (int) ($validated['document_quantity'] ?? $quantity),
-                'quantity' => $quantity,
-                'unit_cost' => (int) ($validated['unit_cost'] ?? 0),
-                'batch_code' => $validated['batch_code'] ?? null,
-                'expiry_date' => $validated['expiry_date'] ?? null,
-                'location_code' => $validated['location_code'] ?? null,
-                'note' => $validated['note'] ?? null,
-            ]);
+            $this->syncWarehouseVoucherLines($voucher, $lines);
 
-            $movement = $validated['type'] === 'outbound'
-                ? $this->inventory->export((int) $validated['warehouse_id'], (int) $validated['product_id'], $quantity, $actor, $validated['note'] ?? null, $actor->id)
-                : $this->inventory->intake((int) $validated['warehouse_id'], (int) $validated['product_id'], $quantity, $actor, $validated['note'] ?? null, $actor->id);
-
-            // Liên kết phiếu nhập/xuất thủ công với thẻ kho để 5.3.2 và 5.3.3
-            // cùng nhìn vào một sự kiện nghiệp vụ, không bị tách thành dữ liệu rời.
-            $movement->forceFill([
-                'reference_type' => 'warehouse_voucher',
-                'reference_id' => $voucher->id,
-                'unit_cost' => (int) ($validated['unit_cost'] ?? $movement->unit_cost ?? 0),
-            ])->save();
-
-            return $voucher->refresh();
+            return $voucher->load(['lines.product:id,name,sku,unit', 'warehouse:id,name', 'creator:id,name'])->refresh();
         });
     }
-    /** @param array<string, mixed> $validated */
+
+    /**
+     * Cập nhật phiếu nháp nhiều dòng — chưa đụng tồn kho.
+     *
+     * @param  array<string, mixed>  $validated
+     */
     private function updateWarehouseVoucher(WarehouseVoucher $voucher, array $validated, ?User $actor): WarehouseVoucher
     {
         abort_if($voucher->status === 'confirmed', 422, 'Phiếu kho đã xác nhận không thể sửa trực tiếp. Hãy tạo phiếu điều chỉnh mới.');
 
-        $voucher->fill([
-            'warehouse_id' => $validated['warehouse_id'],
-            'code' => $validated['code'],
-            'type' => $validated['type'],
-            'document_date' => $validated['document_date'] ?? now()->toDateString(),
-            'note' => $validated['note'] ?? null,
-            'updated_by_user_id' => $actor?->id,
-        ])->save();
+        $type = $this->normalizeWarehouseVoucherType($validated['type'] ?? $voucher->type);
+        $lines = $this->normalizeWarehouseVoucherLines($validated);
+        $this->assertWarehouseVoucherLines($lines);
 
-        $line = $voucher->lines()->firstOrNew();
-        $line->fill([
-            'product_id' => $validated['product_id'],
-            'document_quantity' => $validated['document_quantity'] ?? $validated['quantity'],
-            'quantity' => $validated['quantity'],
-            'unit_cost' => $validated['unit_cost'] ?? 0,
-            'batch_code' => $validated['batch_code'] ?? null,
-            'expiry_date' => $validated['expiry_date'] ?? null,
-            'location_code' => $validated['location_code'] ?? null,
-            'note' => $validated['note'] ?? null,
-        ]);
-        $line->save();
+        return DB::transaction(function () use ($voucher, $validated, $actor, $type, $lines): WarehouseVoucher {
+            $voucher->fill([
+                'warehouse_id' => (int) $validated['warehouse_id'],
+                'code' => (string) $validated['code'],
+                'type' => $type,
+                'document_date' => $validated['document_date'] ?? now()->toDateString(),
+                'partner' => $validated['partner'] ?? $voucher->partner,
+                'note' => $validated['note'] ?? null,
+                'status' => 'draft',
+                'updated_by_user_id' => $actor?->id,
+            ])->save();
 
-        return $voucher->refresh();
+            $this->syncWarehouseVoucherLines($voucher, $lines);
+
+            return $voucher->load(['lines.product:id,name,sku,unit', 'warehouse:id,name', 'creator:id,name'])->refresh();
+        });
+    }
+
+    /**
+     * Hoàn thành phiếu nháp → confirmed và áp dụng nhập/xuất tồn theo loại phiếu.
+     */
+    public function completeWarehouseVoucher(WarehouseVoucher $voucher, User $actor): WarehouseVoucher
+    {
+        abort_if($voucher->status === 'confirmed', 422, 'Phiếu kho đã hoàn thành.');
+        abort_if($voucher->status === 'cancelled', 422, 'Phiếu kho đã hủy không thể hoàn thành.');
+
+        $voucher->loadMissing('lines');
+        $lines = $voucher->lines->map(fn (WarehouseVoucherLine $line): array => [
+            'product_id' => (int) $line->product_id,
+            'document_quantity' => (int) $line->document_quantity,
+            'quantity' => (int) $line->quantity,
+            'unit_cost' => (int) $line->unit_cost,
+            'batch_code' => $line->batch_code,
+            'expiry_date' => $line->expiry_date?->toDateString(),
+            'location_code' => $line->location_code,
+            'note' => $line->note,
+        ])->all();
+        $this->assertWarehouseVoucherLines($lines);
+
+        $type = $this->normalizeWarehouseVoucherType($voucher->type);
+
+        return DB::transaction(function () use ($voucher, $actor, $type): WarehouseVoucher {
+            foreach ($voucher->lines as $line) {
+                $quantity = abs((int) $line->quantity);
+                if ($quantity < 1) {
+                    continue;
+                }
+
+                $movement = $this->isOutboundWarehouseVoucherType($type)
+                    ? $this->inventory->export((int) $voucher->warehouse_id, (int) $line->product_id, $quantity, $actor, $voucher->note, $actor->id)
+                    : $this->inventory->intake((int) $voucher->warehouse_id, (int) $line->product_id, $quantity, $actor, $voucher->note, $actor->id);
+
+                $movement->forceFill([
+                    'reference_type' => 'warehouse_voucher',
+                    'reference_id' => $voucher->id,
+                    'unit_cost' => (int) ($line->unit_cost ?: $movement->unit_cost ?: 0),
+                ])->save();
+            }
+
+            $voucher->forceFill([
+                'status' => 'confirmed',
+                'approved_by_user_id' => $actor->id,
+                'updated_by_user_id' => $actor->id,
+            ])->save();
+
+            return $voucher->load(['lines.product:id,name,sku,unit', 'warehouse:id,name', 'creator:id,name', 'approver:id,name'])->refresh();
+        });
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public function parseWarehouseVoucherImport(mixed $file): array
+    {
+        if (! is_object($file) || ! method_exists($file, 'getRealPath')) {
+            throw ValidationException::withMessages(['file' => 'File import không hợp lệ.']);
+        }
+
+        $path = (string) $file->getRealPath();
+        $handle = fopen($path, 'rb');
+        if ($handle === false) {
+            throw ValidationException::withMessages(['file' => 'Không đọc được file import.']);
+        }
+
+        $header = null;
+        $rows = [];
+        try {
+            while (($data = fgetcsv($handle)) !== false) {
+                if ($data === [null] || $data === false) {
+                    continue;
+                }
+                $cells = array_map(static fn ($value) => trim((string) $value), $data);
+                if ($header === null) {
+                    $header = array_map(static fn (string $value): string => strtolower($value), $cells);
+                    continue;
+                }
+                if (count(array_filter($cells, static fn (string $value): bool => $value !== '')) === 0) {
+                    continue;
+                }
+                $row = [];
+                foreach ($header as $index => $key) {
+                    $row[$key] = $cells[$index] ?? '';
+                }
+                $rows[] = $row;
+            }
+        } finally {
+            fclose($handle);
+        }
+
+        $skuMap = Product::query()
+            ->withoutTenant()
+            ->withoutShop()
+            ->where('is_active', true)
+            ->whereNotNull('sku')
+            ->get(['id', 'sku', 'cost_price'])
+            ->keyBy(fn (Product $product): string => strtoupper(trim((string) $product->sku)));
+
+        $lines = [];
+        foreach ($rows as $index => $row) {
+            $productId = (int) ($row['product_id'] ?? $row['id'] ?? 0);
+            $sku = strtoupper(trim((string) ($row['sku'] ?? $row['ma_san_pham'] ?? $row['mã sản phẩm'] ?? '')));
+            if ($productId < 1 && $sku !== '' && $skuMap->has($sku)) {
+                $productId = (int) $skuMap->get($sku)->id;
+            }
+            if ($productId < 1) {
+                throw ValidationException::withMessages([
+                    'file' => 'Dòng '.($index + 2).': không tìm thấy sản phẩm trong catalog (cần product_id hoặc sku).',
+                ]);
+            }
+
+            $quantity = (int) preg_replace('/[^0-9-]/', '', (string) ($row['quantity'] ?? $row['so_luong'] ?? $row['số lượng'] ?? 0));
+            $documentQuantity = (int) preg_replace('/[^0-9-]/', '', (string) ($row['document_quantity'] ?? $row['sl_chung_tu'] ?? $quantity));
+            $unitCost = (int) preg_replace('/[^0-9-]/', '', (string) ($row['unit_cost'] ?? $row['gia_nhap'] ?? $row['giá nhập'] ?? 0));
+            if ($unitCost <= 0 && $skuMap->has($sku)) {
+                $unitCost = (int) ($skuMap->get($sku)->cost_price ?? 0);
+            }
+
+            $lines[] = [
+                'product_id' => $productId,
+                'document_quantity' => abs($documentQuantity ?: $quantity),
+                'quantity' => abs($quantity),
+                'unit_cost' => max(0, $unitCost),
+                'batch_code' => ($row['batch_code'] ?? $row['lo'] ?? $row['lô'] ?? null) ?: null,
+                'expiry_date' => ($row['expiry_date'] ?? $row['ngay_het_han'] ?? null) ?: null,
+                'location_code' => ($row['location_code'] ?? $row['ma_vi_tri'] ?? null) ?: null,
+                'note' => ($row['note'] ?? $row['ghi_chu'] ?? null) ?: null,
+            ];
+        }
+
+        $this->assertWarehouseVoucherLines($lines);
+
+        return $lines;
+    }
+
+    /**
+     * Tester: cộng tồn cho các dòng tồn < ngưỡng trong kho.
+     *
+     * @return array{updated: int}
+     */
+    public function boostWarehouseStock(int $warehouseId, int $belowQuantity, int $addQuantity, User $actor): array
+    {
+        abort_unless($actor->isAdmin() || $actor->isPlatformAdmin(), 403, 'Chỉ admin mới được cộng tồn thử.');
+        if ($addQuantity < 1) {
+            throw ValidationException::withMessages(['add_quantity' => 'SL cộng thêm phải lớn hơn 0.']);
+        }
+
+        $inventories = \App\Models\WarehouseInventory::query()
+            ->where('warehouse_id', $warehouseId)
+            ->where('stock_quantity', '<', $belowQuantity)
+            ->get();
+
+        $updated = 0;
+        foreach ($inventories as $inventory) {
+            $this->inventory->intake($warehouseId, (int) $inventory->product_id, $addQuantity, $actor, 'Tester cộng tồn kho', $actor->id);
+            $updated++;
+        }
+
+        return ['updated' => $updated];
+    }
+
+    /**
+     * Tester: bù đúng phần âm về 0.
+     *
+     * @return array{updated: int}
+     */
+    public function resetNegativeWarehouseStock(int $warehouseId, User $actor): array
+    {
+        abort_unless($actor->isAdmin() || $actor->isPlatformAdmin(), 403, 'Chỉ admin mới được reset tồn về 0.');
+
+        $inventories = \App\Models\WarehouseInventory::query()
+            ->where('warehouse_id', $warehouseId)
+            ->where('stock_quantity', '<', 0)
+            ->get();
+
+        $updated = 0;
+        foreach ($inventories as $inventory) {
+            $need = abs((int) $inventory->stock_quantity);
+            if ($need < 1) {
+                continue;
+            }
+            $this->inventory->intake($warehouseId, (int) $inventory->product_id, $need, $actor, 'Tester reset tồn kho về 0', $actor->id);
+            $updated++;
+        }
+
+        return ['updated' => $updated];
+    }
+
+    /** @return array{id: int, warehouse_id: int, code: string, type: string, document_date: ?string, partner: ?string, note: ?string, status: string, created_by: ?string, approved_by: ?string, lines: list<array<string, mixed>>}|null */
+    public function serializeWarehouseVoucher(?WarehouseVoucher $voucher): ?array
+    {
+        if (! $voucher) {
+            return null;
+        }
+
+        $voucher->loadMissing(['lines.product:id,name,sku,unit,cost_price', 'warehouse:id,name', 'creator:id,name', 'approver:id,name']);
+
+        return [
+            'id' => (int) $voucher->id,
+            'warehouse_id' => (int) $voucher->warehouse_id,
+            'code' => (string) $voucher->code,
+            'type' => $this->normalizeWarehouseVoucherType($voucher->type),
+            'document_date' => $voucher->document_date?->toDateString(),
+            'partner' => $voucher->partner,
+            'note' => $voucher->note,
+            'status' => (string) $voucher->status,
+            'created_by' => $voucher->creator?->name,
+            'approved_by' => $voucher->approver?->name,
+            'warehouse_name' => $voucher->warehouse?->name,
+            'lines' => $voucher->lines->values()->map(fn (WarehouseVoucherLine $line): array => [
+                'id' => (int) $line->id,
+                'product_id' => (int) $line->product_id,
+                'product' => $line->product?->name,
+                'sku' => $line->product?->sku,
+                'uom' => $line->product?->unit,
+                'document_quantity' => (int) $line->document_quantity,
+                'quantity' => (int) $line->quantity,
+                'unit_cost' => (int) $line->unit_cost,
+                'total' => (int) $line->quantity * (int) $line->unit_cost,
+                'batch_code' => $line->batch_code,
+                'expiry_date' => $line->expiry_date?->toDateString(),
+                'location_code' => $line->location_code,
+                'note' => $line->note,
+            ])->all(),
+        ];
+    }
+
+    public function normalizeWarehouseVoucherType(mixed $type): string
+    {
+        $key = strtolower(trim((string) $type));
+        $map = [
+            '1' => 'inbound',
+            '2' => 'outbound',
+            '3' => 'scrap',
+            '4' => 'internal',
+            'inbound' => 'inbound',
+            'outbound' => 'outbound',
+            'scrap' => 'scrap',
+            'internal' => 'internal',
+            'nhập kho' => 'inbound',
+            'xuat kho' => 'outbound',
+            'xuất kho' => 'outbound',
+            'xuất kho nội bộ' => 'internal',
+            'xuat kho noi bo' => 'internal',
+            'xuất hủy' => 'scrap',
+            'xuat huy' => 'scrap',
+        ];
+
+        return $map[$key] ?? (in_array($key, ['inbound', 'outbound', 'internal', 'scrap'], true) ? $key : 'inbound');
+    }
+
+    public function isOutboundWarehouseVoucherType(string $type): bool
+    {
+        return in_array($this->normalizeWarehouseVoucherType($type), ['outbound', 'internal', 'scrap'], true);
+    }
+
+    /**
+     * @param  array<string, mixed>  $validated
+     * @return list<array<string, mixed>>
+     */
+    private function normalizeWarehouseVoucherLines(array $validated): array
+    {
+        $rawLines = $validated['lines'] ?? null;
+        if (is_array($rawLines) && count($rawLines) > 0) {
+            return collect($rawLines)->map(function (mixed $line): array {
+                $row = is_array($line) ? $line : [];
+                $quantity = abs((int) ($row['quantity'] ?? 0));
+
+                return [
+                    'product_id' => (int) ($row['product_id'] ?? 0),
+                    'document_quantity' => abs((int) ($row['document_quantity'] ?? $quantity)),
+                    'quantity' => $quantity,
+                    'unit_cost' => max(0, (int) ($row['unit_cost'] ?? 0)),
+                    'batch_code' => ($row['batch_code'] ?? null) ?: null,
+                    'expiry_date' => ($row['expiry_date'] ?? null) ?: null,
+                    'location_code' => ($row['location_code'] ?? null) ?: null,
+                    'note' => ($row['note'] ?? null) ?: null,
+                ];
+            })->values()->all();
+        }
+
+        $productId = (int) ($validated['product_id'] ?? 0);
+        if ($productId < 1) {
+            return [];
+        }
+
+        $quantity = abs((int) ($validated['quantity'] ?? 0));
+
+        return [[
+            'product_id' => $productId,
+            'document_quantity' => abs((int) ($validated['document_quantity'] ?? $quantity)),
+            'quantity' => $quantity,
+            'unit_cost' => max(0, (int) ($validated['unit_cost'] ?? 0)),
+            'batch_code' => ($validated['batch_code'] ?? null) ?: null,
+            'expiry_date' => ($validated['expiry_date'] ?? null) ?: null,
+            'location_code' => ($validated['location_code'] ?? null) ?: null,
+            'note' => ($validated['note'] ?? null) ?: null,
+        ]];
+    }
+
+    /** @param list<array<string, mixed>> $lines */
+    private function assertWarehouseVoucherLines(array $lines): void
+    {
+        if (count($lines) < 1) {
+            throw ValidationException::withMessages(['lines' => 'Phiếu kho cần ít nhất một dòng sản phẩm.']);
+        }
+
+        $productIds = collect($lines)
+            ->pluck('product_id')
+            ->map(fn ($id) => (int) $id)
+            ->filter(fn (int $id) => $id > 0)
+            ->values();
+        if ($productIds->count() !== count($lines)) {
+            throw ValidationException::withMessages(['lines' => 'Mỗi dòng phải chọn sản phẩm trong catalog.']);
+        }
+
+        $uniqueIds = $productIds->unique()->values();
+        // exists:products,id đã validate; kiểm tra lại bằng query bỏ shop/tenant scope
+        // vì request HTTP có thể gắn shop context khác với sản phẩm catalog shared.
+        $existing = Product::query()
+            ->withoutTenant()
+            ->withoutShop()
+            ->whereIn('id', $uniqueIds->all())
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id);
+        if ($existing->count() !== $uniqueIds->count()) {
+            throw ValidationException::withMessages(['lines' => 'Chỉ được chọn sản phẩm đang có trong catalog.']);
+        }
+
+        $hasQty = collect($lines)->contains(fn (array $line): bool => abs((int) ($line['quantity'] ?? 0)) >= 1);
+        if (! $hasQty) {
+            throw ValidationException::withMessages(['quantity' => 'Số lượng nhập/xuất phải lớn hơn 0.']);
+        }
+    }
+
+    /** @param list<array<string, mixed>> $lines */
+    private function syncWarehouseVoucherLines(WarehouseVoucher $voucher, array $lines): void
+    {
+        $voucher->lines()->delete();
+
+        foreach ($lines as $line) {
+            WarehouseVoucherLine::query()->create([
+                'warehouse_voucher_id' => $voucher->id,
+                'product_id' => (int) $line['product_id'],
+                'document_quantity' => (int) ($line['document_quantity'] ?? $line['quantity'] ?? 0),
+                'quantity' => (int) ($line['quantity'] ?? 0),
+                'unit_cost' => (int) ($line['unit_cost'] ?? 0),
+                'batch_code' => $line['batch_code'] ?? null,
+                'expiry_date' => $line['expiry_date'] ?? null,
+                'location_code' => $line['location_code'] ?? null,
+                'note' => $line['note'] ?? null,
+            ]);
+        }
     }
 
 }

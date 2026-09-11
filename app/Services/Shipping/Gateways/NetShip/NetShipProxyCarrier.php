@@ -229,7 +229,7 @@ class NetShipProxyCarrier extends AbstractShippingCarrier
             $productName = 'Hang hoa';
         }
 
-        $shopId = $creds['shop_id'] ?? $creds['ShopID'] ?? null;
+        $shopId = $this->resolveShopId($order, $creds);
         if ($shopId === null || $shopId === '') {
             throw new RuntimeException(__('messages.shipping_actions.netship_shop_id_required'));
         }
@@ -264,6 +264,21 @@ class NetShipProxyCarrier extends AbstractShippingCarrier
             'receiverPay' => false,
             'pickupType' => (int) ($creds['pickup_type'] ?? 0),
         ];
+    }
+
+    /**
+     * Ưu tiên ShopID theo kho → credentials NetShip global.
+     *
+     * @param  array<string, mixed>  $creds
+     */
+    private function resolveShopId(Order $order, array $creds): mixed
+    {
+        $warehouseShopId = data_get($order->warehouse?->shipping_account_settings, 'netship.shop_id');
+        if ($warehouseShopId !== null && $warehouseShopId !== '') {
+            return $warehouseShopId;
+        }
+
+        return $creds['shop_id'] ?? $creds['ShopID'] ?? null;
     }
 
     private function customerCode(Order $order): string

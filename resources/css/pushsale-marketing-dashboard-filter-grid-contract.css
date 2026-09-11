@@ -332,7 +332,7 @@ html body.pushsale-app-body .psm-page .psm-dashboard-table thead tr:first-child 
 }
 
 html body.pushsale-app-body .psm-page .psm-dashboard-table thead tr:nth-child(2) th {
-    top: 28px !important;
+    top: 32px !important;
 }
 
 @media (max-width: 1500px) {
@@ -393,8 +393,8 @@ html body.pushsale-app-body .psm-page .psm-dashboard-table thead tr:nth-child(2)
 
     html body.pushsale-app-body .psm-page .psm-dashboard-table th,
     html body.pushsale-app-body .psm-page .psm-dashboard-table td {
-        font-size: 11px !important;
-        line-height: 15px !important;
+        font-size: 12px !important;
+        line-height: 1.35 !important;
         padding: 6px 7px !important;
     }
 }

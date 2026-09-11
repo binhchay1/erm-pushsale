@@ -5095,6 +5095,8 @@ return array (
         array (
           'inbound' => 'Nhập kho',
           'outbound' => 'Xuất kho',
+          'internal' => 'Xuất kho nội bộ',
+          'scrap' => 'Xuất hủy',
         ),
       ),
       3 => 

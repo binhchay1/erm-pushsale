@@ -71,8 +71,8 @@ class LandingApprovalController extends Controller
         $this->authorizeConnectionAccess($request->user(), $connection);
 
         $validated = $request->validate([
-            'product_ids' => ['nullable', 'array', 'max:50'],
-            'product_ids.*' => ['integer', 'distinct', Rule::exists('products', 'id')->where(fn ($query) => $query
+            'product_ids' => ['required', 'array', 'min:1', 'max:50'],
+            'product_ids.*' => ['required', 'integer', 'distinct', Rule::exists('products', 'id')->where(fn ($query) => $query
                 ->where('company_id', (int) $connection->company_id)
                 ->where('is_active', true)
                 ->where('available_marketing', true))],
@@ -89,11 +89,15 @@ class LandingApprovalController extends Controller
                 ->unique()
                 ->values();
 
-            $products = $productIds->isEmpty()
-                ? collect()
-                : Product::query()
-                    ->whereIn('id', $productIds->all())
-                    ->get(['id', 'type']);
+            if ($productIds->isEmpty()) {
+                return back()
+                    ->withErrors(['product_ids' => 'Phải chọn ít nhất 1 sản phẩm/gói từ danh mục trước khi duyệt.'])
+                    ->with('error', 'Phải chọn ít nhất 1 sản phẩm/gói từ danh mục trước khi duyệt.');
+            }
+
+            $products = Product::query()
+                ->whereIn('id', $productIds->all())
+                ->get(['id', 'type']);
 
             $connection->loadMissing(['sources']);
             $mainSource = $connection->sources->firstWhere('source_type', LandingConnectionSource::TYPE_MAIN)

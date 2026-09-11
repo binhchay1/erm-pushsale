@@ -9,12 +9,15 @@ import { RegisterShipmentDialog } from '@/components/operations/RegisterShipment
 import { AddToHandoverDialog } from '@/components/operations/AddToHandoverDialog';
 import { UpdateDeliveryStatusByCodeDialog } from '@/components/operations/UpdateDeliveryStatusByCodeDialog';
 import { UpdateDeliveryStatusExcelDialog } from '@/components/operations/UpdateDeliveryStatusExcelDialog';
+import { UpdateReconByCodeDialog } from '@/components/operations/UpdateReconByCodeDialog';
+import { UpdateReconExcelDialog } from '@/components/operations/UpdateReconExcelDialog';
 import { OrderMoneyCell, OrderProductsBreakdown, OrderStatusFlags } from '@/components/operations/OrderLineBreakdown';
 import { apiPost, apiRequest, getCsrfToken } from '@/lib/api';
 import { formatCurrency, formatDateTime } from '@/lib/format';
 import { openShippingLabel } from '@/lib/shipping';
 import { useConfirm } from '@/hooks/use-confirm';
 import { useOrderLockPresence } from '@/hooks/useOrderLockPresence';
+import { useT } from '@/providers/I18nProvider';
 
 const statusTone = {
     waiting_waybill: 'ttgh1',
@@ -111,18 +114,24 @@ function FloatingWarehouseActions({
     apiBase,
     actionApiBase,
     deliveryStatuses = [],
+    reconciliationStatuses = [],
     printButtons = [],
     exportButtons = [],
     shippingProviders = [],
+    variant = 'warehouse',
     onClear,
     onReload,
 }) {
+    const t = useT();
     const { ask } = useConfirm();
+    const isAccounting = variant === 'accounting';
     const [open, setOpen] = useState(false);
     const [registerOpen, setRegisterOpen] = useState(false);
     const [handoverOpen, setHandoverOpen] = useState(false);
     const [ttghCodeOpen, setTtghCodeOpen] = useState(false);
     const [ttghExcelOpen, setTtghExcelOpen] = useState(false);
+    const [reconCodeOpen, setReconCodeOpen] = useState(false);
+    const [reconExcelOpen, setReconExcelOpen] = useState(false);
     const [exportBusy, setExportBusy] = useState(false);
     const selectedIds = selectedRows.map((row) => row.id);
     const selectedValidForShipment = selectedRows.filter((row) => row.canCreateShipment && !row.hasInsufficientStock);
@@ -270,50 +279,117 @@ function FloatingWarehouseActions({
         setHandoverOpen(true);
     };
 
+    const printRow = (
+        <div className="icon-row" key="print">
+            {printFabButtons.map((button) => (
+                <ActionMenuButton
+                    key={button.key}
+                    title={button.title}
+                    icon={button.icon || 'print'}
+                    tone={button.tone || 'success'}
+                    onClick={() => openPrintProfile(button.key)}
+                />
+            ))}
+        </div>
+    );
+    const ttghRow = (
+        <div className="icon-row" key="ttgh">
+            <ActionMenuButton
+                title={t('operations.warehouse_fab.ttgh')}
+                icon="truck"
+                tone={isAccounting ? 'primary' : 'success'}
+                onClick={() => setTtghCodeOpen(true)}
+            />
+            <ActionMenuButton
+                title={t('operations.warehouse_fab.ttgh_excel')}
+                icon="truck"
+                tone="warning"
+                onClick={() => setTtghExcelOpen(true)}
+            />
+        </div>
+    );
+    const excelRow = (
+        <div className="icon-row" key="excel">
+            {excelFabButtons.map((button) => (
+                <ActionMenuButton
+                    key={button.key}
+                    title={button.title}
+                    icon={button.icon || 'file-excel-o'}
+                    tone={button.tone || 'primary'}
+                    onClick={() => exportExcel(button.title, button.key)}
+                    disabled={exportBusy}
+                />
+            ))}
+        </div>
+    );
+    const invoiceRow = (
+        <div className="icon-row" key="invoice">
+            {!isAccounting ? (
+                <ActionMenuButton
+                    title={t('operations.warehouse_fab.handover')}
+                    icon="file-text-o"
+                    tone="success"
+                    onClick={openHandoverDialog}
+                />
+            ) : null}
+            <ActionMenuButton
+                title={t('operations.warehouse_fab.einvoice')}
+                icon="barcode"
+                tone="success"
+                onClick={issueInvoices}
+            />
+        </div>
+    );
+    const reconRow = isAccounting ? (
+        <div className="icon-row" key="recon">
+            <ActionMenuButton
+                title={t('operations.warehouse_fab.recon')}
+                icon="sliders"
+                tone="success"
+                onClick={() => setReconCodeOpen(true)}
+            />
+            <ActionMenuButton
+                title={t('operations.warehouse_fab.recon_excel')}
+                icon="sliders"
+                tone="warning"
+                onClick={() => setReconExcelOpen(true)}
+            />
+        </div>
+    ) : null;
+    const bulkRow = (
+        <div className="icon-row" key="bulk">
+            <ActionMenuButton
+                title={t('operations.warehouse_fab.bulk_by_code')}
+                icon="gears"
+                tone="success"
+                onClick={openBulkUpdatePage}
+            />
+        </div>
+    );
+
+    // Accounting (htmk1): Đăng/Hủy → Print → TTGH → Đối soát → HĐĐT → Excel → mã PS
+    // Warehouse: Đăng/Hủy → TTGH → Print → Excel → Handover+HĐĐT → mã PS
+    const fabRows = isAccounting
+        ? [printRow, ttghRow, reconRow, invoiceRow, excelRow, bulkRow]
+        : [ttghRow, printRow, excelRow, invoiceRow, bulkRow];
+
     return (
         <>
             <nav className={`action-container ps-wh-floating-actions ${open ? 'open' : ''}`} onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
                 <div className="hidden-actions" aria-hidden={!open}>
                     <div className="icon-row">
-                        <ActionMenuButton title="Đăng đơn" icon="calendar-check-o" tone="primary" onClick={createShipments} />
-                        <ActionMenuButton title="Hủy đăng đơn" icon="calendar-times-o" tone="warning" onClick={cancelShipments} />
+                        <ActionMenuButton title={t('operations.warehouse_fab.register')} icon="calendar-check-o" tone="primary" onClick={createShipments} />
+                        <ActionMenuButton title={t('operations.warehouse_fab.cancel_register')} icon="calendar-times-o" tone="warning" onClick={cancelShipments} />
                     </div>
-                    <div className="icon-row">
-                        <ActionMenuButton title="Cập nhật trạng thái giao hàng" icon="truck" tone="success" onClick={() => setTtghCodeOpen(true)} />
-                        <ActionMenuButton title="Cập nhật trạng thái giao hàng Excel" icon="truck" tone="warning" onClick={() => setTtghExcelOpen(true)} />
-                    </div>
-                    <div className="icon-row">
-                        {printFabButtons.map((button) => (
-                            <ActionMenuButton
-                                key={button.key}
-                                title={button.title}
-                                icon={button.icon || 'print'}
-                                tone={button.tone || 'success'}
-                                onClick={() => openPrintProfile(button.key)}
-                            />
-                        ))}
-                    </div>
-                    <div className="icon-row">
-                        {excelFabButtons.map((button) => (
-                            <ActionMenuButton
-                                key={button.key}
-                                title={button.title}
-                                icon={button.icon || 'file-excel-o'}
-                                tone={button.tone || 'primary'}
-                                onClick={() => exportExcel(button.title, button.key)}
-                                disabled={exportBusy}
-                            />
-                        ))}
-                    </div>
-                    <div className="icon-row">
-                        <ActionMenuButton title="Thêm đơn vào biên bản" icon="file-text-o" tone="success" onClick={openHandoverDialog} />
-                        <ActionMenuButton title="Xuất hóa đơn điện tử theo mã đơn" icon="barcode" tone="success" onClick={issueInvoices} />
-                    </div>
-                    <div className="icon-row">
-                        <ActionMenuButton title="Cập nhật nhiều đơn theo mã Pushsale" icon="gears" tone="success" onClick={openBulkUpdatePage} />
-                    </div>
+                    {fabRows}
                 </div>
-                <button type="button" className="main-action ps-wh-main-action" id="warehouseMenuToggle" title={open ? 'Đóng chức năng' : 'Mở chức năng'} onClick={() => setOpen((value) => !value)}>
+                <button
+                    type="button"
+                    className="main-action ps-wh-main-action"
+                    id="warehouseMenuToggle"
+                    title={open ? t('operations.warehouse_fab.close_menu') : t('operations.warehouse_fab.open_menu')}
+                    onClick={() => setOpen((value) => !value)}
+                >
                     <i className="fa fa-bars" />
                 </button>
             </nav>
@@ -324,13 +400,15 @@ function FloatingWarehouseActions({
                 apiBase={apiBase}
                 onDone={() => { onClear(); onReload(); }}
             />
-            <AddToHandoverDialog
-                open={handoverOpen}
-                onOpenChange={setHandoverOpen}
-                targetRows={resolveActionRows()}
-                providers={shippingProviders}
-                onDone={() => { onClear(); onReload(); }}
-            />
+            {!isAccounting ? (
+                <AddToHandoverDialog
+                    open={handoverOpen}
+                    onOpenChange={setHandoverOpen}
+                    targetRows={resolveActionRows()}
+                    providers={shippingProviders}
+                    onDone={() => { onClear(); onReload(); }}
+                />
+            ) : null}
             <UpdateDeliveryStatusByCodeDialog
                 open={ttghCodeOpen}
                 onOpenChange={setTtghCodeOpen}
@@ -345,6 +423,24 @@ function FloatingWarehouseActions({
                 actionApiBase={actionApiBase}
                 onDone={() => { onClear(); onReload(); }}
             />
+            {isAccounting ? (
+                <>
+                    <UpdateReconByCodeDialog
+                        open={reconCodeOpen}
+                        onOpenChange={setReconCodeOpen}
+                        actionApiBase={actionApiBase}
+                        initialCodes={resolveActionCodesText()}
+                        reconciliationStatuses={reconciliationStatuses}
+                        onDone={() => { onClear(); onReload(); }}
+                    />
+                    <UpdateReconExcelDialog
+                        open={reconExcelOpen}
+                        onOpenChange={setReconExcelOpen}
+                        actionApiBase={actionApiBase}
+                        onDone={() => { onClear(); onReload(); }}
+                    />
+                </>
+            ) : null}
         </>
     );
 }
@@ -513,23 +609,60 @@ export function WarehouseOrderTable({
             <div className="ps-wh-table-shell dragscroll1 tableFixHead">
                 <table className="table table-bordered table-multi-select table-sale ps-wh-table ps-wh-legacy-table">
                     <thead>
-                        <tr className="drags-area hidden"><th className="text-center" colSpan="11">THÔNG TIN ĐƠN HÀNG</th><th className="text-center" colSpan="4">THÔNG TIN GIAO HÀNG</th></tr>
+                        <tr className="drags-area hidden">
+                            {isAccounting ? (
+                                <>
+                                    <th className="text-center" colSpan="8">GIAO VẬN</th>
+                                    <th className="text-center" colSpan="10">THÔNG TIN ĐƠN HÀNG</th>
+                                    <th className="text-center" colSpan="2">THÔNG TIN GIAO HÀNG</th>
+                                </>
+                            ) : (
+                                <>
+                                    <th className="text-center" colSpan="11">THÔNG TIN ĐƠN HÀNG</th>
+                                    <th className="text-center" colSpan="4">THÔNG TIN GIAO HÀNG</th>
+                                </>
+                            )}
+                        </tr>
                         <tr className="drags-area">
                             <th className="text-center c-check"><span className="chk-all"><input ref={checkAllRef} type="checkbox" checked={allSelected} onChange={toggleAll} /><label>&nbsp;</label></span></th>
                             <th className="text-center c-sale">Sale</th>
                             <th className="text-center no-wrap c-order">Ngày data về<br />Mã đơn<br />Ngày chốt đơn</th>
-                            <th className="text-center no-wrap c-shipper">Kho<br /><span title="Phương thức giao hàng">PTGH</span><br />Mã giao vận</th>
-                            <th className="text-center no-wrap c-care">Ngày cập nhật care đơn<br /><span>Care đơn<br />Ghi chú kế toán</span></th>
+                            <th className="text-center no-wrap c-shipper">Kho<br /><span title="Phương thức giao hàng" style={{ display: 'inline-block', minWidth: 120 }}>PTGH</span><br />Mã giao vận</th>
+                            <th className="text-center no-wrap c-care">Ngày cập nhật care đơn<br /><span className="span-col" style={{ display: 'inline-block', minWidth: 180 }}>Care đơn<br />Ghi chú kế toán</span></th>
                             <th className="text-center no-wrap c-status">Ngày cập nhật<br />Trạng thái giao hàng<br />Ngày đăng đơn</th>
-                            <th className="text-center no-wrap c-customer"><span>Họ tên</span><br />Số điện thoại<br />Ngày muốn nhận hàng</th>
-                            <th className="text-center c-address"><span>Địa chỉ<br />Ghi chú giao hàng</span><br />Hóa đơn điện tử</th>
-                            <th className="text-left no-wrap c-products"><span>Sản phẩm - Số lượng - Đơn giá</span></th>
-                            <th className="text-center no-wrap area3 c-money"><span>Thành tiền<br />CK / VAT SP<br />Phí VC / Tổng tiền</span></th>
-                            <th className="text-center no-wrap c-deposit">Đặt cọc</th>
-                            <th className="text-center no-wrap c-cod">Tiền thu<br />của khách</th>
-                            <th className="text-center c-fee">Giá dịch vụ<br />VC</th>
-                            <th className="text-center c-fee">Phí VC<br />hỗ trợ khách</th>
-                            <th className="text-center c-recon" title="Đối soát nội bộ">ĐSNB</th>
+                            {isAccounting ? (
+                                <>
+                                    <th className="text-center c-recon" title="Đối soát nội bộ">ĐSNB</th>
+                                    <th className="text-left no-wrap c-products">
+                                        <span style={{ display: 'inline-block', minWidth: 200 }}>Sản phẩm - Số lượng - Đơn giá</span>
+                                        <br />
+                                        Mã HĐĐT
+                                    </th>
+                                    <th className="text-right no-wrap c-money-sub">Thành tiền</th>
+                                    <th className="text-center no-wrap c-money-ck">CK</th>
+                                    <th className="text-center no-wrap c-money-vat">Tiền<br />VAT SP</th>
+                                    <th className="text-center no-wrap c-money-ship">Phí VC<br />thu của khách</th>
+                                    <th className="text-center no-wrap c-money-total">Tổng tiền</th>
+                                    <th className="text-center no-wrap c-deposit">Đặt cọc</th>
+                                    <th className="text-center no-wrap c-cod">Tiền thu<br />của khách</th>
+                                    <th className="text-center c-fee">Giá dịch vụ<br />VC</th>
+                                    <th className="text-center c-fee">Phí VC<br />hỗ trợ khách</th>
+                                    <th className="text-center no-wrap c-customer"><span style={{ display: 'inline-block', minWidth: 100 }}>Họ tên</span><br />Số điện thoại<br />Ngày muốn nhận hàng</th>
+                                    <th className="text-center c-address"><span style={{ display: 'inline-block', width: 120 }}>Địa chỉ<br />Ghi chú giao hàng</span></th>
+                                </>
+                            ) : (
+                                <>
+                                    <th className="text-center no-wrap c-customer"><span>Họ tên</span><br />Số điện thoại<br />Ngày muốn nhận hàng</th>
+                                    <th className="text-center c-address"><span>Địa chỉ<br />Ghi chú giao hàng</span><br />Hóa đơn điện tử</th>
+                                    <th className="text-left no-wrap c-products"><span>Sản phẩm - Số lượng - Đơn giá</span></th>
+                                    <th className="text-center no-wrap area3 c-money"><span>Thành tiền<br />CK / VAT SP<br />Phí VC / Tổng tiền</span></th>
+                                    <th className="text-center no-wrap c-deposit">Đặt cọc</th>
+                                    <th className="text-center no-wrap c-cod">Tiền thu<br />của khách</th>
+                                    <th className="text-center c-fee">Giá dịch vụ<br />VC</th>
+                                    <th className="text-center c-fee">Phí VC<br />hỗ trợ khách</th>
+                                    <th className="text-center c-recon" title="Đối soát nội bộ">ĐSNB</th>
+                                </>
+                            )}
                         </tr>
                     </thead>
                     <tbody>
@@ -608,47 +741,99 @@ export function WarehouseOrderTable({
                         {row.shipmentError ? <div className="ps-wh-error text-left">{row.shipmentError}</div> : null}
                     </div>
                 </td>
-                <td className="text-center c-customer-body ps-contact-name-phone" title={`${row.id} | ${row.sourceType || ''}`}>
-                    <div className="text-right">
-                        <InlineIconButton title="Cập nhật ngày muốn nhận hàng" icon="calendar" onClick={() => openAction({ type: 'date', row })} />
-                        {!isAccounting && (
-                            <InlineIconButton title="Tách đơn" icon="clipboard" onClick={() => openAction({ type: 'split', row })} disabled={!row.canSplit} />
-                        )}
-                        <InlineIconButton title="Cập nhật đơn vị giao vận" icon="truck" onClick={() => openAction({ type: 'edit', row })} />
-                    </div>
-                    <div className="sline text-left ps-wh-customer-name">
-                        <span>{row.effectiveReceiverName || row.customerName}</span>
-                    </div>
-                    {row.carrierLabel ? <span className="nha-mang text-left">{row.carrierLabel}</span> : null}
-                    <div className="no-wrap ps-contact-phone-row">
-                        <div className="ps-phone-main">
-                            <a className="text-left ps-phone-link" href={`tel:${row.effectiveReceiverPhone || row.customerPhone}`}>{row.effectiveReceiverPhone || row.customerPhone}</a>
-                        </div>
-                        <OrderStatusFlags row={row} className="ps-contact-flags" />
-                    </div>
-                    {row.customerNote ? <div className="text-left khkn sline">{row.customerNote}</div> : null}
-                    {row.desiredDeliveryAt ? (
-                        <div className="ps-wh-green">{formatDateTime(row.desiredDeliveryAt, { withSeconds: false })}</div>
-                    ) : null}
-                </td>
-                                <td className="c-address-body"><span>{row.shippingAddress || ''}</span>{row.shippingNotes && <><br /><span className="small-tip ps-wh-magenta">{row.shippingNotes}</span></>}</td>
-                                <td className="text-left c-products-body"><OrderProductsBreakdown items={row.products || [...(row.mainProducts || []), ...(row.upsellProducts || [])]} order={row} /></td>
-                                <OrderMoneyCell className="no-wrap area3 c-money-body" row={row} />
-                                <td className="text-right">{formatCurrency(row.deposit)}</td>
-                                <td className="text-right">{formatCurrency(row.codAmount || row.total)}</td>
-                                <td className="text-right">{formatCurrency(row.carrierServiceFee)}</td>
-                                <td className="text-right">{formatCurrency(row.carrierReturnFee || row.carrierOtherFee || row.codFee)}</td>
-                                <td className="text-center">
-                                    {row.reconciliationStatus && !['pending', 'none', 'null'].includes(String(row.reconciliationStatus).toLowerCase()) ? (
-                                        <>
-                                            <span>{row.reconciliationStatusLabel || row.reconciliationStatus}</span>
-                                            <br />
-                                            <span className="small-tip">{row.reconciliationUpdatedAt || ''}</span>
-                                        </>
-                                    ) : null}
-                                </td>
+                {isAccounting ? (
+                    <>
+                        <td className="text-center c-recon-body">
+                            {row.reconciliationStatus && !['pending', 'none', 'null'].includes(String(row.reconciliationStatus).toLowerCase()) ? (
+                                <>
+                                    <span>{row.reconciliationStatusLabel || row.reconciliationStatus}</span>
+                                    <br />
+                                    <span className="small-tip">{row.reconciliationUpdatedAt || ''}</span>
+                                </>
+                            ) : (
+                                <i className="fa fa-circle-o ps-acc-recon-empty" title="Chưa đối soát nội bộ" />
+                            )}
+                        </td>
+                        <td className="text-left c-products-body">
+                            <OrderProductsBreakdown items={row.products || [...(row.mainProducts || []), ...(row.upsellProducts || [])]} order={row} />
+                            {row.einvoiceCode || row.invoiceCode ? (
+                                <div className="small-tip sline">{row.einvoiceCode || row.invoiceCode}</div>
+                            ) : null}
+                        </td>
+                        <td className="text-right no-wrap c-money-sub">{formatCurrency(row.subtotal)}</td>
+                        <td className="text-right no-wrap c-money-ck">{Number(row.discount) ? formatCurrency(row.discount) : ''}</td>
+                        <td className="text-right no-wrap c-money-vat">{Number(row.vat) ? formatCurrency(row.vat) : ''}</td>
+                        <td className="text-right no-wrap c-money-ship">{Number(row.shippingFeeCollected) ? formatCurrency(row.shippingFeeCollected) : ''}</td>
+                        <td className="text-right no-wrap c-money-total"><strong>{formatCurrency(row.total)}</strong></td>
+                        <td className="text-right">{formatCurrency(row.deposit)}</td>
+                        <td className="text-right">{formatCurrency(row.codAmount || row.total)}</td>
+                        <td className="text-right">{formatCurrency(row.carrierServiceFee)}</td>
+                        <td className="text-right">{formatCurrency(row.carrierReturnFee || row.carrierOtherFee || row.codFee)}</td>
+                        <td className="text-center c-customer-body ps-contact-name-phone" title={`${row.id} | ${row.sourceType || ''}`}>
+                            <div className="text-right">
+                                <InlineIconButton title="Cập nhật ngày muốn nhận hàng" icon="calendar" onClick={() => openAction({ type: 'date', row })} />
+                                <InlineIconButton title="Cập nhật đơn vị giao vận" icon="truck" onClick={() => openAction({ type: 'edit', row })} />
+                            </div>
+                            <div className="sline text-left ps-wh-customer-name">
+                                <span>{row.effectiveReceiverName || row.customerName}</span>
+                            </div>
+                            {row.carrierLabel ? <span className="nha-mang text-left">{row.carrierLabel}</span> : null}
+                            <div className="no-wrap ps-contact-phone-row">
+                                <div className="ps-phone-main">
+                                    <a className="text-left ps-phone-link" href={`tel:${row.effectiveReceiverPhone || row.customerPhone}`}>{row.effectiveReceiverPhone || row.customerPhone}</a>
+                                </div>
+                                <OrderStatusFlags row={row} className="ps-contact-flags" />
+                            </div>
+                            {row.customerNote ? <div className="text-left khkn sline">{row.customerNote}</div> : null}
+                            {row.desiredDeliveryAt ? (
+                                <div className="ps-wh-green">{formatDateTime(row.desiredDeliveryAt, { withSeconds: false })}</div>
+                            ) : null}
+                        </td>
+                        <td className="c-address-body"><span>{row.shippingAddress || ''}</span>{row.shippingNotes && <><br /><span className="small-tip ps-wh-magenta">{row.shippingNotes}</span></>}</td>
+                    </>
+                ) : (
+                    <>
+                        <td className="text-center c-customer-body ps-contact-name-phone" title={`${row.id} | ${row.sourceType || ''}`}>
+                            <div className="text-right">
+                                <InlineIconButton title="Cập nhật ngày muốn nhận hàng" icon="calendar" onClick={() => openAction({ type: 'date', row })} />
+                                <InlineIconButton title="Tách đơn" icon="clipboard" onClick={() => openAction({ type: 'split', row })} disabled={!row.canSplit} />
+                                <InlineIconButton title="Cập nhật đơn vị giao vận" icon="truck" onClick={() => openAction({ type: 'edit', row })} />
+                            </div>
+                            <div className="sline text-left ps-wh-customer-name">
+                                <span>{row.effectiveReceiverName || row.customerName}</span>
+                            </div>
+                            {row.carrierLabel ? <span className="nha-mang text-left">{row.carrierLabel}</span> : null}
+                            <div className="no-wrap ps-contact-phone-row">
+                                <div className="ps-phone-main">
+                                    <a className="text-left ps-phone-link" href={`tel:${row.effectiveReceiverPhone || row.customerPhone}`}>{row.effectiveReceiverPhone || row.customerPhone}</a>
+                                </div>
+                                <OrderStatusFlags row={row} className="ps-contact-flags" />
+                            </div>
+                            {row.customerNote ? <div className="text-left khkn sline">{row.customerNote}</div> : null}
+                            {row.desiredDeliveryAt ? (
+                                <div className="ps-wh-green">{formatDateTime(row.desiredDeliveryAt, { withSeconds: false })}</div>
+                            ) : null}
+                        </td>
+                        <td className="c-address-body"><span>{row.shippingAddress || ''}</span>{row.shippingNotes && <><br /><span className="small-tip ps-wh-magenta">{row.shippingNotes}</span></>}</td>
+                        <td className="text-left c-products-body"><OrderProductsBreakdown items={row.products || [...(row.mainProducts || []), ...(row.upsellProducts || [])]} order={row} /></td>
+                        <OrderMoneyCell className="no-wrap area3 c-money-body" row={row} />
+                        <td className="text-right">{formatCurrency(row.deposit)}</td>
+                        <td className="text-right">{formatCurrency(row.codAmount || row.total)}</td>
+                        <td className="text-right">{formatCurrency(row.carrierServiceFee)}</td>
+                        <td className="text-right">{formatCurrency(row.carrierReturnFee || row.carrierOtherFee || row.codFee)}</td>
+                        <td className="text-center">
+                            {row.reconciliationStatus && !['pending', 'none', 'null'].includes(String(row.reconciliationStatus).toLowerCase()) ? (
+                                <>
+                                    <span>{row.reconciliationStatusLabel || row.reconciliationStatus}</span>
+                                    <br />
+                                    <span className="small-tip">{row.reconciliationUpdatedAt || ''}</span>
+                                </>
+                            ) : null}
+                        </td>
+                    </>
+                )}
                             </tr>
-                        )) : <tr><td colSpan="15" className="ps-wh-empty">Không có đơn phù hợp bộ lọc.</td></tr>}
+                        )) : <tr><td colSpan={isAccounting ? 19 : 15} className="ps-wh-empty">Không có đơn phù hợp bộ lọc.</td></tr>}
                     </tbody>
                 </table>
             </div>
@@ -661,9 +846,11 @@ export function WarehouseOrderTable({
                 apiBase={apiBase}
                 actionApiBase={actionApiBase}
                 deliveryStatuses={filterOptions.deliveryStatuses ?? []}
+                reconciliationStatuses={filterOptions.reconciliationStatuses ?? []}
                 printButtons={printButtons}
                 exportButtons={exportButtons}
                 shippingProviders={filterOptions.shippingProviders ?? []}
+                variant={variant}
                 onClear={() => setSelected([])}
                 onReload={reload}
             />

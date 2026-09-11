@@ -193,7 +193,7 @@ return [
         'status_sync_failed' => 'Could not sync status from the carrier.',
         'fee_failed' => 'Could not calculate the shipping fee.',
         'netship_not_ready' => 'NetShip is disabled or missing an access token.',
-        'netship_shop_id_required' => 'NetShip Shop ID is required (profile ID on NetShip).',
+        'netship_shop_id_required' => 'NetShip Shop ID is required — set it per warehouse (NetShip tab) or as the default Shop ID under Shipping partners.',
         'netship_create_failed' => 'Could not create a waybill via NetShip.',
         'netship_sync_failed' => 'Could not sync status from NetShip.',
         'netship_cancel_failed' => 'Could not cancel the waybill on NetShip.',

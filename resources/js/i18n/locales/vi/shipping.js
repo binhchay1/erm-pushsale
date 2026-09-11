@@ -183,13 +183,17 @@ export default {
             sender_as_warehouse: 'Có thể hiểu là kho',
             ghn_shop: 'Mã shop / kho GHN',
         },
+        hints: {
+            netship_shop_id_warehouse: 'Shop ID mặc định toàn hệ thống. Có thể ghi đè theo từng kho tại Danh sách kho → Cấu hình tài khoản giao hàng → tab NetShip.',
+        },
         help: {
             netship: [
-                'Bắt buộc: bật “Sử dụng kết nối này” + Access token + Shop ID (ID trang cá nhân NetShip), rồi Lưu.',
+                'Bắt buộc: bật “Sử dụng kết nối này” + Access token, rồi Lưu. Shop ID mặc định khuyến nghị (hoặc cấu hình theo từng kho).',
                 'API Base URL để mặc định https://netship.vn (sandbox: https://test.netship.vn).',
                 'Khi tạo tài khoản / lấy access token trên NetShip, copy URL webhook bên trên (:url) dán vào ô URL callback trên trang đó.',
                 'Ba trường còn lại là default tùy chọn khi tạo đơn — không điền vẫn dùng mặc định hệ thống.',
                 'NetShip không hiện trên dropdown ĐVVC của đơn.',
+                'Muốn ShopID khác theo kho: cấu hình tại Danh sách kho → tab NetShip (ghi đè Shop ID mặc định này).',
             ],
             vnpost: [
                 'Cấu hình đối tác tại donhang.vnpost.vn/#/app/cau-hinh-nguoi-dung.',

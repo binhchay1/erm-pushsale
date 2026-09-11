@@ -460,7 +460,7 @@ class PushsalePageService
             ->where('is_active', true)
             ->orderBy('name')
             ->limit(2000)
-            ->get(['id', 'name', 'sku', 'type', 'unit_price', 'is_active']);
+            ->get(['id', 'name', 'sku', 'type', 'unit', 'unit_price', 'cost_price', 'is_active']);
 
         return [
             'warehouses' => Warehouse::query()
@@ -479,14 +479,16 @@ class PushsalePageService
                 'name' => $product->name,
                 'type' => $product->type,
                 'unit_price' => (int) $product->unit_price,
+                'cost_price' => (int) $product->cost_price,
                 'sku' => $product->sku,
+                'unit' => $product->unit,
                 'is_active' => (bool) $product->is_active,
             ])->all(),
             'warehouseVoucherTypes' => [
-                ['id' => 1, 'label' => 'Nhập kho'],
-                ['id' => 2, 'label' => 'Xuất kho'],
-                ['id' => 4, 'label' => 'Xuất kho nội bộ'],
-                ['id' => 3, 'label' => 'Xuất hủy'],
+                ['id' => 'inbound', 'value' => 'inbound', 'legacy_id' => 1, 'label' => 'Nhập kho'],
+                ['id' => 'outbound', 'value' => 'outbound', 'legacy_id' => 2, 'label' => 'Xuất kho'],
+                ['id' => 'internal', 'value' => 'internal', 'legacy_id' => 4, 'label' => 'Xuất kho nội bộ'],
+                ['id' => 'scrap', 'value' => 'scrap', 'legacy_id' => 3, 'label' => 'Xuất hủy'],
             ],
             'warehouseUsers' => User::query()
                 ->whereIn('role', [UserRole::Warehouse, UserRole::Admin])
@@ -1444,7 +1446,12 @@ class PushsalePageService
                     'id' => $index + 1,
                     'select' => '',
                     'warehouse' => $voucher->warehouse?->name,
-                    'type' => $voucher->type === 'outbound' ? 'Xuất kho' : 'Nhập kho',
+                    'type' => match ((string) $voucher->type) {
+                        'outbound' => 'Xuất kho',
+                        'internal' => 'Xuất kho nội bộ',
+                        'scrap' => 'Xuất hủy',
+                        default => 'Nhập kho',
+                    },
                     'voucher_code' => $voucher->code,
                     'performed_at' => $voucher->document_date?->toDateString(),
                     'total_quantity' => $quantity,
@@ -1455,6 +1462,7 @@ class PushsalePageService
                     'updated_at' => $voucher->updated_at?->toIso8601String(),
                     'actions' => '',
                     '_record_id' => $voucher->id,
+                    '_edit_url' => '/admin/warehouse/vouchers/entry?id='.$voucher->id,
                     '_warehouse_id' => $voucher->warehouse_id,
                     '_product_ids' => $voucher->lines->pluck('product_id')->filter()->map(fn ($id) => (string) $id)->unique()->values()->all(),
                     '_data_arrived_at' => $voucher->document_date?->toDateString(),

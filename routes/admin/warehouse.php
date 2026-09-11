@@ -29,6 +29,7 @@ use App\Http\Controllers\Admin\Warehouse\WarehouseController;
 use App\Http\Controllers\Admin\Warehouse\WarehouseIncidentController;
 use App\Http\Controllers\Admin\WarehouseInventoryController;
 use App\Http\Controllers\Warehouse\DeliveryStatusBulkController;
+use App\Http\Controllers\Warehouse\ReconciliationBulkController;
 use App\Http\Controllers\Warehouse\WarehouseOrderActionController;
 use App\Http\Controllers\Operations\OrderInteractionLockController;
 use App\Models\User;
@@ -39,6 +40,10 @@ Route::get('warehouse/vouchers/entry', [WarehouseVoucherEntryController::class, 
 Route::post('warehouse/vouchers/entry/records', [WarehouseVoucherEntryController::class, 'store'])->name('warehouse.vouchers.entry.store');
 Route::match(['put', 'patch'], 'warehouse/vouchers/entry/records/{record}', [WarehouseVoucherEntryController::class, 'update'])->whereNumber('record')->name('warehouse.vouchers.entry.update');
 Route::delete('warehouse/vouchers/entry/records/{record}', [WarehouseVoucherEntryController::class, 'destroy'])->whereNumber('record')->name('warehouse.vouchers.entry.destroy');
+Route::post('warehouse/vouchers/entry/records/{record}/complete', [WarehouseVoucherEntryController::class, 'complete'])->whereNumber('record')->name('warehouse.vouchers.entry.complete');
+Route::post('warehouse/vouchers/entry/import', [WarehouseVoucherEntryController::class, 'import'])->name('warehouse.vouchers.entry.import');
+Route::post('warehouse/vouchers/entry/tester/boost-stock', [WarehouseVoucherEntryController::class, 'boostStock'])->name('warehouse.vouchers.entry.boost-stock');
+Route::post('warehouse/vouchers/entry/tester/reset-stock', [WarehouseVoucherEntryController::class, 'resetStock'])->name('warehouse.vouchers.entry.reset-stock');
 
 // 5.3.2 Danh sách phiếu xuất / nhập kho
 Route::get('warehouse/vouchers', [WarehouseVoucherListController::class, 'index'])->name('warehouse.vouchers.index-page');
@@ -90,6 +95,14 @@ Route::middleware('role:'.User::ROLE_ADMIN)->group(function (): void {
     Route::get('warehouse/orders/delivery-status-bulk/history', [DeliveryStatusBulkController::class, 'history'])->name('warehouse.orders.delivery-status-bulk.history');
     Route::post('warehouse/orders/delivery-status-bulk/batches/{batch}/apply', [DeliveryStatusBulkController::class, 'apply'])->whereNumber('batch')->name('warehouse.orders.delivery-status-bulk.apply');
     Route::post('warehouse/orders/delivery-status-bulk/batches/{batch}/clear', [DeliveryStatusBulkController::class, 'clear'])->whereNumber('batch')->name('warehouse.orders.delivery-status-bulk.clear');
+    Route::get('warehouse/orders/reconciliation-bulk/meta', [ReconciliationBulkController::class, 'meta'])->name('warehouse.orders.reconciliation-bulk.meta');
+    Route::post('warehouse/orders/reconciliation-bulk/inspect', [ReconciliationBulkController::class, 'inspect'])->name('warehouse.orders.reconciliation-bulk.inspect');
+    Route::post('warehouse/orders/reconciliation-bulk/update', [ReconciliationBulkController::class, 'updateByCodes'])->name('warehouse.orders.reconciliation-bulk.update');
+    Route::get('warehouse/orders/reconciliation-bulk/template', [ReconciliationBulkController::class, 'template'])->name('warehouse.orders.reconciliation-bulk.template');
+    Route::post('warehouse/orders/reconciliation-bulk/upload', [ReconciliationBulkController::class, 'upload'])->name('warehouse.orders.reconciliation-bulk.upload');
+    Route::get('warehouse/orders/reconciliation-bulk/history', [ReconciliationBulkController::class, 'history'])->name('warehouse.orders.reconciliation-bulk.history');
+    Route::post('warehouse/orders/reconciliation-bulk/batches/{batch}/apply', [ReconciliationBulkController::class, 'apply'])->whereNumber('batch')->name('warehouse.orders.reconciliation-bulk.apply');
+    Route::post('warehouse/orders/reconciliation-bulk/batches/{batch}/clear', [ReconciliationBulkController::class, 'clear'])->whereNumber('batch')->name('warehouse.orders.reconciliation-bulk.clear');
     Route::get('warehouse/orders/print/profiles', [ShippingLabelPrintController::class, 'profiles'])->name('warehouse.orders.print.profiles');
     Route::post('warehouse/orders/print/mark-printed', [ShippingLabelPrintController::class, 'markPrinted'])->name('warehouse.orders.print.mark-printed');
     Route::get('warehouse/orders/print/{profile}', [ShippingLabelPrintController::class, 'show'])->where('profile', 'internal|shopee|tiktok|ghtk|jnt|spx')->name('warehouse.orders.print');

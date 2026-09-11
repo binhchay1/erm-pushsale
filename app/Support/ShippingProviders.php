@@ -23,6 +23,18 @@ final class ShippingProviders
             ->all();
     }
 
+    /**
+     * Gateway providers (NetShip…) — cấu hình kho/đối tác, không chọn trên đơn.
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    public static function gatewayProviders(): array
+    {
+        return collect(config('shipping_partners.providers', []))
+            ->filter(fn ($meta, $key) => self::isGateway((string) $key))
+            ->all();
+    }
+
     /** @return list<string> */
     public static function keys(): array
     {

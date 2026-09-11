@@ -430,7 +430,7 @@ function DashboardTable({ report, expanded, onToggle, onChart, onPackets, advanc
                 <thead>
                     <tr className="psm-head-group"><th colSpan={advancedUtm ? 9 : 6}>{t('dashboard.marketing.source_info')}</th><th colSpan="14">{t('dashboard.marketing.performance_info')}</th></tr>
                     <tr>
-                        <th>{t('reports.pushsale.stt')}</th><th>{t('dashboard.marketing.source_name')}</th><th>{t('reports.pushsale.product')}</th><th>{t('dashboard.marketing.ad_channel')}</th><th>UTM Source</th><th>UTM<br />Campaign</th>
+                        <th>{t('reports.pushsale.stt')}</th><th>{t('dashboard.marketing.source_name')}</th><th>{t('dashboard.marketing.product_package')}</th><th>{t('dashboard.marketing.ad_channel')}</th><th>UTM Source</th><th>UTM<br />Campaign</th>
                         {advancedUtm && <><th>UTM<br />Medium</th><th>UTM<br />Term</th><th>UTM<br />Content</th></>}
                         <th>{t('dashboard.marketing.budget_number')}</th><th>{t('dashboard.marketing.interactions_number')}</th><th>{t('dashboard.marketing.received_packets_number')}</th><th>{t('dashboard.marketing.packet_rate_number')}</th>
                         <th>{t('dashboard.marketing.cost_per_packet_number')}</th><th>{t('dashboard.marketing.closed_orders_number')}</th><th>{t('dashboard.marketing.close_rate_packets_number')}</th><th>{t('dashboard.marketing.products_number')}</th>

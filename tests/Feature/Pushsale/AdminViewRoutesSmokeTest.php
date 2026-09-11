@@ -173,6 +173,25 @@ class AdminViewRoutesSmokeTest extends TestCase
         $this->assertSame('manual', $warehouse->default_shipping_provider);
         $this->assertSame('manual', $warehouse->default_shipping_service);
         $this->assertSame('Kho thủ công', $warehouse->shipping_account_settings['manual']['account']);
+
+        $this->put("/admin/warehouses/{$warehouse->id}/shipping-account", [
+            'default_shipping_provider' => 'manual',
+            'default_shipping_service' => 'manual',
+            'shipping_account_settings' => [
+                'manual' => [
+                    'account' => 'Kho thủ công',
+                    'api_token' => 'demo-token',
+                ],
+                'netship' => [
+                    'shop_id' => '530',
+                    'account' => 'should-be-stripped',
+                ],
+            ],
+        ])->assertSessionHas('success');
+
+        $warehouse->refresh();
+        $this->assertSame('530', (string) ($warehouse->shipping_account_settings['netship']['shop_id'] ?? ''));
+        $this->assertArrayNotHasKey('account', $warehouse->shipping_account_settings['netship'] ?? []);
     }
 
 

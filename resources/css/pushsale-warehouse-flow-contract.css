@@ -776,3 +776,199 @@ html body.pushsale-app-body .pushsale-page[data-page-code="5.3.1"] .box-body {
     }
 }
 
+/* React voucher entry form (5.3.1) — scoped .ps-voucher-entry-* contract */
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-body {
+    max-width: var(--ps-voucher-width, 1200px);
+    margin: 0 auto;
+    padding: 0 14px 24px;
+}
+
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-error {
+    margin: 0 14px 12px;
+}
+
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-grid {
+    display: grid;
+    grid-template-columns: var(--ps-voucher-label-width, 155px) minmax(180px, 1fr) minmax(140px, .8fr) var(--ps-voucher-label-width, 155px) minmax(220px, 1.2fr);
+    gap: 8px 12px;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-label {
+    margin: 0;
+    font-weight: 600;
+    color: #445566;
+}
+
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-field .form-control,
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-field .ps-product-search-select {
+    width: 100%;
+}
+
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-field--wide {
+    grid-column: span 1;
+}
+
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-field--mid {
+    grid-column: span 1;
+}
+
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-status {
+    font-weight: 600;
+    color: #2f6fed;
+    text-align: right;
+}
+
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-code {
+    text-transform: uppercase;
+}
+
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-spacer {
+    display: block;
+    min-height: 1px;
+}
+
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-actions-inline {
+    grid-column: 3 / span 3;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 18px;
+    align-items: center;
+}
+
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-actions-inline .btn-icon {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #2f6fed;
+    text-decoration: none;
+    background: transparent;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+}
+
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-table-wrap {
+    overflow-x: auto;
+    margin-bottom: 14px;
+}
+
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-table {
+    width: 100%;
+    min-width: 980px;
+    background: #fff;
+}
+
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-table th {
+    white-space: nowrap;
+    text-align: center;
+    vertical-align: middle;
+    background: #f7f9fb;
+}
+
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-table td {
+    vertical-align: middle;
+}
+
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-table .form-control {
+    min-width: 70px;
+    height: 30px;
+    padding: 2px 6px;
+}
+
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-empty {
+    text-align: center;
+    color: #778899;
+    font-style: italic;
+    padding: 18px 8px;
+}
+
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-total-row td {
+    font-weight: 600;
+    background: #fafbfc;
+}
+
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-footer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: flex-start;
+}
+
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-notice {
+    color: #667788;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-footer-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-tester {
+    margin-top: 18px;
+    padding-top: 12px;
+    border-top: 1px dashed #d5dde6;
+}
+
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-tester-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 10px;
+    align-items: center;
+    justify-content: flex-end;
+    margin-bottom: 10px;
+}
+
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-tester-row .form-control {
+    width: 100px;
+}
+
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-tester-row--reset span {
+    font-size: 11px;
+    color: #778899;
+    margin-right: 8px;
+}
+
+.pushsale-page.ps-voucher-entry-page .text-orange {
+    color: darkorange;
+}
+
+.pushsale-page.ps-voucher-entry-page .hidden {
+    display: none !important;
+}
+
+@media (max-width: 991px) {
+    .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-label,
+    .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-field,
+    .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-status,
+    .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-actions-inline,
+    .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-spacer {
+        grid-column: auto;
+    }
+
+    .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-actions-inline {
+        grid-column: 1 / -1;
+    }
+}
+
+@media print {
+    .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-footer-actions,
+    .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-tester,
+    .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-actions-inline,
+    .pushsale-page.ps-voucher-entry-page .hidden-print,
+    .pushsale-page.ps-voucher-entry-page .ps-header-close-icon {
+        display: none !important;
+    }
+}
+
+

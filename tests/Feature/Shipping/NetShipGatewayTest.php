@@ -52,6 +52,7 @@ class NetShipGatewayTest extends TestCase
     {
         $this->assertTrue(ShippingProviders::isGateway('netship'));
         $this->assertArrayNotHasKey('netship', ShippingProviders::selectableProviders());
+        $this->assertArrayHasKey('netship', ShippingProviders::gatewayProviders());
         $this->assertFalse(collect(ShippingProviders::options())->contains(fn ($o) => $o['value'] === 'netship'));
     }
 
@@ -142,6 +143,126 @@ class NetShipGatewayTest extends TestCase
             && data_get($request->data(), 'myRequest.carrierCode') === 'VTP'
             && data_get($request->data(), 'myRequest.customerCode') === 'NS-ORDER-001'
             && (int) data_get($request->data(), 'myRequest.ShopID') === 530);
+    }
+
+    public function test_create_shipment_prefers_warehouse_netship_shop_id_over_global(): void
+    {
+        Http::fake(function (Request $request) {
+            $url = $request->url();
+            if (str_contains($url, '/api/address/provinces')) {
+                return Http::response([['id' => 1, 'name' => 'Hà Nội']], 200);
+            }
+            if (str_contains($url, '/api/address/districts')) {
+                return Http::response([['id' => 10, 'name' => 'Quận Cầu Giấy']], 200);
+            }
+            if (str_contains($url, '/api/address/ward')) {
+                return Http::response([['id' => 100, 'name' => 'Phường Dịch Vọng']], 200);
+            }
+            if (str_contains($url, '/api/third-party/order') && $request->method() === 'POST') {
+                return Http::response([
+                    'success' => true,
+                    'data' => ['id' => 555, 'tracking_number' => 'NS555', 'fee' => 10000],
+                ], 200);
+            }
+
+            return Http::response(['success' => false, 'message' => 'unexpected '.$url], 500);
+        });
+
+        config([
+            'shipping_partners.pickup.province' => 'Hà Nội',
+            'shipping_partners.pickup.district' => 'Quận Cầu Giấy',
+            'shipping_partners.pickup.ward' => 'Phường Dịch Vọng',
+            'shipping_partners.default_geo.province' => 'Hà Nội',
+            'shipping_partners.default_geo.district' => 'Quận Cầu Giấy',
+            'shipping_partners.default_geo.ward' => 'Phường Dịch Vọng',
+        ]);
+
+        $warehouse = \App\Models\Warehouse::query()->create([
+            'name' => 'Kho NetShip Map',
+            'shipping_account_settings' => [
+                'netship' => ['shop_id' => 9991],
+            ],
+        ]);
+
+        $order = Order::query()->create([
+            'order_code' => 'NS-WH-SHOP',
+            'warehouse_id' => $warehouse->id,
+            'customer_name' => 'KH Map',
+            'customer_phone' => '0902222333',
+            'receiver_name' => 'KH Map',
+            'receiver_phone' => '0902222333',
+            'shipping_address' => '2 Lê Lợi',
+            'shipping_provider' => 'viettel_post',
+            'shipping_geo' => [
+                'province' => 'Hà Nội',
+                'district' => 'Quận Cầu Giấy',
+                'ward' => 'Phường Dịch Vọng',
+            ],
+            'closed_at' => now(),
+            'total' => 80_000,
+            'amount_to_collect' => 80_000,
+        ]);
+
+        app(CreateShipmentService::class)->createForOrder($order, 'viettel_post');
+
+        Http::assertSent(fn (Request $request) => str_contains($request->url(), '/api/third-party/order')
+            && $request->method() === 'POST'
+            && (int) data_get($request->data(), 'myRequest.ShopID') === 9991);
+    }
+
+    public function test_create_shipment_requires_netship_shop_id_when_missing(): void
+    {
+        ShippingPartnerConnection::forProvider('netship')->update([
+            'credentials' => [
+                'token' => 'test-netship-token',
+                'base_url' => 'https://test.netship.vn',
+            ],
+        ]);
+
+        Http::fake([
+            '*/api/address/provinces' => Http::response([['id' => 1, 'name' => 'Hà Nội']], 200),
+            '*/api/address/districts*' => Http::response([['id' => 10, 'name' => 'Quận Cầu Giấy']], 200),
+            '*/api/address/ward*' => Http::response([['id' => 100, 'name' => 'Phường Dịch Vọng']], 200),
+        ]);
+
+        config([
+            'shipping_partners.pickup.province' => 'Hà Nội',
+            'shipping_partners.pickup.district' => 'Quận Cầu Giấy',
+            'shipping_partners.pickup.ward' => 'Phường Dịch Vọng',
+            'shipping_partners.default_geo.province' => 'Hà Nội',
+            'shipping_partners.default_geo.district' => 'Quận Cầu Giấy',
+            'shipping_partners.default_geo.ward' => 'Phường Dịch Vọng',
+        ]);
+
+        $order = Order::query()->create([
+            'order_code' => 'NS-NO-SHOP',
+            'customer_name' => 'No Shop',
+            'customer_phone' => '0903333444',
+            'receiver_name' => 'No Shop',
+            'receiver_phone' => '0903333444',
+            'shipping_address' => '3 Pasteur',
+            'shipping_provider' => 'viettel_post',
+            'shipping_geo' => [
+                'province' => 'Hà Nội',
+                'district' => 'Quận Cầu Giấy',
+                'ward' => 'Phường Dịch Vọng',
+            ],
+            'closed_at' => now(),
+            'total' => 50_000,
+            'amount_to_collect' => 50_000,
+        ]);
+
+        try {
+            app(CreateShipmentService::class)->createForOrder($order, 'viettel_post');
+            $this->fail('Expected RuntimeException for missing NetShip Shop ID');
+        } catch (\RuntimeException $e) {
+            $this->assertSame(__('messages.shipping_actions.netship_shop_id_required'), $e->getMessage());
+        } catch (ValidationException $e) {
+            $this->assertStringContainsString(
+                __('messages.shipping_actions.netship_shop_id_required'),
+                collect($e->errors())->flatten()->implode(' ')
+            );
+        }
     }
 
     public function test_webhook_matches_by_customer_code_without_overwriting_business_provider(): void

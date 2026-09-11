@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use App\Support\TenantManager;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class LandingConnectionManager
 {
@@ -153,6 +154,13 @@ class LandingConnectionManager
     public function setApprovalFlag(LandingConnection $connection, bool $approved, User $actor): LandingConnection
     {
         if ($approved) {
+            $connection->loadMissing('products');
+            if ($connection->products->where('product_id', '>', 0)->isEmpty()) {
+                throw ValidationException::withMessages([
+                    'products' => 'Phải gắn ít nhất 1 sản phẩm/gói từ danh mục trước khi duyệt.',
+                ]);
+            }
+
             return $this->approve($connection, [
                 'budget_type' => (string) ($connection->budget_type ?: 'total'),
                 'budget_amount' => max(0, (int) $connection->budget_amount),

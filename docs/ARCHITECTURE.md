@@ -24,7 +24,7 @@ HTTP / Inertia / API
   → Controllers (thin) + Form Requests
   → Services (Reports/*, Operations/*, Leads/*, Inventory/*)
   → Repositories / Models
-  → Database
+  → Database 
 ```
 
 - Controllers: validate + call service + return Inertia/JSON.

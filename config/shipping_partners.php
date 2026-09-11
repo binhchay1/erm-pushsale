@@ -236,7 +236,8 @@ return [
                 'shop_id' => [
                     'label' => 'Shop ID (NetShip)',
                     'secret' => false,
-                    'required' => true,
+                    // Không bắt buộc cho isReady — kho có thể ghi đè qua shipping_account_settings.netship.shop_id.
+                    'required' => false,
                     'default' => env('NETSHIP_SHOP_ID'),
                 ],
                 'base_url' => [

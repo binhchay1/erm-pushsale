@@ -96,6 +96,7 @@ class WarehouseController extends Controller
                 'new2025' => ['provinces' => [], 'wards' => []],
             ],
             'shippingProviders' => $this->shippingProviderOptions(),
+            'shippingGatewayProviders' => $this->shippingGatewayProviderOptions(),
             'activeMenuCode' => '5.2.1',
         ]);
     }
@@ -192,8 +193,10 @@ class WarehouseController extends Controller
     {
         $providers = array_keys((array) config('shipping_partners.providers', []));
 
+        $selectable = ShippingProviders::keys();
+
         $validated = $request->validate([
-            'default_shipping_provider' => ['nullable', 'string', Rule::in($providers)],
+            'default_shipping_provider' => ['nullable', 'string', Rule::in($selectable)],
             'default_shipping_service' => ['nullable', 'string', 'max:80'],
             'shipping_account_settings' => ['nullable', 'array'],
         ]);
@@ -201,6 +204,12 @@ class WarehouseController extends Controller
         $settings = [];
         foreach ((array) ($validated['shipping_account_settings'] ?? []) as $provider => $payload) {
             if (! in_array($provider, $providers, true) || ! is_array($payload)) {
+                continue;
+            }
+
+            // NetShip gateway: chỉ map ShopID theo kho (không lưu account/token — dùng connection global).
+            if ($provider === 'netship' || ShippingProviders::isGateway($provider)) {
+                $settings[$provider] = Arr::only($payload, ['shop_id']);
                 continue;
             }
 
@@ -370,12 +379,28 @@ class WarehouseController extends Controller
     /** @return list<array<string,mixed>> */
     protected function shippingProviderOptions(): array
     {
-        return collect(ShippingProviders::selectableProviders())
+        return $this->mapShippingProviderOptions(ShippingProviders::selectableProviders(), isGateway: false);
+    }
+
+    /** @return list<array<string,mixed>> */
+    protected function shippingGatewayProviderOptions(): array
+    {
+        return $this->mapShippingProviderOptions(ShippingProviders::gatewayProviders(), isGateway: true);
+    }
+
+    /**
+     * @param  array<string, array<string, mixed>>  $providers
+     * @return list<array<string,mixed>>
+     */
+    protected function mapShippingProviderOptions(array $providers, bool $isGateway): array
+    {
+        return collect($providers)
             ->map(fn (array $provider, string $key): array => [
                 'key' => $key,
                 'label' => (string) ($provider['label'] ?? $key),
                 'description' => (string) ($provider['description'] ?? ''),
-                'integration_mode' => (string) ($provider['integration_mode'] ?? 'direct'),
+                'integration_mode' => (string) ($provider['integration_mode'] ?? ($isGateway ? 'gateway' : 'direct')),
+                'is_gateway' => $isGateway,
                 'services' => collect($provider['services'] ?? [])
                     ->map(fn (array $service): array => [
                         'code' => (string) ($service['code'] ?? ''),

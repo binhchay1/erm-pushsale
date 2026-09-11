@@ -111,13 +111,13 @@ class InventoryIntakeService
             ]);
         }
 
-        if (! Warehouse::query()->whereKey($warehouseId)->exists()) {
+        if (! Warehouse::query()->withoutShop()->whereKey($warehouseId)->exists()) {
             throw ValidationException::withMessages([
                 'warehouse_id' => 'Kho không tồn tại.',
             ]);
         }
 
-        if (! Product::query()->whereKey($productId)->exists()) {
+        if (! Product::query()->withoutShop()->whereKey($productId)->exists()) {
             throw ValidationException::withMessages([
                 'product_id' => 'Sản phẩm không tồn tại.',
             ]);

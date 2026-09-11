@@ -69,6 +69,7 @@ class NetShipApiClient extends AbstractCarrierHttpClient
 
     /**
      * NetShip bind body vào struct `myRequest` và bắt buộc ShopID (ID shop trên trang cá nhân NetShip).
+     * Caller (NetShipProxyCarrier) đã resolve: warehouse.settings.netship.shop_id → credentials.shop_id.
      *
      * @param  array<string, mixed>  $payload
      * @return array{myRequest: array<string, mixed>}
@@ -83,9 +84,11 @@ class NetShipApiClient extends AbstractCarrierHttpClient
             ?? $creds['ShopID']
             ?? null;
 
-        if ($shopId !== null && $shopId !== '') {
-            $payload['ShopID'] = is_numeric($shopId) ? (int) $shopId : $shopId;
+        if ($shopId === null || $shopId === '') {
+            throw new \RuntimeException(__('messages.shipping_actions.netship_shop_id_required'));
         }
+
+        $payload['ShopID'] = is_numeric($shopId) ? (int) $shopId : $shopId;
         unset($payload['shopId'], $payload['shop_id']);
 
         return ['myRequest' => $payload];

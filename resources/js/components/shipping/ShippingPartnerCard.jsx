@@ -304,15 +304,20 @@ export function ShippingPartnerCard({ provider }) {
                             invalid={Boolean(errorFor('token', 'credentials.token'))}
                         />
                     </Field>
-                    <Field label={L('shop_id')} required error={errorFor('shop_id', 'credentials.shop_id')}>
+                    <Field label={L('shop_id')} error={errorFor('shop_id', 'credentials.shop_id')}>
                         <TextInput
-                            required
                             value={credential('shop_id')}
                             onChange={(value) => setCredential('shop_id', value)}
                             placeholder={P('netship_shop_id')}
                             invalid={Boolean(errorFor('shop_id', 'credentials.shop_id'))}
                         />
                     </Field>
+                    <div className="pssp-help-row pssp-inline-hint">
+                        <div className="pssp-control-col">
+                            <small className="text-muted">{t('shipping.partners_page.hints.netship_shop_id_warehouse')}</small>
+                        </div>
+                        <div className="pssp-label" aria-hidden="true" />
+                    </div>
                     <Field label={L('api_base_url')}>
                         <TextInput
                             value={credential('base_url')}

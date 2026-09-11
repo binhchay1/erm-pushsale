@@ -206,29 +206,24 @@ function cleanPayload(data, { canToggleApproval = false } = {}) {
         is_active: true,
     };
     payload.sources = [mainSource, ...sources.filter((source) => source.source_type !== 'main')];
-    // Cho phép cập nhật products từ dialog sửa/duyệt; tạo mới có thể gửi rỗng.
-    if (Array.isArray(data.product_ids)) {
-        const mainKey = (payload.sources.find((source) => source.source_type === 'main') ?? blankSource('main')).client_key;
-        const catalogHint = Array.isArray(data.products) ? data.products : [];
-        payload.products = data.product_ids
-            .map((id, index) => {
-                const productId = Number(id);
-                if (!Number.isFinite(productId) || productId <= 0) return null;
-                const existing = catalogHint.find((row) => Number(row?.product_id) === productId);
-                return {
-                    product_id: productId,
-                    source_key: existing?.source_key || mainKey,
-                    item_type: existing?.item_type === 'combo' || existing?.product_type === 'combo' ? 'combo' : 'product',
-                    quantity: Math.max(1, Number(existing?.quantity ?? 1) || 1),
-                    unit_price_override: existing?.unit_price_override ?? '',
-                    is_default: index === 0,
-                    sort_order: index,
-                };
-            })
-            .filter(Boolean);
-    } else {
-        delete payload.products;
-    }
+    // Tạo/sửa đều bắt buộc ≥1 sản phẩm từ catalog.
+    const mainKey = (payload.sources.find((source) => source.source_type === 'main') ?? blankSource('main')).client_key;
+    const catalogHint = Array.isArray(data.products) ? data.products : [];
+    const productIds = Array.isArray(data.product_ids)
+        ? data.product_ids.map(Number).filter((id) => Number.isFinite(id) && id > 0)
+        : [];
+    payload.products = productIds.map((productId, index) => {
+        const existing = catalogHint.find((row) => Number(row?.product_id) === productId);
+        return {
+            product_id: productId,
+            source_key: existing?.source_key || mainKey,
+            item_type: existing?.item_type === 'combo' || existing?.product_type === 'combo' ? 'combo' : 'product',
+            quantity: Math.max(1, Number(existing?.quantity ?? 1) || 1),
+            unit_price_override: existing?.unit_price_override ?? '',
+            is_default: index === 0,
+            sort_order: index,
+        };
+    });
     delete payload.product_ids;
     payload.success_url = payload.success_url || '';
     // Mặc định chưa duyệt; chỉ admin mới gửi is_approved=true để auto duyệt.
@@ -447,6 +442,12 @@ export default function LandingConnectionsPage({
 
     const save = (event) => {
         event.preventDefault();
+        const productIds = (form.data.product_ids ?? []).map(Number).filter((id) => id > 0);
+        if (!productIds.length) {
+            form.setError('products', l('product_required'));
+            return;
+        }
+        form.clearErrors('products');
         const options = {
             preserveScroll: true,
             onSuccess: () => setOpen(false),
@@ -756,7 +757,7 @@ export default function LandingConnectionsPage({
                             <label>{l('ad_channel')} <span className="required">(*)</span></label>
                             <PushsaleSelect options={channelTranslatedOptions} value={form.data.ad_channel} onChange={(value) => form.setData('ad_channel', value || 'facebook_ads')} searchable />
 
-                            <label>Sản phẩm</label>
+                            <label>Sản phẩm <span className="required">(*)</span></label>
                             <div className="pslc-inline-action-field">
                                 <PushsaleMultiSelect
                                     label="Sản phẩm"
@@ -782,16 +783,28 @@ export default function LandingConnectionsPage({
                                                 };
                                             }),
                                         });
+                                        if (nextIds.length) form.clearErrors('products');
                                     }}
                                     allLabel="Chọn sản phẩm / gói sản phẩm"
                                     className="pslc-product-multiselect"
                                     placeholder="--Chọn sản phẩm / gói--"
                                     emptyLabel="Chưa chọn sản phẩm"
                                 />
-                                <button type="button" className="btn-icon" title="Xóa sản phẩm" onClick={() => form.setData({ ...form.data, product_ids: [], products: [] })}><i className="fa fa-trash" /></button>
+                                <button
+                                    type="button"
+                                    className="btn-icon"
+                                    title={l('clear_products')}
+                                    disabled={(form.data.product_ids ?? []).length === 0}
+                                    onClick={() => form.setData({ ...form.data, product_ids: [], products: [] })}
+                                >
+                                    <i className="fa fa-trash" />
+                                </button>
                             </div>
                             <div></div>
-                            <small className="text-muted">* Khi chia số sẽ chia đều cho các Sale có quyền bán một trong các sản phẩm được cấu hình tại đây</small>
+                            {(form.errors.products || form.errors['products.0.product_id']) && (
+                                <small className="text-danger">{form.errors.products || form.errors['products.0.product_id']}</small>
+                            )}
+                            <small className="text-muted">{l('product_required_hint')}</small>
 
                             <label>{l('upsale_url')}</label>
                             <input className="form-control" type="url" value={form.data.upsell_urls_text ?? ''} onChange={(event) => form.setData('upsell_urls_text', event.target.value)} placeholder={l('optional')} />

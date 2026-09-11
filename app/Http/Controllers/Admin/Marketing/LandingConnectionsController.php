@@ -189,6 +189,8 @@ final class LandingConnectionsController extends Controller
                 return back()->with('success', $approved
                     ? 'Đã duyệt nguồn landing.'
                     : 'Đã bỏ duyệt nguồn landing.');
+            } catch (ValidationException $exception) {
+                throw $exception;
             } catch (Throwable $exception) {
                 Log::error('landing_connections.flags_approve_failed', [
                     'connection_id' => $record->id,
@@ -272,10 +274,8 @@ final class LandingConnectionsController extends Controller
     {
         $companyId = $this->resolveCompanyId($request->user());
 
-        // Contract: form 2.4.1 chỉ tạo nguồn dữ liệu.
-        // Product/package và ngân sách chỉ được xử lý ở menu duyệt, nên bỏ mọi product payload cũ gửi kèm.
+        // Contract: tạo/sửa kết nối phải gắn ≥1 sản phẩm từ catalog; luôn gửi duyệt.
         $request->merge([
-            'products' => [],
             'request_approval' => true,
         ]);
 
@@ -333,9 +333,9 @@ final class LandingConnectionsController extends Controller
             'sources.*.sort_order' => ['nullable', 'integer', 'min:0', 'max:1000'],
             'sources.*.is_active' => ['boolean'],
             'sources.*.notes' => ['nullable', 'string', 'max:500'],
-            'products' => ['nullable', 'array', 'max:100'],
+            'products' => ['required', 'array', 'min:1', 'max:100'],
             'products.*.product_id' => [
-                'nullable',
+                'required',
                 'integer',
                 Rule::exists('products', 'id')->where(fn ($query) => $query
                     ->where('company_id', $companyId)
@@ -409,30 +409,30 @@ final class LandingConnectionsController extends Controller
                 }
             }
 
-            // Luồng mới: Marketing tạo kết nối landing trước, chưa cần gắn sản phẩm.
-            // Duyệt không bắt buộc sản phẩm — mapping có thể gắn sau, webhook vẫn nhận data.
-            if ($products->isNotEmpty()) {
-                foreach ($sources->whereIn('source_type', ['main', 'upsell']) as $sourceIndex => $source) {
-                    $key = (string) ($source['client_key'] ?? '');
-                    $applicableProducts = $products->filter(function ($product) use ($key): bool {
-                        $sourceKey = (string) ($product['source_key'] ?? '');
+            if ($products->isEmpty()) {
+                $validator->errors()->add('products', 'Phải chọn ít nhất 1 sản phẩm/gói từ danh mục.');
+            }
 
-                        return $sourceKey === '' || $sourceKey === $key;
-                    });
+            foreach ($sources->whereIn('source_type', ['main', 'upsell']) as $sourceIndex => $source) {
+                $key = (string) ($source['client_key'] ?? '');
+                $applicableProducts = $products->filter(function ($product) use ($key): bool {
+                    $sourceKey = (string) ($product['source_key'] ?? '');
 
-                    if ($applicableProducts->isEmpty()) {
-                        $validator->errors()->add("sources.{$sourceIndex}.name", 'Nguồn nhận form phải có ít nhất 1 sản phẩm/gói áp dụng trước khi duyệt.');
-                        continue;
-                    }
+                    return $sourceKey === '' || $sourceKey === $key;
+                });
 
-                    $hasSafeFallback = $applicableProducts->contains(function ($product): bool {
-                        return trim((string) ($product['external_field'] ?? '')) === ''
-                            || (bool) ($product['is_default'] ?? false);
-                    });
+                if ($applicableProducts->isEmpty()) {
+                    $validator->errors()->add("sources.{$sourceIndex}.name", 'Nguồn nhận form phải có ít nhất 1 sản phẩm/gói áp dụng.');
+                    continue;
+                }
 
-                    if (! $hasSafeFallback) {
-                        $validator->errors()->add("sources.{$sourceIndex}.name", 'Nguồn nhận form phải có ít nhất 1 gói cố định hoặc gói mặc định để tránh mất sản phẩm khi landing gửi sai giá trị.');
-                    }
+                $hasSafeFallback = $applicableProducts->contains(function ($product): bool {
+                    return trim((string) ($product['external_field'] ?? '')) === ''
+                        || (bool) ($product['is_default'] ?? false);
+                });
+
+                if (! $hasSafeFallback) {
+                    $validator->errors()->add("sources.{$sourceIndex}.name", 'Nguồn nhận form phải có ít nhất 1 gói cố định hoặc gói mặc định để tránh mất sản phẩm khi landing gửi sai giá trị.');
                 }
             }
         });

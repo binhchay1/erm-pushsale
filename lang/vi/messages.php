@@ -193,7 +193,7 @@ return [
         'status_sync_failed' => 'Không đồng bộ được trạng thái từ hãng vận chuyển.',
         'fee_failed' => 'Không tính được phí vận chuyển.',
         'netship_not_ready' => 'NetShip chưa bật hoặc thiếu access token.',
-        'netship_shop_id_required' => 'Thiếu Shop ID NetShip (ID trên trang cá nhân NetShip).',
+        'netship_shop_id_required' => 'Thiếu Shop ID NetShip — cấu hình theo kho (tab NetShip) hoặc Shop ID mặc định ở Đối tác vận chuyển.',
         'netship_create_failed' => 'Không tạo được vận đơn qua NetShip.',
         'netship_sync_failed' => 'Không đồng bộ được trạng thái từ NetShip.',
         'netship_cancel_failed' => 'Không hủy được vận đơn trên NetShip.',

@@ -181,10 +181,16 @@ function WarehouseForm({ form, managers, locations, editing, onSubmit, onAppendP
     );
 }
 
-function ShippingAccountDialog({ open, warehouse, providers, form, selectedProvider, onSelectProvider, onClose, onSubmit, setProviderField }) {
-    const activeProvider = providers.find((item) => item.key === selectedProvider) ?? providers[0];
+function ShippingAccountDialog({ open, warehouse, providers, gatewayProviders = [], form, selectedProvider, onSelectProvider, onClose, onSubmit, setProviderField }) {
+    const configProviders = [...providers, ...gatewayProviders];
+    const activeProvider = configProviders.find((item) => item.key === selectedProvider)
+        ?? providers.find((item) => item.key === selectedProvider)
+        ?? providers[0]
+        ?? gatewayProviders[0];
+    const defaultProvider = providers.find((item) => item.key === form.data.default_shipping_provider) ?? providers[0];
     const activeSettings = form.data.shipping_account_settings?.[activeProvider?.key] ?? {};
-    const services = activeProvider?.services ?? [];
+    const services = defaultProvider?.services ?? [];
+    const isGateway = Boolean(activeProvider?.is_gateway) || activeProvider?.key === 'netship';
 
     return (
         <DialogShell open={open} onClose={onClose} wide title={`CẤU HÌNH TÀI KHOẢN GIAO HÀNG CỦA KHO [${warehouse?.name ?? ''}]`} className="ps-shipping-account-dialog">
@@ -210,30 +216,57 @@ function ShippingAccountDialog({ open, warehouse, providers, form, selectedProvi
                     <h3>CẤU HÌNH GIAO HÀNG</h3>
                     <div className="ps-shipping-config-body">
                         <div className="ps-shipping-provider-tabs">
-                            {providers.map((item) => <button type="button" key={item.key} className={item.key === activeProvider?.key ? 'active' : ''} onClick={() => onSelectProvider(item.key)}>{item.label}</button>)}
+                            {configProviders.map((item) => <button type="button" key={item.key} className={item.key === activeProvider?.key ? 'active' : ''} onClick={() => onSelectProvider(item.key)}>{item.label}</button>)}
                         </div>
                         <div className="ps-shipping-provider-form">
                             <h4>{activeProvider?.label}</h4>
-                            <div className="ps-shipping-provider-grid">
-                                <label><span>Tài khoản <b>(*)</b></span><input value={activeSettings.account ?? ''} onChange={(event) => setProviderField(activeProvider.key, 'account', event.target.value)} /></label>
-                                <label><span>API Token <b>(*)</b></span><input value={activeSettings.api_token ?? ''} onChange={(event) => setProviderField(activeProvider.key, 'api_token', event.target.value)} /></label>
-                                <label><span>Cửa hàng (có thể hiểu là kho)</span><input value={activeSettings.shop_id ?? activeSettings.store_code ?? ''} onChange={(event) => setProviderField(activeProvider.key, 'shop_id', event.target.value)} /></label>
-                                <label><span>Thời gian lấy hàng</span><select value={activeSettings.pickup_time ?? ''} onChange={(event) => setProviderField(activeProvider.key, 'pickup_time', event.target.value)}>{optionNodes(['Sáng', 'Chiều', 'Tối'], '-- Lựa chọn thời gian --')}</select></label>
-                                <label><span>Phương thức lấy hàng</span><select value={activeSettings.pickup_method ?? 'carrier_pickup'} onChange={(event) => setProviderField(activeProvider.key, 'pickup_method', event.target.value)}><option value="carrier_pickup">Bưu tá đến lấy hàng</option><option value="dropoff">Mang hàng ra bưu cục</option><option value="manual">Tự giao / thủ công</option></select></label>
-                                <label><span>Nhãn đơn hàng</span><input value={activeSettings.order_label_note ?? ''} onChange={(event) => setProviderField(activeProvider.key, 'order_label_note', event.target.value)} /></label>
-                                <label><span>Cố định SĐT người nhận khi đăng đơn</span><input value={activeSettings.fixed_receiver_phone ?? ''} onChange={(event) => setProviderField(activeProvider.key, 'fixed_receiver_phone', event.target.value)} /></label>
-                            </div>
+                            {isGateway ? (
+                                <div className="ps-shipping-provider-grid">
+                                    <label className="span-2">
+                                        <span>NetShip ShopID (theo kho)</span>
+                                        <input
+                                            value={activeSettings.shop_id ?? ''}
+                                            onChange={(event) => setProviderField(activeProvider.key, 'shop_id', event.target.value)}
+                                            placeholder="VD: 530 — để trống thì dùng Shop ID mặc định ở Đối tác vận chuyển"
+                                        />
+                                    </label>
+                                </div>
+                            ) : (
+                                <div className="ps-shipping-provider-grid">
+                                    <label><span>Tài khoản <b>(*)</b></span><input value={activeSettings.account ?? ''} onChange={(event) => setProviderField(activeProvider.key, 'account', event.target.value)} /></label>
+                                    <label><span>API Token <b>(*)</b></span><input value={activeSettings.api_token ?? ''} onChange={(event) => setProviderField(activeProvider.key, 'api_token', event.target.value)} /></label>
+                                    <label><span>Cửa hàng (có thể hiểu là kho)</span><input value={activeSettings.shop_id ?? activeSettings.store_code ?? ''} onChange={(event) => setProviderField(activeProvider.key, 'shop_id', event.target.value)} /></label>
+                                    <label><span>Thời gian lấy hàng</span><select value={activeSettings.pickup_time ?? ''} onChange={(event) => setProviderField(activeProvider.key, 'pickup_time', event.target.value)}>{optionNodes(['Sáng', 'Chiều', 'Tối'], '-- Lựa chọn thời gian --')}</select></label>
+                                    <label><span>Phương thức lấy hàng</span><select value={activeSettings.pickup_method ?? 'carrier_pickup'} onChange={(event) => setProviderField(activeProvider.key, 'pickup_method', event.target.value)}><option value="carrier_pickup">Bưu tá đến lấy hàng</option><option value="dropoff">Mang hàng ra bưu cục</option><option value="manual">Tự giao / thủ công</option></select></label>
+                                    <label><span>Nhãn đơn hàng</span><input value={activeSettings.order_label_note ?? ''} onChange={(event) => setProviderField(activeProvider.key, 'order_label_note', event.target.value)} /></label>
+                                    <label><span>Cố định SĐT người nhận khi đăng đơn</span><input value={activeSettings.fixed_receiver_phone ?? ''} onChange={(event) => setProviderField(activeProvider.key, 'fixed_receiver_phone', event.target.value)} /></label>
+                                </div>
+                            )}
                             <div className="ps-shipping-provider-actions">
                                 <button type="submit" className="btn btn-primary" disabled={form.processing}><i className="fa fa-save" /> Lưu</button>
-                                <button type="button" className="btn btn-default"><i className="fa fa-chain-broken" /> Kết nối</button>
-                                <button type="button" className="btn btn-link">Xem danh sách</button>
+                                {!isGateway && (
+                                    <>
+                                        <button type="button" className="btn btn-default"><i className="fa fa-chain-broken" /> Kết nối</button>
+                                        <button type="button" className="btn btn-link">Xem danh sách</button>
+                                    </>
+                                )}
                             </div>
                             <div className="ps-shipping-help-box">
-                                <p><b>+ Hướng dẫn kết nối:</b></p>
-                                <p>- Cấu hình tài khoản giao vận theo từng kho để đăng đơn đúng người gửi/kho lấy hàng.</p>
-                                <p>- Nhập tài khoản, API Token sau đó bấm “Lưu”. Khi đăng đơn, hệ thống ưu tiên cấu hình của kho này.</p>
-                                <p><b>+ Hủy kết nối:</b></p>
-                                <p>- Xóa tài khoản/API Token rồi bấm “Lưu”.</p>
+                                {isGateway ? (
+                                    <>
+                                        <p><b>+ NetShip (cổng trung gian):</b></p>
+                                        <p>- Không chọn NetShip làm ĐVVC trên đơn — đơn vẫn chọn VTP/GHTK/…; hệ thống định tuyến qua NetShip khi cần.</p>
+                                        <p>- ShopID theo kho ghi đè Shop ID mặc định ở trang Đối tác vận chuyển. Để trống để dùng giá trị global.</p>
+                                    </>
+                                ) : (
+                                    <>
+                                        <p><b>+ Hướng dẫn kết nối:</b></p>
+                                        <p>- Cấu hình tài khoản giao vận theo từng kho để đăng đơn đúng người gửi/kho lấy hàng.</p>
+                                        <p>- Nhập tài khoản, API Token sau đó bấm “Lưu”. Khi đăng đơn, hệ thống ưu tiên cấu hình của kho này.</p>
+                                        <p><b>+ Hủy kết nối:</b></p>
+                                        <p>- Xóa tài khoản/API Token rồi bấm “Lưu”.</p>
+                                    </>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -245,7 +278,7 @@ function ShippingAccountDialog({ open, warehouse, providers, form, selectedProvi
     );
 }
 
-export default function WarehouseIndex({ warehouses, filters = {}, managers = [], provinces = [], districts = [], locations: initialLocations = emptyLocations, shippingProviders = [] }) {
+export default function WarehouseIndex({ warehouses, filters = {}, managers = [], provinces = [], districts = [], locations: initialLocations = emptyLocations, shippingProviders = [], shippingGatewayProviders = [] }) {
     const { ask } = useConfirm();
     const [search, setSearch] = useState(filters.search ?? '');
     const [manager, setManager] = useState(filters.manager_user_id ?? '');
@@ -482,6 +515,7 @@ export default function WarehouseIndex({ warehouses, filters = {}, managers = []
                 open={shippingOpen}
                 warehouse={shippingWarehouse}
                 providers={providerOptions}
+                gatewayProviders={shippingGatewayProviders}
                 form={shippingForm}
                 selectedProvider={selectedProvider}
                 onSelectProvider={setSelectedProvider}

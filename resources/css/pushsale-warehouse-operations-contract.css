@@ -1053,39 +1053,72 @@ html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table td:nth-child(6),
 html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table th.c-status,
 html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table td:nth-child(6) { width: 150px !important; min-width: 150px !important; }
 html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table th.c-customer,
-html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table td:nth-child(7),
-html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table th.c-customer,
-html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table td:nth-child(7) { width: 160px !important; min-width: 160px !important; }
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table td:nth-child(7) { width: 160px !important; min-width: 160px !important; }
 html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table th.c-address,
-html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table td:nth-child(8),
-html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table th.c-address,
-html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table td:nth-child(8) { width: 230px !important; min-width: 230px !important; }
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table td:nth-child(8) { width: 230px !important; min-width: 230px !important; }
 html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table th.c-products,
-html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table td:nth-child(9),
-html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table th.c-products,
-html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table td:nth-child(9) { width: 280px !important; min-width: 280px !important; }
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table td:nth-child(9) { width: 280px !important; min-width: 280px !important; }
 html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table th.c-money,
-html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table td:nth-child(10),
-html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table th.c-money,
-html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table td:nth-child(10) { width: 142px !important; min-width: 142px !important; }
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table td:nth-child(10) { width: 142px !important; min-width: 142px !important; }
 html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table th.c-deposit,
-html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table td:nth-child(11),
-html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table th.c-deposit,
-html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table td:nth-child(11) { width: 80px !important; min-width: 80px !important; }
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table td:nth-child(11) { width: 80px !important; min-width: 80px !important; }
 html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table th.c-cod,
-html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table td:nth-child(12),
-html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table th.c-cod,
-html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table td:nth-child(12) { width: 112px !important; min-width: 112px !important; }
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table td:nth-child(12) { width: 112px !important; min-width: 112px !important; }
 html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table th.c-fee,
 html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table td:nth-child(13),
-html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table td:nth-child(14),
-html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table th.c-fee,
-html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table td:nth-child(13),
-html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table td:nth-child(14) { width: 92px !important; min-width: 92px !important; }
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table td:nth-child(14) { width: 92px !important; min-width: 92px !important; }
 html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table th.c-recon,
-html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table td:nth-child(15),
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table td:nth-child(15) { width: 72px !important; min-width: 72px !important; }
+
+/* Accounting 6.1 — column order matches Pushsale htmk1 (ĐSNB early, split money, customer last) */
 html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table th.c-recon,
-html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table td:nth-child(15) { width: 72px !important; min-width: 72px !important; }
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table td.c-recon-body { width: 72px !important; min-width: 72px !important; }
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table th.c-products,
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table td.c-products-body { width: 220px !important; min-width: 200px !important; }
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table th.c-money-sub,
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table th.c-money-ck,
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table th.c-money-vat,
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table th.c-money-ship,
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table th.c-money-total,
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table td.c-money-sub,
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table td.c-money-ck,
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table td.c-money-vat,
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table td.c-money-ship,
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table td.c-money-total {
+    width: 88px !important;
+    min-width: 80px !important;
+    white-space: nowrap !important;
+}
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table th.c-customer,
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table td.c-customer-body { width: 160px !important; min-width: 140px !important; }
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table th.c-address,
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table td.c-address-body { width: 200px !important; min-width: 160px !important; }
+
+html body.pushsale-app-body .ps-acc-page .action-container.ps-wh-floating-actions {
+    z-index: 1200 !important;
+    padding-left: 20px !important;
+    padding-bottom: 12px !important;
+}
+html body.pushsale-app-body .ps-acc-page .action-container.ps-wh-floating-actions .icon-row {
+    display: flex !important;
+    gap: 10px !important;
+    flex-wrap: nowrap !important;
+}
+html body.pushsale-app-body .ps-acc-page .action-container.ps-wh-floating-actions .n-button {
+    width: 50px !important;
+    height: 50px !important;
+    border-radius: 50% !important;
+    font-size: 22px !important;
+}
+html body.pushsale-app-body .ps-acc-page .action-container.ps-wh-floating-actions .main-action {
+    width: 60px !important;
+    height: 60px !important;
+    font-size: 24px !important;
+}
+html body.pushsale-app-body .ps-acc-page .ps-acc-recon-empty {
+    color: #9aa4b2 !important;
+    font-size: 16px !important;
+}
 
 @media (max-width: 991px) {
     html body.pushsale-app-body .ps-page-extra-filters.ps-wh-search-header .ps-wh-filter-row-main.ps-adv-filter-row,

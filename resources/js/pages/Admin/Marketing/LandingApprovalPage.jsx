@@ -119,6 +119,12 @@ export default function LandingApprovalPage({
             ? form.data.product_ids.map((id) => Number(id)).filter((id, index, source) => id > 0 && source.indexOf(id) === index)
             : [];
 
+        if (!productIds.length) {
+            setApprovalErrors({ product_ids: 'Phải chọn ít nhất 1 sản phẩm/gói từ danh mục trước khi duyệt.' });
+            toast.error('Phải chọn ít nhất 1 sản phẩm/gói từ danh mục trước khi duyệt.');
+            return;
+        }
+
         setApprovalErrors({});
         setApprovalProcessing(true);
         router.post(`${approveBaseUrl}/${selected.id}/approve`, {
@@ -254,7 +260,7 @@ export default function LandingApprovalPage({
                             <label>Url nguồn dữ liệu</label>
                             <input className="form-control" readOnly value={selected?.source_url || ''} />
 
-                            <label>Sản phẩm</label>
+                            <label>Sản phẩm <span className="required">(*)</span></label>
                             <div className="pslc-inline-action-field">
                                 <PushsaleMultiSelect
                                     label="Sản phẩm"
@@ -262,7 +268,16 @@ export default function LandingApprovalPage({
                                     selectedIds={form.data.product_ids}
                                     enabled
                                     onEnabledChange={() => {}}
-                                    onChange={(ids) => form.setData('product_ids', ids)}
+                                    onChange={(ids) => {
+                                        form.setData('product_ids', ids);
+                                        if ((ids ?? []).length) {
+                                            setApprovalErrors((prev) => {
+                                                const next = { ...prev };
+                                                delete next.product_ids;
+                                                return next;
+                                            });
+                                        }
+                                    }}
                                     allLabel="Chọn sản phẩm / gói sản phẩm"
                                     className="pslc-product-multiselect"
                                     placeholder="--Chọn sản phẩm / gói--"
@@ -270,7 +285,7 @@ export default function LandingApprovalPage({
                                 />
                             </div>
                             <div></div>
-                            <small className="text-muted">* Khi chia số sẽ chia đều cho các Sale có quyền bán một trong các sản phẩm được cấu hình tại đây</small>
+                            <small className="text-muted">* Bắt buộc chọn ít nhất 1 sản phẩm/gói. Khi chia số sẽ chia đều cho các Sale có quyền bán một trong các sản phẩm được cấu hình tại đây.</small>
 
                             <label>Loại ngân sách</label>
                             <PushsaleSelect options={budgetTypeOptions} value={form.data.budget_type} searchable={false} onChange={(value) => form.setData('budget_type', value || 'total')} />

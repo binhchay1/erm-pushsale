@@ -183,13 +183,17 @@ export default {
             sender_as_warehouse: 'Can be treated as warehouse',
             ghn_shop: 'GHN shop / warehouse code',
         },
+        hints: {
+            netship_shop_id_warehouse: 'Global default Shop ID. Override per warehouse under Warehouses → Shipping account config → NetShip tab.',
+        },
         help: {
             netship: [
-                'Required: enable “Use this connection” + Access token + Shop ID (NetShip profile ID), then Save.',
+                'Required: enable “Use this connection” + Access token, then Save. A default Shop ID is recommended (or set per warehouse).',
                 'API Base URL defaults to https://netship.vn (sandbox: https://test.netship.vn).',
                 'When creating an account / getting an access token on NetShip, copy the webhook URL above (:url) and paste it into the callback URL field on that page.',
                 'The other fields are optional create-order defaults — leave blank to use system defaults.',
                 'NetShip does not appear in the order carrier dropdown.',
+                'Per-warehouse ShopID: configure under Warehouses → NetShip tab (overrides this default).',
             ],
             vnpost: [
                 'Configure the partner at donhang.vnpost.vn/#/app/cau-hinh-nguoi-dung.',
