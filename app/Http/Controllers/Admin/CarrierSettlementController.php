@@ -24,13 +24,19 @@ class CarrierSettlementController extends Controller
             'period_to' => ['nullable', 'date'],
         ]);
 
-        $result = $import->importCsv(
-            $validated['provider'],
-            $request->file('file'),
-            $validated['settlement_code'] ?? null,
-            isset($validated['period_from']) ? Carbon::parse($validated['period_from']) : null,
-            isset($validated['period_to']) ? Carbon::parse($validated['period_to']) : null,
-        );
+        try {
+            $result = $import->importCsv(
+                $validated['provider'],
+                $request->file('file'),
+                $validated['settlement_code'] ?? null,
+                isset($validated['period_from']) ? Carbon::parse($validated['period_from']) : null,
+                isset($validated['period_to']) ? Carbon::parse($validated['period_to']) : null,
+            );
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            return back()->with('error', $exception->getMessage() ?: __('messages.settlement.import_failed'));
+        }
 
         return back()->with('success', __('messages.settlement.import_success', [
             'matched' => $result['lines_matched'],
@@ -62,8 +68,14 @@ class CarrierSettlementController extends Controller
             'date_to' => $validated['date_to'] ?? null,
         ];
 
-        [$from, $to] = $recon->resolveRange($filter);
-        $result = $sync->syncProvider($validated['provider'], $from, $to);
+        try {
+            [$from, $to] = $recon->resolveRange($filter);
+            $result = $sync->syncProvider($validated['provider'], $from, $to);
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            return back()->with('error', $exception->getMessage() ?: __('messages.settlement.sync_failed'));
+        }
 
         return back()->with('success', __('messages.settlement.sync_success', [
             'matched' => $result['lines_matched'],

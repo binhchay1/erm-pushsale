@@ -58,10 +58,17 @@ class OrderClosingService
             ]);
         }
 
-        // Ladi đổ sản phẩm về với SL 0 — không cho chốt đơn khi sale chưa nhập số lượng.
-        if ($order->items()->exists() && $order->items()->where('quantity', '>', 0)->doesntExist()) {
+        // Không cho chốt khi chưa có dòng SP hoặc toàn bộ SL = 0.
+        if ($order->items()->where('quantity', '>', 0)->doesntExist()) {
             throw ValidationException::withMessages([
                 'order' => __('messages.sale_ops.close_requires_quantity'),
+            ]);
+        }
+
+        $warehouseId = $payload['warehouse_id'] ?? $order->warehouse_id;
+        if (! $warehouseId) {
+            throw ValidationException::withMessages([
+                'warehouse_id' => __('messages.sale_ops.warehouse_required'),
             ]);
         }
 
@@ -109,7 +116,7 @@ class OrderClosingService
                 'amount_to_collect' => $amountToCollect,
                 'shipping_geo' => $payload['shipping_geo'] ?? $order->shipping_geo,
                 'shipping_address' => $payload['shipping_address'] ?? $order->shipping_address,
-                'warehouse_id' => $payload['warehouse_id'] ?? $order->warehouse_id,
+                'warehouse_id' => $warehouseId,
                 'shipping_provider' => $shippingProvider,
                 'shipping_method' => $payload['shipping_method'] ?? $order->shipping_method,
                 'shipping_notes' => $shippingNotes,

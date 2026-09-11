@@ -570,6 +570,7 @@ export default {
         address_suggest_title: 'Enable 2-level address to use conversion suggestions',
         warehouse: 'Warehouse',
         choose_warehouse: 'Select warehouse',
+        warehouse_required: 'Please select a warehouse before closing the order.',
         pickup_address: 'Pickup address',
         pick_base_product: 'Select base product',
         pick_variant_product: 'Select product',

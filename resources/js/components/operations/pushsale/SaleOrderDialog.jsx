@@ -406,6 +406,16 @@ export function SaleOrderDialog({
         return null;
     };
 
+    const validateClose = () => {
+        const base = validate();
+        if (base) return base;
+        if (!form.warehouse_id) return t('operations.sale_order.warehouse_required');
+        if (!form.items.some((item) => hasProductLine(item) && numberValue(item.quantity) > 0)) {
+            return t('operations.sale_order.quantity_required');
+        }
+        return null;
+    };
+
     const firstError = (errors) => {
         const value = Object.values(errors ?? {})[0];
         if (Array.isArray(value)) return value[0];
@@ -450,7 +460,7 @@ export function SaleOrderDialog({
             setFormError(t('operations.sale_order.closed_locked'));
             return;
         }
-        const error = validate();
+        const error = shouldClose ? validateClose() : validate();
         if (error) {
             setFormError(error);
             return;

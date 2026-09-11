@@ -26,7 +26,7 @@ class OrderClosingController extends Controller
             'shipping_geo.address' => ['nullable', 'string', 'max:500'],
             'warehouse_id' => ['nullable', 'integer', 'exists:warehouses,id'],
             'shipping_method' => ['nullable', 'string', 'max:40'],
-            'shipping_provider' => ['nullable', 'string', 'in:ghtk,ghn,viettel_post,jnt'],
+            'shipping_provider' => ['nullable', 'string', 'in:ghtk,ghn,viettel_post,jnt,manual'],
             'amount_to_collect' => ['nullable', 'integer', 'min:0'],
             'confirm_insufficient_stock' => ['nullable', 'boolean'],
         ]);

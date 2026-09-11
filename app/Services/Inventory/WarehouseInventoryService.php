@@ -14,7 +14,7 @@ class WarehouseInventoryService
     /** @return array<string, mixed> */
     public function build(Request $request): array
     {
-        $query = WarehouseInventory::query()->with(['warehouse', 'product']);
+        $query = WarehouseInventory::query();
 
         if ($request->filled('warehouse_id')) {
             $query->where('warehouse_id', $request->integer('warehouse_id'));
@@ -46,14 +46,23 @@ class WarehouseInventoryService
         }
 
         $perPage = max(10, min(100, $request->integer('per_page', 20)));
-        $rows = $query->latest()->paginate($perPage)->withQueryString();
+        // Inventory rows are tenant-scoped; warehouse/product are shop-scoped — load without shop
+        // scope so cross-shop leftovers never NPE the page (multi-shop).
+        $rows = $query
+            ->with([
+                'warehouse' => fn ($q) => $q->withoutShop(),
+                'product' => fn ($q) => $q->withoutShop(),
+            ])
+            ->latest()
+            ->paginate($perPage)
+            ->withQueryString();
 
         return [
             'rows' => $rows->through(fn (WarehouseInventory $inv) => [
                 'id' => (string) $inv->id,
-                'warehouseName' => $inv->warehouse->name,
-                'productName' => $inv->product->name,
-                'sku' => $inv->product->sku,
+                'warehouseName' => $inv->warehouse?->name ?? '—',
+                'productName' => $inv->product?->name ?? '—',
+                'sku' => $inv->product?->sku,
                 'uom' => $inv->uom,
                 'batchCode' => $inv->batch_code,
                 'expiryDate' => $inv->expiry_date?->toDateString(),

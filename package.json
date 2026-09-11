@@ -12,9 +12,16 @@
         "build": "vite build",
         "dev": "vite",
         "audit:pushsale": "node ./scripts/audit-pushsale-contract.mjs",
-        "check:frontend": "node --check resources/js/lib/uiShellStyles.js && node --check resources/js/lib/pushsaleStyleRegistry.js && node ./scripts/audit-pushsale-contract.mjs"
+        "check:frontend": "node --check resources/js/lib/uiShellStyles.js && node --check resources/js/lib/pushsaleStyleRegistry.js && node ./scripts/audit-pushsale-contract.mjs",
+        "e2e": "playwright test --project=chromium",
+        "e2e:demo": "playwright test --project=demo",
+        "e2e:flows": "playwright test e2e/flows --project=chromium",
+        "e2e:ui": "playwright test --ui",
+        "e2e:headed": "playwright test --headed --project=chromium",
+        "e2e:report": "playwright show-report"
     },
     "devDependencies": {
+        "@playwright/test": "^1.63.0",
         "@tailwindcss/vite": "^4.3.0",
         "@vitejs/plugin-react": "^6.0.2",
         "concurrently": "^9.2.1",

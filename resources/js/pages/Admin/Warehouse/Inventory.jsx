@@ -207,10 +207,11 @@ export default function Inventory({ report, filterOptions = {}, intakeUrl, expor
                     <label>Kho (*)<select className="form-control" value={movement.data.warehouse_id} onChange={(event) => movement.setData('warehouse_id', event.target.value)} required><option value="">--Chọn kho--</option>{(filterOptions.warehouses ?? []).map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
                     <label>Sản phẩm (*)<select className="form-control" value={movement.data.product_id} onChange={(event) => movement.setData('product_id', event.target.value)} required><option value="">--Chọn sản phẩm--</option>{(filterOptions.products ?? []).map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
                     <label>Số lượng (*)<input className="form-control" type="number" min="1" value={movement.data.quantity} onChange={(event) => movement.setData('quantity', Number(event.target.value))} required /></label>
-                    <label>Người duyệt (*)<select className="form-control" value={movement.data.approved_by_user_id} onChange={(event) => movement.setData('approved_by_user_id', event.target.value)} required><option value="">--Chọn người duyệt--</option>{approverOptions.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
+                    <label>Người duyệt (*)<select className="form-control" value={movement.data.approved_by_user_id} onChange={(event) => movement.setData('approved_by_user_id', event.target.value)} required disabled={!approverOptions.length}><option value="">--Chọn người duyệt--</option>{approverOptions.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
                     <label className="span-2">Ghi chú<textarea className="form-control" value={movement.data.note} onChange={(event) => movement.setData('note', event.target.value)} /></label>
+                    {!approverOptions.length && <div className="alert alert-warning span-2">Chưa có người duyệt (trưởng kho / admin). Không thể lưu phiếu nhập xuất.</div>}
                     {Object.keys(movement.errors).length > 0 && <div className="alert alert-danger span-2">{Object.values(movement.errors).join(' · ')}</div>}
-                    <div className="span-2"><button className="btn btn-primary" disabled={movement.processing}><i className="fa fa-save" /> Lưu phiếu</button></div>
+                    <div className="span-2"><button className="btn btn-primary" disabled={movement.processing || !approverOptions.length}><i className="fa fa-save" /> Lưu phiếu</button></div>
                 </form>
             </DialogShell>
         </AppLayout>

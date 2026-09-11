@@ -171,6 +171,7 @@ return [
         'no_permission_close' => 'You are not allowed to close this order.',
         'cannot_close_cancelled' => 'Order was cancelled — cannot be closed.',
         'close_requires_quantity' => 'Enter a quantity for at least one product before closing the order.',
+        'warehouse_required' => 'Select a warehouse before closing the order.',
         'cannot_unclose' => 'Unclose is only allowed while waiting for waybill and before carrier handoff.',
         'no_permission_unclose' => 'You are not allowed to unclose this order.',
         'unclose_success' => 'Order unclosed — you can operate and edit again.',
@@ -228,5 +229,7 @@ return [
         'empty_file' => 'Settlement file has no data rows.',
         'import_success' => 'COD statement imported: :matched/:total lines matched.',
         'sync_success' => 'Cash flow synced: :matched/:total lines matched.',
+        'import_failed' => 'COD statement import failed.',
+        'sync_failed' => 'Cash flow sync failed.',
     ],
 ];

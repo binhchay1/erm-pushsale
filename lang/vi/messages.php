@@ -171,6 +171,7 @@ return [
         'no_permission_close' => 'Bạn không có quyền chốt đơn này.',
         'cannot_close_cancelled' => 'Đơn đã hủy — không thể chốt.',
         'close_requires_quantity' => 'Cần nhập số lượng cho ít nhất một sản phẩm trước khi chốt đơn.',
+        'warehouse_required' => 'Vui lòng chọn kho trước khi chốt đơn.',
         'cannot_unclose' => 'Chỉ hủy chốt được khi đơn còn Chờ vận đơn và chưa chuyển ĐVVC.',
         'no_permission_unclose' => 'Bạn không có quyền hủy chốt đơn này.',
         'unclose_success' => 'Đã hủy chốt đơn — có thể tác nghiệp và chỉnh sửa lại.',
@@ -228,5 +229,7 @@ return [
         'empty_file' => 'File đối soát không có dòng dữ liệu.',
         'import_success' => 'Đã import bảng kê COD: :matched/:total dòng khớp đơn.',
         'sync_success' => 'Đã đồng bộ dòng tiền: :matched/:total dòng khớp đơn.',
+        'import_failed' => 'Import bảng kê COD thất bại.',
+        'sync_failed' => 'Đồng bộ dòng tiền thất bại.',
     ],
 ];

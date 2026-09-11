@@ -570,6 +570,7 @@ export default {
         address_suggest_title: 'Bật địa chỉ 2 cấp để dùng gợi ý chuyển đổi',
         warehouse: 'Kho',
         choose_warehouse: 'Chọn kho',
+        warehouse_required: 'Vui lòng chọn kho trước khi chốt đơn.',
         pickup_address: 'Địa chỉ lấy hàng',
         pick_base_product: 'Chọn sản phẩm gốc',
         pick_variant_product: 'Chọn sản phẩm',
