@@ -1500,7 +1500,7 @@ html body.pushsale-app-body .action-container.ps-wh-floating-actions .main-actio
     line-height: 1 !important;
 }
 
-/* ===== Recon dialogs — htmk3 Excel + htmk4 by-code (Pushsale table.tb-sp) ===== */
+/* ===== Recon dialogs - htmk3 Excel + htmk4 by-code (Pushsale table.tb-sp) ===== */
 html body.pushsale-app-body [data-slot='dialog-content'].ps-recon-excel-dialog,
 html body.pushsale-app-body [data-slot='dialog-content'].ps-recon-bycode-dialog {
     width: min(1180px, calc(100vw - 24px)) !important;
