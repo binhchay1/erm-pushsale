@@ -297,7 +297,7 @@ html body.pushsale-app-body .ps-revenue-detail-page {
 
 html body.pushsale-app-body .ps-revenue-detail-scroll {
     position: relative !important;
-    border-top: 1px solid #2675bf !important;
+    border-top: 0 !important;
     border-bottom: 1px solid #d6dee6 !important;
     background: #fff !important;
 }

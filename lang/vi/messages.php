@@ -44,6 +44,7 @@ return [
     'inventory_export' => 'Đã xuất kho thành công.',
     'lead_deleted' => 'Đã xóa bản ghi lead.',
     'inventory_row_deleted' => 'Đã xóa dòng tồn kho.',
+    'inventory_discontinued_updated' => 'Đã cập nhật trạng thái ngừng kinh doanh.',
     'warehouse_created' => 'Đã tạo kho mới.',
     'warehouse_updated' => 'Đã cập nhật kho.',
     'warehouse_deleted' => 'Đã xóa kho.',

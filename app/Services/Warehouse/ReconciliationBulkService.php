@@ -121,6 +121,20 @@ class ReconciliationBulkService
 
     public function downloadTemplate(): StreamedResponse
     {
+        $samplePath = resource_path('templates/recon/3.doisoat.xls');
+        if (is_file($samplePath)) {
+            return response()->streamDownload(static function () use ($samplePath): void {
+                $stream = fopen($samplePath, 'rb');
+                if ($stream === false) {
+                    return;
+                }
+                fpassthru($stream);
+                fclose($stream);
+            }, '3.doisoat.xls', [
+                'Content-Type' => 'application/vnd.ms-excel',
+            ]);
+        }
+
         $spreadsheet = new Spreadsheet;
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Mau');

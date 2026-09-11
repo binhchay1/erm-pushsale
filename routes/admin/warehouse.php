@@ -131,5 +131,6 @@ Route::middleware('role:'.User::ROLE_ADMIN)->group(function (): void {
     Route::put('warehouses/{warehouse}', [WarehouseController::class, 'update'])->name('warehouses.update');
     Route::put('warehouses/{warehouse}/shipping-account', [WarehouseController::class, 'updateShippingAccount'])->name('warehouses.shipping-account.update');
     Route::delete('warehouses/{warehouse}', [WarehouseController::class, 'destroy'])->name('warehouses.destroy');
+    Route::patch('warehouse-inventories/{inventory}/discontinued', [WarehouseInventoryController::class, 'updateDiscontinued'])->name('warehouse-inventories.discontinued');
     Route::delete('warehouse-inventories/{inventory}', [WarehouseInventoryController::class, 'destroy'])->name('warehouse-inventories.destroy');
 });

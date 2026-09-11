@@ -134,6 +134,7 @@ test.describe('13 — Kế toán đối soát + NetShip + Kho', () => {
         await expect(page.locator('textarea.ps-wh-bulk-codes, textarea').first()).toBeVisible();
         await expect(page.getByRole('button', { name: /Thực hiện/i })).toBeVisible();
         await expect(page.locator('.ps-wh-bulk-notice, .notice').first()).toBeVisible();
+        await expect(page.locator('button.ps-wh-bulk-close, a.ps-wh-bulk-close')).toHaveCount(0);
     });
 
     test('kho 5.1: FAB đăng đơn không 500', async ({ page }) => {

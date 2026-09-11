@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { useAppName } from '@/hooks/use-app-name';
 import { useT } from '@/providers/I18nProvider';
 import { apiRequest } from '@/lib/api';
 
@@ -18,6 +19,7 @@ export function UpdateReconByCodeDialog({
     onDone,
 }) {
     const t = useT();
+    const appName = useAppName();
     const apiBase = `${actionApiBase}/reconciliation-bulk`;
     const [codeType, setCodeType] = useState('MHT');
     const [isGhtk, setIsGhtk] = useState(false);
@@ -116,7 +118,7 @@ export function UpdateReconByCodeDialog({
                                         </td>
                                         <td>
                                             <select className="form-control txt-dotted" value={codeType} onChange={(e) => setCodeType(e.target.value)}>
-                                                <option value="MHT">{t('operations.recon_bulk.code_type_mht')}</option>
+                                                <option value="MHT">{t('operations.recon_bulk.code_type_mht', { app: appName })}</option>
                                                 <option value="MGV">{t('operations.recon_bulk.code_type_mgv')}</option>
                                             </select>
                                         </td>

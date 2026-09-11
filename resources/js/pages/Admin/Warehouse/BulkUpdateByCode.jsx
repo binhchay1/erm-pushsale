@@ -1,10 +1,11 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 import AppLayout from '@/layouts/AppLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { apiRequest } from '@/lib/api';
+import { useAppName } from '@/hooks/use-app-name';
 import { useConfirm } from '@/hooks/use-confirm';
 import { useT } from '@/providers/I18nProvider';
 
@@ -37,8 +38,10 @@ export default function BulkUpdateByCode({
     filterOptions = {},
 }) {
     const t = useT();
+    const appName = useAppName();
     const { ask } = useConfirm();
-    const title = pageTitle || t('operations.bulk_update_by_code.title');
+    const title = pageTitle || t('operations.bulk_update_by_code.title', { app: appName });
+    const appParams = { app: appName };
 
     const [codeType, setCodeType] = useState('MHT');
     const [isGhtk, setIsGhtk] = useState(false);
@@ -90,7 +93,7 @@ export default function BulkUpdateByCode({
 
         const ok = await ask({
             title: t('operations.bulk_update_by_code.confirm_title'),
-            description: t('operations.bulk_update_by_code.confirm_body'),
+            description: t('operations.bulk_update_by_code.confirm_body', appParams),
             confirmLabel: t('operations.bulk_update_by_code.execute'),
         });
         if (!ok) return;
@@ -138,11 +141,6 @@ export default function BulkUpdateByCode({
                 <PageHeader
                     title={title}
                     pageCode={activeMenuCode}
-                    actions={(
-                        <Link href={backUrl} className="btn btn-default btn-sm ps-wh-bulk-close" title={t('operations.bulk_update_by_code.close')}>
-                            <i className="fa fa-close" aria-hidden="true" />
-                        </Link>
-                    )}
                 />
 
                 <div className="box-body ps-wh-bulk-body">
@@ -154,7 +152,7 @@ export default function BulkUpdateByCode({
                                 </div>
                                 <div className="col-xs-6 form-group">
                                     <select className="form-control" value={codeType} onChange={(e) => setCodeType(e.target.value)}>
-                                        <option value="MHT">{t('operations.bulk_update_by_code.code_type_mht')}</option>
+                                        <option value="MHT">{t('operations.bulk_update_by_code.code_type_mht', appParams)}</option>
                                         <option value="MGV">{t('operations.bulk_update_by_code.code_type_mgv')}</option>
                                     </select>
                                 </div>
@@ -201,12 +199,12 @@ export default function BulkUpdateByCode({
                                         -
                                         {' '}
                                         <span className="ps-wh-bulk-danger">
-                                            {t('operations.bulk_update_by_code.guide_one_process')}
+                                            {t('operations.bulk_update_by_code.guide_one_process', appParams)}
                                         </span>
                                         <br />
                                         -
                                         {' '}
-                                        {t('operations.bulk_update_by_code.guide_codes')}
+                                        {t('operations.bulk_update_by_code.guide_codes', appParams)}
                                         <br />
                                         -
                                         {' '}
@@ -226,7 +224,7 @@ export default function BulkUpdateByCode({
                                         <br />
                                         -
                                         {' '}
-                                        {t('operations.bulk_update_by_code.guide_cancel')}
+                                        {t('operations.bulk_update_by_code.guide_cancel', appParams)}
                                         <br />
                                         -
                                         {' '}
@@ -235,7 +233,7 @@ export default function BulkUpdateByCode({
                                         <span className="ps-wh-bulk-danger">
                                             {t('operations.bulk_update_by_code.guide_cancel_no_api_warn')}
                                         </span>
-                                        {t('operations.bulk_update_by_code.guide_cancel_no_api_tail')}
+                                        {t('operations.bulk_update_by_code.guide_cancel_no_api_tail', appParams)}
                                     </div>
                                 </div>
                             </div>

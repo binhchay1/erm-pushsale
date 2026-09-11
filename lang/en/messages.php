@@ -44,6 +44,7 @@ return [
     'inventory_export' => 'Stock export recorded.',
     'lead_deleted' => 'Lead record deleted.',
     'inventory_row_deleted' => 'Inventory row deleted.',
+    'inventory_discontinued_updated' => 'Discontinued status updated.',
     'warehouse_created' => 'Warehouse created.',
     'warehouse_updated' => 'Warehouse updated.',
     'warehouse_deleted' => 'Warehouse deleted.',

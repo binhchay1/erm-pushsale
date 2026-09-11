@@ -1503,10 +1503,10 @@ html body.pushsale-app-body .action-container.ps-wh-floating-actions .main-actio
 /* ===== Recon dialogs - htmk3 Excel + htmk4 by-code (Pushsale table.tb-sp) ===== */
 html body.pushsale-app-body [data-slot='dialog-content'].ps-recon-excel-dialog,
 html body.pushsale-app-body [data-slot='dialog-content'].ps-recon-bycode-dialog {
-    width: min(1180px, calc(100vw - 24px)) !important;
-    max-width: min(1180px, calc(100vw - 24px)) !important;
-    height: min(860px, calc(100dvh - 24px)) !important;
-    max-height: min(860px, calc(100dvh - 24px)) !important;
+    width: min(98vw, 1400px) !important;
+    max-width: min(98vw, 1400px) !important;
+    height: min(92dvh, 920px) !important;
+    max-height: min(92dvh, 920px) !important;
     padding: 0 !important;
     margin: 0 !important;
     border: 1px solid #c5d3e0 !important;
@@ -1519,10 +1519,10 @@ html body.pushsale-app-body [data-slot='dialog-content'].ps-recon-bycode-dialog 
 }
 
 html body.pushsale-app-body [data-slot='dialog-content'].ps-recon-bycode-dialog {
-    width: min(920px, calc(100vw - 24px)) !important;
-    max-width: min(920px, calc(100vw - 24px)) !important;
+    width: min(96vw, 1080px) !important;
+    max-width: min(96vw, 1080px) !important;
     height: auto !important;
-    max-height: min(720px, calc(100dvh - 24px)) !important;
+    max-height: min(90dvh, 820px) !important;
 }
 
 html body.pushsale-app-body .ps-recon-dialog-header.m-header-wrap {
@@ -1536,12 +1536,32 @@ html body.pushsale-app-body .ps-recon-dialog-header.m-header-wrap {
 
 html body.pushsale-app-body .ps-recon-dialog-header .m-header {
     display: flex !important;
-    align-items: center !important;
+    align-items: flex-start !important;
     justify-content: space-between !important;
+    gap: 12px !important;
     width: 100% !important;
     min-height: 44px !important;
     margin: 0 !important;
-    padding: 8px 14px !important;
+    padding: 10px 14px !important;
+    float: none !important;
+}
+
+html body.pushsale-app-body .ps-recon-dialog-header .m-header > .col-xs-6 {
+    width: auto !important;
+    float: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+html body.pushsale-app-body .ps-recon-dialog-header .m-header > .col-xs-6.form-group {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+}
+
+html body.pushsale-app-body .ps-recon-dialog-header .m-header > .col-xs-6.text-right {
+    flex: 0 0 auto !important;
+    margin-left: auto !important;
+    text-align: right !important;
 }
 
 html body.pushsale-app-body .ps-recon-dialog-header .m-header .text {
@@ -1564,12 +1584,19 @@ html body.pushsale-app-body .ps-recon-close {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    width: 28px !important;
-    height: 28px !important;
+    width: 22px !important;
+    height: 22px !important;
     border: 0 !important;
     background: transparent !important;
     color: #666 !important;
     cursor: pointer !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+}
+
+html body.pushsale-app-body .ps-recon-close .fa {
+    font-size: 14px !important;
+    margin: 0 !important;
 }
 
 html body.pushsale-app-body .ps-recon-excel-body,
@@ -1588,12 +1615,23 @@ html body.pushsale-app-body .ps-recon-bycode-body > .row {
     margin-right: -8px !important;
 }
 
-html body.pushsale-app-body .ps-recon-excel-body .col-xs-4,
-html body.pushsale-app-body .ps-recon-bycode-body .col-xs-4 {
+html body.pushsale-app-body .ps-recon-excel-body .col-xs-4 {
     width: 33.33333333% !important;
     float: none !important;
     padding-left: 8px !important;
     padding-right: 8px !important;
+}
+
+html body.pushsale-app-body .ps-recon-bycode-body .col-xs-4 {
+    width: min(100%, 640px) !important;
+    max-width: 640px !important;
+    float: none !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+}
+
+html body.pushsale-app-body .ps-recon-bycode-body .col-xs-8 {
+    display: none !important;
 }
 
 html body.pushsale-app-body .ps-recon-excel-body .col-xs-8,

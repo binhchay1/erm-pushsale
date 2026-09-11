@@ -164,6 +164,12 @@ export default function VoucherEntry({
     const [busy, setBusy] = useState(false);
     const [boostBelow, setBoostBelow] = useState(0);
     const [boostAdd, setBoostAdd] = useState(1000);
+    /** Pushsale-style column apply radios: when on, edits propagate to every line / new lines inherit last values. */
+    const [applyFlags, setApplyFlags] = useState({
+        unit_cost: false,
+        batch_code: false,
+        expiry_date: false,
+    });
 
     useEffect(() => { if (pageRuntimeError) toast.error(pageRuntimeError); }, [pageRuntimeError]);
 
@@ -185,7 +191,30 @@ export default function VoucherEntry({
     const patchForm = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
 
     const patchLine = (key, field, value) => {
-        setLines((prev) => prev.map((line) => (line.key === key ? { ...line, [field]: value } : line)));
+        setLines((prev) => {
+            if (applyFlags[field]) {
+                return prev.map((line) => ({ ...line, [field]: value }));
+            }
+            return prev.map((line) => (line.key === key ? { ...line, [field]: value } : line));
+        });
+    };
+
+    const toggleApplyFlag = (field) => {
+        setApplyFlags((prev) => {
+            const next = !prev[field];
+            if (next) {
+                const seed = lines.find((line) => String(line[field] ?? '').trim() !== '')?.[field]
+                    ?? lines[0]?.[field]
+                    ?? '';
+                if (seed !== '' && seed !== undefined && seed !== null) {
+                    setLines((rows) => rows.map((line) => ({ ...line, [field]: seed })));
+                    toast.success(t('operations.voucher_entry.apply_column_ok', {
+                        column: t(`operations.voucher_entry.col_${field === 'unit_cost' ? 'unit_cost' : field === 'batch_code' ? 'batch' : 'expiry'}`),
+                    }));
+                }
+            }
+            return { ...prev, [field]: next };
+        });
     };
 
     const removeLine = (key) => setLines((prev) => prev.filter((line) => line.key !== key));
@@ -207,19 +236,24 @@ export default function VoucherEntry({
             toast.error(t('operations.voucher_entry.product_required'));
             return;
         }
+        const last = lines[lines.length - 1];
         setLines((prev) => [
             ...prev,
             {
                 ...emptyLine(),
                 product_id: id,
-                unit_cost: Number(product.cost_price || product.unit_price || 0),
+                unit_cost: applyFlags.unit_cost && last
+                    ? Number(last.unit_cost) || 0
+                    : Number(product.cost_price || product.unit_price || 0),
+                batch_code: applyFlags.batch_code && last ? (last.batch_code || '') : '',
+                expiry_date: applyFlags.expiry_date && last ? (last.expiry_date || '') : '',
                 product: product.name,
                 sku: product.sku,
                 uom: product.unit,
             },
         ]);
         setPendingProductId('');
-        };
+    };
 
     const buildPayload = () => {
         const code = String(form.code || '').trim() || `${typePrefix(form.type)}-${Date.now()}`;
@@ -651,10 +685,43 @@ export default function VoucherEntry({
                                                 <th>{t('operations.voucher_entry.col_uom')}</th>
                                                 <th>{t('operations.voucher_entry.col_doc_qty')}</th>
                                                 <th>{t('operations.voucher_entry.col_qty')}</th>
-                                                <th>{t('operations.voucher_entry.col_unit_cost')}</th>
+                                                <th>
+                                                    <label className="ps-voucher-col-apply" title={t('operations.voucher_entry.apply_column_hint')}>
+                                                        <input
+                                                            type="checkbox"
+                                                            className="ps-voucher-col-apply__tick"
+                                                            checked={applyFlags.unit_cost}
+                                                            disabled={isConfirmed || busy}
+                                                            onChange={() => toggleApplyFlag('unit_cost')}
+                                                        />
+                                                        <span>{t('operations.voucher_entry.col_unit_cost')}</span>
+                                                    </label>
+                                                </th>
                                                 <th>{t('operations.voucher_entry.col_total')}</th>
-                                                <th>{t('operations.voucher_entry.col_batch')}</th>
-                                                <th>{t('operations.voucher_entry.col_expiry')}</th>
+                                                <th>
+                                                    <label className="ps-voucher-col-apply" title={t('operations.voucher_entry.apply_column_hint')}>
+                                                        <input
+                                                            type="checkbox"
+                                                            className="ps-voucher-col-apply__tick"
+                                                            checked={applyFlags.batch_code}
+                                                            disabled={isConfirmed || busy}
+                                                            onChange={() => toggleApplyFlag('batch_code')}
+                                                        />
+                                                        <span>{t('operations.voucher_entry.col_batch')}</span>
+                                                    </label>
+                                                </th>
+                                                <th>
+                                                    <label className="ps-voucher-col-apply" title={t('operations.voucher_entry.apply_column_hint')}>
+                                                        <input
+                                                            type="checkbox"
+                                                            className="ps-voucher-col-apply__tick"
+                                                            checked={applyFlags.expiry_date}
+                                                            disabled={isConfirmed || busy}
+                                                            onChange={() => toggleApplyFlag('expiry_date')}
+                                                        />
+                                                        <span>{t('operations.voucher_entry.col_expiry')}</span>
+                                                    </label>
+                                                </th>
                                                 <th>{t('operations.voucher_entry.col_location')}</th>
                                                 <th>{t('operations.voucher_entry.col_note')}</th>
                                                 <th className="hidden-print" />

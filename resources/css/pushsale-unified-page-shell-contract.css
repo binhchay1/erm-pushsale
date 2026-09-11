@@ -401,19 +401,20 @@ html body.pushsale-app-body .ps-page-header.ps-voucher-entry-header .ps-header-c
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    width: 30px !important;
-    min-width: 30px !important;
-    height: 30px !important;
+    width: 22px !important;
+    min-width: 22px !important;
+    height: 22px !important;
     padding: 0 !important;
-    border: 1px solid #cfd8e3 !important;
-    background: #fff !important;
-    color: #5c6b7a !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: #666 !important;
     line-height: 1 !important;
+    box-shadow: none !important;
 }
 
 html body.pushsale-app-body .ps-page-header .ps-header-close-icon .fa {
     margin: 0 !important;
-    font-size: 14px !important;
+    font-size: 13px !important;
 }
 
 @media (max-width: 1100px) {

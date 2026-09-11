@@ -20,7 +20,7 @@ class ReconciliationBulkController extends Controller
         return response()->json([
             'reconciliationStatuses' => $options['reconciliationStatuses'] ?? $service->statusCatalog(),
             'codeTypes' => [
-                ['value' => 'MHT', 'label' => 'Mã đơn PUSHSALE'],
+                ['value' => 'MHT', 'label' => 'Mã đơn '.config('saleops.brand.name', config('app.name', 'SaleOps'))],
                 ['value' => 'MGV', 'label' => 'Mã vận đơn'],
             ],
             'template_headers' => $service->templateHeaders(),

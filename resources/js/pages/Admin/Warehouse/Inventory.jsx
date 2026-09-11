@@ -1,5 +1,6 @@
 import { Head, router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 import { PushsalePagination } from '@/components/pagination/PushsalePagination';
 import { PushsalePageShell } from '@/components/layout/PushsalePageShell';
@@ -38,6 +39,19 @@ export default function Inventory({ report, filterOptions = {}, intakeUrl, expor
     });
     const [movementOpen, setMovementOpen] = useState(false);
     const [mode, setMode] = useState('intake');
+    const [discontinuedBusyId, setDiscontinuedBusyId] = useState(null);
+
+    const toggleDiscontinued = (row, nextChecked) => {
+        setDiscontinuedBusyId(row.id);
+        router.patch(`/admin/warehouse-inventories/${row.id}/discontinued`, {
+            is_discontinued: nextChecked ? 1 : 0,
+        }, {
+            preserveScroll: true,
+            onSuccess: () => toast.success(nextChecked ? 'Đã đánh dấu ngừng KD.' : 'Đã mở lại kinh doanh.'),
+            onError: () => toast.error('Không cập nhật được trạng thái Ngừng KD.'),
+            onFinish: () => setDiscontinuedBusyId(null),
+        });
+    };
     const movement = useForm({ warehouse_id: '', product_id: '', quantity: 1, approved_by_user_id: '', note: '' });
 
     const search = (event) => {
@@ -170,7 +184,15 @@ export default function Inventory({ report, filterOptions = {}, intakeUrl, expor
                                     <td className="text-center"><strong>{number.format(row.stockQuantity)}</strong></td>
                                     <td className="text-center">{number.format(row.pendingSalesQuantity)}</td>
                                     <td className="text-center" />
-                                    <td className="text-center"><input type="checkbox" readOnly checked={Boolean(row.isDiscontinued)} /></td>
+                                    <td className="text-center">
+                                        <input
+                                            type="checkbox"
+                                            checked={Boolean(row.isDiscontinued)}
+                                            disabled={discontinuedBusyId === row.id}
+                                            title={row.isDiscontinued ? 'Mở lại kinh doanh' : 'Ngừng kinh doanh'}
+                                            onChange={(event) => toggleDiscontinued(row, event.target.checked)}
+                                        />
+                                    </td>
                                     <td className="text-center" />
                                     <td className="text-center ps-row-actions-cell">
                                         <span className="ps-row-actions">

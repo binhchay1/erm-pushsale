@@ -16,6 +16,7 @@ import { apiPost, apiRequest, getCsrfToken } from '@/lib/api';
 import { formatCurrency, formatDateTime } from '@/lib/format';
 import { openShippingLabel } from '@/lib/shipping';
 import { useConfirm } from '@/hooks/use-confirm';
+import { useAppName } from '@/hooks/use-app-name';
 import { useOrderLockPresence } from '@/hooks/useOrderLockPresence';
 import { useT } from '@/providers/I18nProvider';
 
@@ -123,6 +124,7 @@ function FloatingWarehouseActions({
     onReload,
 }) {
     const t = useT();
+    const appName = useAppName();
     const { ask } = useConfirm();
     const isAccounting = variant === 'accounting';
     const [open, setOpen] = useState(false);
@@ -359,7 +361,7 @@ function FloatingWarehouseActions({
     const bulkRow = (
         <div className="icon-row" key="bulk">
             <ActionMenuButton
-                title={t('operations.warehouse_fab.bulk_by_code')}
+                title={t('operations.warehouse_fab.bulk_by_code', { app: appName })}
                 icon="gears"
                 tone="success"
                 onClick={openBulkUpdatePage}
