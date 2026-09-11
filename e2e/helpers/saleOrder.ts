@@ -7,16 +7,27 @@ import {
     waitUiReady,
 } from './ui';
 
-/**
- * Fill SaleOrderDialog for create+close on real prod data.
- * Products may already appear from marketing source — do not force disabled SKU select.
- */
-export async function fillAndCloseNewSaleOrder(page: Page, customer: {
+export type SaleOrderCustomer = {
     name: string;
     phone: string;
     message: string;
     address: string;
-}) {
+};
+
+export type SaleOrderOptions = {
+    /** Prefer selecting a real carrier (Viettel/GHTK/…) so warehouse can register via NetShip. */
+    preferCarrier?: boolean | RegExp;
+};
+
+/**
+ * Fill SaleOrderDialog for create+close on real prod data.
+ * Products may already appear from marketing source — do not force disabled SKU select.
+ */
+export async function fillAndCloseNewSaleOrder(
+    page: Page,
+    customer: SaleOrderCustomer,
+    options: SaleOrderOptions = {},
+) {
     await page.locator('button.tao-don-fixed.ps-create-order-fab').click();
     const dialog = page.locator('.ps-sale-order-dialog, .ps-sale-order-modal').first();
     await expect(dialog).toBeVisible({ timeout: 20_000 });
@@ -55,6 +66,46 @@ export async function fillAndCloseNewSaleOrder(page: Page, customer: {
     }
     if (!pickedWh) {
         throw new Error('Không có kho trong dropdown — cần ít nhất 1 warehouse.');
+    }
+
+    // Shipping provider (PTGH) — needed for NetShip proxy path (carrier = Viettel/GHTK, gateway = netship).
+    if (options.preferCarrier) {
+        const carrierField = dialog.locator('.ps-order-field').filter({
+            hasText: /Phương thức giao|Đơn vị giao|Shipping method|PTGH/i,
+        }).first();
+        const carrierSelect = carrierField.locator('select').first()
+            .or(dialog.locator('.ps-order-right-panel select.form-control').nth(1));
+        if (await carrierSelect.count()) {
+            const prefer = options.preferCarrier instanceof RegExp
+                ? options.preferCarrier
+                : /Viettel|GHTK|GHN|J&T|Best|Ninja|Snappy|Ahamove|Grab/i;
+            const opts = carrierSelect.locator('option');
+            let picked = false;
+            for (let i = 0; i < await opts.count(); i += 1) {
+                const val = await opts.nth(i).getAttribute('value');
+                const text = (await opts.nth(i).innerText()).trim();
+                if (val && prefer.test(text)) {
+                    await carrierSelect.selectOption(val);
+                    picked = true;
+                    break;
+                }
+            }
+            if (!picked) {
+                for (let i = 0; i < await opts.count(); i += 1) {
+                    const val = await opts.nth(i).getAttribute('value');
+                    const text = (await opts.nth(i).innerText()).trim();
+                    if (val && !/thủ công|manual|--/i.test(text)) {
+                        await carrierSelect.selectOption(val);
+                        picked = true;
+                        break;
+                    }
+                }
+            }
+            if (!picked) {
+                throw new Error('Không chọn được PTGH (carrier) — cần ít nhất 1 đơn vị giao vận.');
+            }
+            await page.waitForTimeout(300);
+        }
     }
 
     // Product: only real line rows (qty input), not footer totals / empty placeholder.

@@ -54,7 +54,7 @@ test.describe('13 — Kế toán đối soát + NetShip + Kho', () => {
         expect(aligned.ok, `Table left ${aligned.tableLeft} vs status ${aligned.statusLeft} (Δ=${aligned.delta})`).toBeTruthy();
     });
 
-    test('FAB → dialog đối soát theo mã đơn', async ({ page }) => {
+    test('FAB → dialog đối soát theo mã đơn (layout htmk4)', async ({ page }) => {
         await loginAs(page, DEMO.admin);
         await page.goto('/admin/accounting', { waitUntil: 'domcontentloaded' });
         await waitUiReady(page);
@@ -63,12 +63,21 @@ test.describe('13 — Kế toán đối soát + NetShip + Kho', () => {
 
         const dialog = page.getByRole('dialog').filter({ hasText: /Cập nhật đối soát theo mã đơn/i });
         await expect(dialog).toBeVisible({ timeout: 15_000 });
-        await expect(dialog.locator('textarea, select').first()).toBeVisible();
+        await expect(dialog.locator('.ps-recon-bycode-dialog, [data-slot="dialog-content"]').first()).toBeVisible();
+        await expect(dialog.locator('table.tb-sp, table.ps-recon-tb-sp').first()).toBeVisible();
+        await expect(dialog.locator('textarea').first()).toBeVisible();
+        await expect(dialog.locator('select').first()).toBeVisible();
+        await expect(dialog.getByText(/Đơn vị GH là: Giao hàng tiết kiệm/i)).toBeVisible();
         await expect(dialog.getByRole('button', { name: /Cập nhật đối soát/i })).toBeVisible();
-        await page.keyboard.press('Escape');
+
+        await dialog.locator('button.ps-recon-guide-toggle, button').filter({ hasText: /Xem hướng dẫn/i }).first().click();
+        await expect(dialog.getByText(/Tối đa 5\.000 mã đơn/i)).toBeVisible();
+
+        await dialog.locator('button.ps-recon-close, .ps-recon-close').first().click();
+        await expect(dialog).toBeHidden({ timeout: 10_000 });
     });
 
-    test('FAB → đối soát Excel: upload fixture 3.doisoat.xls', async ({ page }) => {
+    test('FAB → đối soát Excel: layout htmk3 + upload fixture 3.doisoat.xls', async ({ page }) => {
         await loginAs(page, DEMO.admin);
         await page.goto('/admin/accounting', { waitUntil: 'domcontentloaded' });
         await waitUiReady(page);
@@ -77,21 +86,28 @@ test.describe('13 — Kế toán đối soát + NetShip + Kho', () => {
 
         const dialog = page.getByRole('dialog').filter({ hasText: /Cập nhật đối soát Excel/i });
         await expect(dialog).toBeVisible({ timeout: 15_000 });
+        await expect(dialog.locator('table.tb-sp, table.ps-recon-tb-sp').first()).toBeVisible();
         await expect(dialog.getByText(/Tải mẫu/i).first()).toBeVisible();
+        await expect(dialog.getByText(/Chọn file/i).first()).toBeVisible();
+        await expect(dialog.getByText(/Kiểm tra khớp tổng tiền đơn/i)).toBeVisible();
         await expect(dialog.getByRole('button', { name: /Upload/i })).toBeVisible();
         await expect(dialog.getByRole('button', { name: /2\.\s*Đối soát/i })).toBeVisible();
+        await expect(dialog.locator('.ps-recon-excel-history, .ps-recon-excel-main').first()).toBeVisible();
+
+        await dialog.locator('button.ps-recon-guide-toggle, button').filter({ hasText: /Xem hướng dẫn/i }).first().click();
+        await expect(dialog.getByText(/cột mã đơn là bắt buộc/i)).toBeVisible();
 
         const fileInput = dialog.locator('input[type="file"]');
         await expect(fileInput).toBeAttached();
         await fileInput.setInputFiles(RECON_XLS);
         await dialog.getByRole('button', { name: /^Upload$/i }).click();
 
-        const statsCell = dialog.locator('.ps-ttgh-excel-stats td').nth(1);
+        const totalStat = dialog.locator('tr.smd0 td').nth(1);
         const toast = page.locator('[data-sonner-toast]');
         await Promise.race([
-            expect(statsCell).not.toHaveText(/^0$/, { timeout: 60_000 }),
+            expect(totalStat).not.toHaveText(/^0$/, { timeout: 60_000 }),
             toast.waitFor({ state: 'visible', timeout: 60_000 }),
-            dialog.locator('.ps-ttgh-excel-main li, .ps-ttgh-excel-main tr, .ps-ttgh-excel-list li').first()
+            dialog.locator('.ps-recon-excel-history-row, .ps-recon-order-link').first()
                 .waitFor({ state: 'visible', timeout: 60_000 }),
         ]);
 

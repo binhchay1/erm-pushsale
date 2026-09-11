@@ -1499,3 +1499,295 @@ html body.pushsale-app-body .action-container.ps-wh-floating-actions .main-actio
     font-size: inherit !important;
     line-height: 1 !important;
 }
+
+/* ===== Recon dialogs — htmk3 Excel + htmk4 by-code (Pushsale table.tb-sp) ===== */
+html body.pushsale-app-body [data-slot='dialog-content'].ps-recon-excel-dialog,
+html body.pushsale-app-body [data-slot='dialog-content'].ps-recon-bycode-dialog {
+    width: min(1180px, calc(100vw - 24px)) !important;
+    max-width: min(1180px, calc(100vw - 24px)) !important;
+    height: min(860px, calc(100dvh - 24px)) !important;
+    max-height: min(860px, calc(100dvh - 24px)) !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: 1px solid #c5d3e0 !important;
+    border-radius: 2px !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    background: #fff !important;
+    box-shadow: 0 12px 32px rgba(15, 35, 60, 0.22) !important;
+}
+
+html body.pushsale-app-body [data-slot='dialog-content'].ps-recon-bycode-dialog {
+    width: min(920px, calc(100vw - 24px)) !important;
+    max-width: min(920px, calc(100vw - 24px)) !important;
+    height: auto !important;
+    max-height: min(720px, calc(100dvh - 24px)) !important;
+}
+
+html body.pushsale-app-body .ps-recon-dialog-header.m-header-wrap {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-bottom: 1px solid #e2e6ea !important;
+    background: #fff !important;
+    box-shadow: none !important;
+}
+
+html body.pushsale-app-body .ps-recon-dialog-header .m-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    min-height: 44px !important;
+    margin: 0 !important;
+    padding: 8px 14px !important;
+}
+
+html body.pushsale-app-body .ps-recon-dialog-header .m-header .text {
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    color: #111 !important;
+}
+
+html body.pushsale-app-body .ps-recon-guide-toggle {
+    margin-left: 8px !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: darkcyan !important;
+    font-size: 11px !important;
+    font-style: italic !important;
+    cursor: pointer !important;
+}
+
+html body.pushsale-app-body .ps-recon-close {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 28px !important;
+    height: 28px !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: #666 !important;
+    cursor: pointer !important;
+}
+
+html body.pushsale-app-body .ps-recon-excel-body,
+html body.pushsale-app-body .ps-recon-bycode-body {
+    flex: 1 1 auto !important;
+    overflow: auto !important;
+    padding: 12px 14px 16px !important;
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .ps-recon-excel-body > .row,
+html body.pushsale-app-body .ps-recon-bycode-body > .row {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    margin-left: -8px !important;
+    margin-right: -8px !important;
+}
+
+html body.pushsale-app-body .ps-recon-excel-body .col-xs-4,
+html body.pushsale-app-body .ps-recon-bycode-body .col-xs-4 {
+    width: 33.33333333% !important;
+    float: none !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+}
+
+html body.pushsale-app-body .ps-recon-excel-body .col-xs-8,
+html body.pushsale-app-body .ps-recon-bycode-body .col-xs-8,
+html body.pushsale-app-body .ps-recon-excel-body .col-xs-12,
+html body.pushsale-app-body .ps-recon-bycode-body .col-xs-12 {
+    float: none !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+}
+
+html body.pushsale-app-body .ps-recon-excel-body .col-xs-8 {
+    width: 66.66666667% !important;
+}
+
+html body.pushsale-app-body .ps-recon-excel-body .col-xs-3 {
+    width: 25% !important;
+    float: left !important;
+    padding-left: 6px !important;
+    padding-right: 6px !important;
+}
+
+html body.pushsale-app-body .ps-recon-tb-sp {
+    margin-bottom: 10px !important;
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .ps-recon-tb-sp > tbody > tr > td {
+    vertical-align: middle !important;
+    padding: 6px 8px !important;
+    border: 1px solid #d7dde5 !important;
+    font-size: 12px !important;
+}
+
+html body.pushsale-app-body .ps-recon-tb-sp td.no-wrap {
+    white-space: nowrap !important;
+    width: 1% !important;
+    font-weight: 600 !important;
+    background: #fafbfc !important;
+}
+
+html body.pushsale-app-body .ps-recon-tb-sp .text-red {
+    color: #d73925 !important;
+}
+
+html body.pushsale-app-body .ps-recon-check {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    margin: 0 !important;
+    font-weight: 400 !important;
+    white-space: normal !important;
+}
+
+html body.pushsale-app-body .ps-recon-file-upload {
+    display: flex !important;
+    align-items: stretch !important;
+    gap: 0 !important;
+}
+
+html body.pushsale-app-body .ps-recon-file-label {
+    flex: 1 1 auto !important;
+    margin: 0 !important;
+    height: 31px !important;
+    min-height: 31px !important;
+    line-height: 20px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    cursor: pointer !important;
+    border-right: 0 !important;
+}
+
+html body.pushsale-app-body .ps-recon-file-icon {
+    width: 30px !important;
+    min-width: 30px !important;
+    height: 31px !important;
+    padding: 4px 6px !important;
+    border: 1px solid #ccc !important;
+    border-radius: 0 !important;
+    background: #f4f4f4 !important;
+}
+
+html body.pushsale-app-body .ps-recon-link-btn {
+    padding: 0 !important;
+    color: #337ab7 !important;
+}
+
+html body.pushsale-app-body .ps-recon-clear-btn {
+    float: right !important;
+}
+
+html body.pushsale-app-body .ps-recon-excel-apply-wrap {
+    margin-top: 4px !important;
+}
+
+html body.pushsale-app-body .ps-recon-excel-filters {
+    margin: 0 0 10px !important;
+}
+
+html body.pushsale-app-body .ps-recon-excel-filters .mr15 {
+    margin-right: 8px !important;
+}
+
+html body.pushsale-app-body .ps-recon-excel-history {
+    border: 1px solid #e2e6ea !important;
+    min-height: 320px !important;
+    max-height: calc(100dvh - 280px) !important;
+    overflow: auto !important;
+    background: #fff !important;
+}
+
+html body.pushsale-app-body .ps-recon-excel-history-row {
+    display: grid !important;
+    grid-template-columns: 28px minmax(140px, 1.1fr) 90px minmax(220px, 2fr) minmax(140px, 1fr) !important;
+    gap: 8px !important;
+    align-items: center !important;
+    padding: 8px 10px !important;
+    border-bottom: 1px solid #edf0f4 !important;
+    font-size: 12px !important;
+}
+
+html body.pushsale-app-body .ps-recon-order-link {
+    color: #007bff !important;
+    font-weight: 700 !important;
+}
+
+html body.pushsale-app-body .ps-recon-amount {
+    text-align: right !important;
+    font-weight: 600 !important;
+}
+
+html body.pushsale-app-body .ps-recon-processed {
+    color: #007bff !important;
+    text-align: right !important;
+    font-size: 11px !important;
+}
+
+html body.pushsale-app-body .ps-recon-excel-history-empty {
+    padding: 24px !important;
+    color: #888 !important;
+    text-align: center !important;
+}
+
+html body.pushsale-app-body .ps-recon-excel-footer {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-top: 8px !important;
+    font-size: 12px !important;
+}
+
+html body.pushsale-app-body .ps-recon-pager .btn {
+    margin-left: 4px !important;
+}
+
+html body.pushsale-app-body .ps-recon-bycode-body .txt-dotted,
+html body.pushsale-app-body .ps-recon-tb-sp .txt-dotted {
+    border-style: dashed !important;
+}
+
+html body.pushsale-app-body .ps-recon-excel-body .huong-dan .notice,
+html body.pushsale-app-body .ps-recon-bycode-body .huong-dan .notice {
+    margin: 0 0 12px !important;
+    padding: 10px 12px !important;
+    border: 1px solid #f0c36d !important;
+    background: #fff8e8 !important;
+    color: #8a4b08 !important;
+}
+
+html body.pushsale-app-body .ps-recon-guide-emph {
+    color: #007bff !important;
+    font-weight: 700 !important;
+}
+
+html body.pushsale-app-body .ps-recon-tb-sp textarea.form-control {
+    line-height: 20px !important;
+    min-height: 100px !important;
+}
+
+@media (max-width: 991px) {
+    html body.pushsale-app-body .ps-recon-excel-body .col-xs-4,
+    html body.pushsale-app-body .ps-recon-excel-body .col-xs-8,
+    html body.pushsale-app-body .ps-recon-bycode-body .col-xs-4,
+    html body.pushsale-app-body .ps-recon-bycode-body .col-xs-8 {
+        width: 100% !important;
+    }
+
+    html body.pushsale-app-body .ps-recon-excel-history-row {
+        grid-template-columns: 24px 1fr !important;
+    }
+
+    html body.pushsale-app-body .ps-recon-amount,
+    html body.pushsale-app-body .ps-recon-processed {
+        text-align: left !important;
+    }
+}
