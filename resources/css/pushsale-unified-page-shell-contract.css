@@ -2671,3 +2671,35 @@ html body.pushsale-app-body aside.pushsale-main-sidebar .sidebar-menu.ul1 > li.l
     background: transparent !important;
     box-shadow: none !important;
 }
+
+/* Accounting/Warehouse ops: table left edge must match status chips.
+ * .ps-acc-page padding is the shared gutter — do not double-indent the table. */
+html body.pushsale-app-body .ps-acc-page.ps-wh-legacy-page {
+    padding-left: 24px !important;
+    padding-right: 24px !important;
+    padding-top: 10px !important;
+}
+
+html body.pushsale-app-body .ps-acc-page.ps-wh-legacy-page .ps-wh-status-row,
+html body.pushsale-app-body .ps-acc-page.ps-wh-legacy-page .ps-wh-status-row.ttgh-acc,
+html body.pushsale-app-body .ps-acc-page.ps-wh-legacy-page .ps-wh-status-row.row,
+html body.pushsale-app-body .ps-acc-page.ps-wh-legacy-page .ps-wh-table-shell,
+html body.pushsale-app-body .ps-acc-page.ps-wh-legacy-page .tableFixHead,
+html body.pushsale-app-body .ps-acc-page.ps-wh-legacy-page .pushsale-pagination {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* Warehouse 5.1: keep status + table on the same 24px gutter */
+html body.pushsale-app-body .ps-wh-page.ps-wh-legacy-page:not(.ps-acc-page) .ps-wh-status-row,
+html body.pushsale-app-body .ps-wh-page.ps-wh-legacy-page:not(.ps-acc-page) .ps-wh-status-row.ttgh-acc,
+html body.pushsale-app-body .ps-wh-page.ps-wh-legacy-page:not(.ps-acc-page) .ps-wh-table-shell {
+    margin-left: 24px !important;
+    margin-right: 24px !important;
+    width: calc(100% - 48px) !important;
+    max-width: calc(100% - 48px) !important;
+    box-sizing: border-box !important;
+}

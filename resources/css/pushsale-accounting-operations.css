@@ -2,7 +2,8 @@
    Scope: /admin/accounting only. Align accounting operation UI with sale/warehouse Pushsale tables. */
 
 html body.pushsale-app-body .ps-acc-page {
-    padding: 0 14px 20px !important;
+    /* Shared horizontal gutter with status chips + table (unified contract reinforces). */
+    padding: 10px 24px 20px !important;
     background: #fff !important;
     min-height: auto !important;
 }

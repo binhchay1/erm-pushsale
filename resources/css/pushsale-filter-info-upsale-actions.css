@@ -174,49 +174,54 @@ html body.pushsale-app-body .pslc-guide-setup code {
 html body.pushsale-app-body nav.action-container.ps-wh-floating-actions,
 html body.pushsale-app-body .action-container.ps-wh-floating-actions {
     position: fixed !important;
-    left: 22px !important;
-    bottom: 22px !important;
+    left: 0 !important;
+    bottom: 0 !important;
     z-index: 12000 !important;
-    width: 66px !important;
-    height: 66px !important;
+    width: auto !important;
+    height: auto !important;
+    padding: 50px 100px 15px 20px !important;
     overflow: visible !important;
     background: transparent !important;
     box-shadow: none !important;
     pointer-events: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
 }
 
 html body.pushsale-app-body .ps-wh-floating-actions .hidden-actions {
-    position: absolute !important;
-    left: 0 !important;
-    bottom: 78px !important;
+    position: static !important;
+    left: auto !important;
+    bottom: auto !important;
     width: max-content !important;
-    display: flex !important;
+    display: none !important;
     flex-direction: column !important;
     align-items: flex-start !important;
     gap: 10px !important;
     overflow: visible !important;
     opacity: 0 !important;
     pointer-events: none !important;
-    transform: translateY(16px) scale(.94) !important;
-    transform-origin: left bottom !important;
-    transition: opacity .18s ease, transform .18s ease !important;
+    transform: none !important;
+    transition: opacity .3s ease, visibility .3s ease !important;
 }
 
 html body.pushsale-app-body .ps-wh-floating-actions.open .hidden-actions,
 html body.pushsale-app-body .ps-wh-floating-actions.is-open .hidden-actions,
 html body.pushsale-app-body .ps-wh-floating-actions:hover .hidden-actions,
 html body.pushsale-app-body .ps-wh-floating-actions:focus-within .hidden-actions {
+    display: flex !important;
     opacity: 1 !important;
     pointer-events: auto !important;
-    transform: translateY(0) scale(1) !important;
+    margin-left: 5px !important;
+    transform: none !important;
 }
 
 html body.pushsale-app-body .ps-wh-floating-actions .icon-row {
     display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
-    gap: 12px !important;
-    min-height: 58px !important;
+    gap: 10px !important;
+    min-height: 0 !important;
 }
 
 html body.pushsale-app-body .ps-wh-floating-actions .main-action,
@@ -226,48 +231,48 @@ html body.pushsale-app-body .ps-wh-floating-actions .ps-wh-action-button {
     appearance: none !important;
     -webkit-appearance: none !important;
     position: relative !important;
+    left: auto !important;
+    bottom: auto !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    width: 54px !important;
-    height: 54px !important;
-    min-width: 54px !important;
-    min-height: 54px !important;
-    max-width: 54px !important;
-    max-height: 54px !important;
+    width: 50px !important;
+    height: 50px !important;
+    min-width: 50px !important;
+    min-height: 50px !important;
+    max-width: 50px !important;
+    max-height: 50px !important;
     padding: 0 !important;
+    margin: 0 !important;
     border: 0 !important;
-    border-radius: 9999px !important;
+    border-radius: 50% !important;
     aspect-ratio: 1 / 1 !important;
-    clip-path: circle(50% at 50% 50%) !important;
-    overflow: hidden !important;
+    clip-path: none !important;
+    overflow: visible !important;
     color: #fff !important;
     opacity: 1 !important;
     filter: none !important;
     line-height: 1 !important;
     text-align: center !important;
-    box-shadow: 0 5px 14px rgba(0,0,0,.25) !important;
-    transform: translateZ(0) !important;
+    box-shadow: 0 4px 6px rgba(0,0,0,.2) !important;
+    transform: none !important;
 }
 
 html body.pushsale-app-body .ps-wh-floating-actions .main-action,
 html body.pushsale-app-body .ps-wh-floating-actions .ps-wh-main-action {
-    position: absolute !important;
-    left: 0 !important;
-    bottom: 0 !important;
-    width: 62px !important;
-    height: 62px !important;
-    min-width: 62px !important;
-    min-height: 62px !important;
-    max-width: 62px !important;
-    max-height: 62px !important;
-    background: #0073d8 !important;
+    width: 60px !important;
+    height: 60px !important;
+    min-width: 60px !important;
+    min-height: 60px !important;
+    max-width: 60px !important;
+    max-height: 60px !important;
+    background: #007bff !important;
     font-size: 24px !important;
 }
 
 html body.pushsale-app-body .ps-wh-floating-actions .n-button,
 html body.pushsale-app-body .ps-wh-floating-actions .ps-wh-action-button {
-    font-size: 21px !important;
+    font-size: 22px !important;
 }
 
 html body.pushsale-app-body .ps-wh-floating-actions .fam-primary { background: #0585e5 !important; }
@@ -287,8 +292,8 @@ html body.pushsale-app-body .ps-wh-floating-actions .main-action:hover,
 html body.pushsale-app-body .ps-wh-floating-actions .ps-wh-main-action:hover,
 html body.pushsale-app-body .ps-wh-floating-actions .n-button:hover:not(:disabled),
 html body.pushsale-app-body .ps-wh-floating-actions .ps-wh-action-button:hover:not(:disabled) {
-    box-shadow: 0 7px 18px rgba(0,0,0,.30) !important;
-    transform: translateY(-1px) translateZ(0) !important;
+    box-shadow: 0 4px 6px rgba(0,0,0,.2) !important;
+    transform: scale(1.1) !important;
 }
 
 html body.pushsale-app-body .ps-wh-floating-actions .n-button::after,

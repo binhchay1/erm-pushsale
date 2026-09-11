@@ -495,10 +495,12 @@ export default function VoucherEntry({
                         </div>
                     ) : null}
 
-                    <div className="ps-voucher-entry-body">
-                        <div className="ps-voucher-entry-grid">
-                            <label className="ps-voucher-entry-label">{t('operations.voucher_entry.type_status')}</label>
-                            <div className="ps-voucher-entry-field">
+                    <div className="ps-voucher-entry-body box-body">
+                        <div className="ps-voucher-entry-row">
+                            <div className="ps-voucher-entry-col ps-voucher-entry-col--2 form-group">
+                                <span className="h-label">{t('operations.voucher_entry.type_status')}</span>
+                            </div>
+                            <div className="ps-voucher-entry-col ps-voucher-entry-col--2 form-group">
                                 <select
                                     className="form-control"
                                     value={form.type}
@@ -512,9 +514,13 @@ export default function VoucherEntry({
                                     ))}
                                 </select>
                             </div>
-                            <div className="ps-voucher-entry-status">{statusLabel(status, t)}</div>
-                            <label className="ps-voucher-entry-label">{t('operations.voucher_entry.warehouse')}</label>
-                            <div className="ps-voucher-entry-field ps-voucher-entry-field--wide">
+                            <div className="ps-voucher-entry-col ps-voucher-entry-col--2 form-group text-right">
+                                <span className="h-text ps-voucher-entry-status">{statusLabel(status, t)}</span>
+                            </div>
+                            <div className="ps-voucher-entry-col ps-voucher-entry-col--2 form-group">
+                                <span className="h-label">{t('operations.voucher_entry.warehouse')}</span>
+                            </div>
+                            <div className="ps-voucher-entry-col ps-voucher-entry-col--4 form-group">
                                 <select
                                     className="form-control"
                                     value={form.warehouse_id}
@@ -529,9 +535,13 @@ export default function VoucherEntry({
                                     ))}
                                 </select>
                             </div>
+                        </div>
 
-                            <label className="ps-voucher-entry-label">{t('operations.voucher_entry.code_date')}</label>
-                            <div className="ps-voucher-entry-field">
+                        <div className="ps-voucher-entry-row">
+                            <div className="ps-voucher-entry-col ps-voucher-entry-col--2 form-group">
+                                <span className="h-label">{t('operations.voucher_entry.code_date')}</span>
+                            </div>
+                            <div className="ps-voucher-entry-col ps-voucher-entry-col--2 form-group">
                                 <input
                                     className="form-control ps-voucher-entry-code"
                                     value={form.code}
@@ -540,7 +550,7 @@ export default function VoucherEntry({
                                     onChange={(event) => patchForm('code', event.target.value.toUpperCase())}
                                 />
                             </div>
-                            <div className="ps-voucher-entry-field">
+                            <div className="ps-voucher-entry-col ps-voucher-entry-col--2 form-group">
                                 <input
                                     type="date"
                                     className="form-control"
@@ -549,11 +559,15 @@ export default function VoucherEntry({
                                     onChange={(event) => patchForm('document_date', event.target.value)}
                                 />
                             </div>
-                            <span className="ps-voucher-entry-spacer" />
-                            <span className="ps-voucher-entry-spacer" />
+                            <div className="ps-voucher-entry-col ps-voucher-entry-col--2 form-group" aria-hidden="true" />
+                            <div className="ps-voucher-entry-col ps-voucher-entry-col--4 form-group" aria-hidden="true" />
+                        </div>
 
-                            <label className="ps-voucher-entry-label">{t('operations.voucher_entry.partner')}</label>
-                            <div className="ps-voucher-entry-field ps-voucher-entry-field--mid">
+                        <div className="ps-voucher-entry-row">
+                            <div className="ps-voucher-entry-col ps-voucher-entry-col--2 form-group">
+                                <span className="h-label">{t('operations.voucher_entry.partner')}</span>
+                            </div>
+                            <div className="ps-voucher-entry-col ps-voucher-entry-col--4 form-group">
                                 <input
                                     className="form-control"
                                     value={form.partner}
@@ -561,8 +575,10 @@ export default function VoucherEntry({
                                     onChange={(event) => patchForm('partner', event.target.value)}
                                 />
                             </div>
-                            <label className="ps-voucher-entry-label">{t('operations.voucher_entry.note')}</label>
-                            <div className="ps-voucher-entry-field ps-voucher-entry-field--mid">
+                            <div className="ps-voucher-entry-col ps-voucher-entry-col--2 form-group">
+                                <span className="h-label">{t('operations.voucher_entry.note')}</span>
+                            </div>
+                            <div className="ps-voucher-entry-col ps-voucher-entry-col--4 form-group">
                                 <input
                                     className="form-control"
                                     value={form.note}
@@ -570,16 +586,23 @@ export default function VoucherEntry({
                                     onChange={(event) => patchForm('note', event.target.value)}
                                 />
                             </div>
+                        </div>
 
-                            <label className="ps-voucher-entry-label">{t('operations.voucher_entry.creator')}</label>
-                            <div className="ps-voucher-entry-field ps-voucher-entry-field--mid">
+                        <div className="ps-voucher-entry-row">
+                            <div className="ps-voucher-entry-col ps-voucher-entry-col--2 form-group">
+                                <span className="h-label">{t('operations.voucher_entry.creator')}</span>
+                            </div>
+                            <div className="ps-voucher-entry-col ps-voucher-entry-col--4 form-group">
                                 <input className="form-control" value={form.creator_name} disabled readOnly />
                             </div>
-                            <span className="ps-voucher-entry-spacer" />
-                            <span className="ps-voucher-entry-spacer" />
+                            <div className="ps-voucher-entry-col ps-voucher-entry-col--6 form-group" aria-hidden="true" />
+                        </div>
 
-                            <label className="ps-voucher-entry-label">{t('operations.voucher_entry.product')}</label>
-                            <div className="ps-voucher-entry-field ps-voucher-entry-field--mid">
+                        <div className="ps-voucher-entry-row ps-voucher-entry-row--product">
+                            <div className="ps-voucher-entry-col ps-voucher-entry-col--2 form-group">
+                                <span className="h-label">{t('operations.voucher_entry.product')}</span>
+                            </div>
+                            <div className="ps-voucher-entry-col ps-voucher-entry-col--4 form-group">
                                 <ProductSearchSelect
                                     products={products}
                                     value={pendingProductId}
@@ -591,17 +614,32 @@ export default function VoucherEntry({
                                     }}
                                 />
                             </div>
-                            <div className="ps-voucher-entry-actions-inline">
+                            <div className="ps-voucher-entry-col ps-voucher-entry-col--2 form-group" aria-hidden="true">
+                                <span className="h-label">&nbsp;</span>
+                            </div>
+                            <div className="ps-voucher-entry-col ps-voucher-entry-col--2 form-group">
                                 <button
                                     type="button"
-                                    className="btn-icon"
+                                    className="btn-icon btn-sm ps-voucher-entry-excel-btn hidden-print"
                                     disabled={isConfirmed || busy}
                                     onClick={() => importInputRef.current?.click()}
                                 >
-                                    <i className="fa fa-file-excel-o" aria-hidden="true" /> {t('operations.voucher_entry.import_excel')}
+                                    <i className="fa fa-file-excel-o" aria-hidden="true" />
+                                    {' '}
+                                    {t('operations.voucher_entry.import_excel')}
                                 </button>
-                                <button type="button" className="btn-icon" disabled={busy} onClick={exportLines}>
-                                    <i className="fa fa-file-excel-o" aria-hidden="true" /> {t('operations.voucher_entry.export_excel')}
+                            </div>
+                            <div className="ps-voucher-entry-col ps-voucher-entry-col--2 form-group">
+                                <button
+                                    type="button"
+                                    className="btn-icon btn-sm ps-voucher-entry-excel-btn"
+                                    disabled={busy}
+                                    onClick={exportLines}
+                                    title={t('operations.voucher_entry.export_excel')}
+                                >
+                                    <i className="fa fa-file-excel-o" aria-hidden="true" />
+                                    {' '}
+                                    {t('operations.voucher_entry.export_excel')}
                                 </button>
                                 <input
                                     ref={importInputRef}
@@ -613,212 +651,242 @@ export default function VoucherEntry({
                             </div>
                         </div>
 
-                        <div className="ps-voucher-entry-table-wrap">
-                            <table className="table table-bordered ps-voucher-entry-table">
-                                <thead>
-                                    <tr>
-                                        <th>{t('operations.voucher_entry.col_index')}</th>
-                                        <th>{t('operations.voucher_entry.col_product')}</th>
-                                        <th>{t('operations.voucher_entry.col_sku')}</th>
-                                        <th>{t('operations.voucher_entry.col_uom')}</th>
-                                        <th>{t('operations.voucher_entry.col_doc_qty')}</th>
-                                        <th>{t('operations.voucher_entry.col_qty')}</th>
-                                        <th>{t('operations.voucher_entry.col_unit_cost')}</th>
-                                        <th>{t('operations.voucher_entry.col_total')}</th>
-                                        <th>{t('operations.voucher_entry.col_batch')}</th>
-                                        <th>{t('operations.voucher_entry.col_expiry')}</th>
-                                        <th>{t('operations.voucher_entry.col_location')}</th>
-                                        <th>{t('operations.voucher_entry.col_note')}</th>
-                                        <th className="hidden-print" />
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {lines.length === 0 ? (
-                                        <tr>
-                                            <td colSpan={13} className="ps-voucher-entry-empty">
-                                                {t('operations.voucher_entry.empty_lines')}
-                                            </td>
-                                        </tr>
-                                    ) : lines.map((line, index) => {
-                                        const product = productById.get(String(line.product_id));
-                                        const total = (Number(line.quantity) || 0) * (Number(line.unit_cost) || 0);
-                                        return (
-                                            <tr key={line.key}>
-                                                <td className="text-center">{index + 1}</td>
-                                                <td>{product?.name || line.product || '—'}</td>
-                                                <td className="text-center">{product?.sku || line.sku || ''}</td>
-                                                <td className="text-center">{product?.unit || line.uom || ''}</td>
-                                                <td>
-                                                    <input
-                                                        type="number"
-                                                        min="0"
-                                                        className="form-control text-right"
-                                                        value={line.document_quantity}
-                                                        disabled={isConfirmed || busy}
-                                                        onChange={(event) => patchLine(line.key, 'document_quantity', event.target.value)}
-                                                    />
-                                                </td>
-                                                <td>
-                                                    <input
-                                                        type="number"
-                                                        min="0"
-                                                        className="form-control text-right"
-                                                        value={line.quantity}
-                                                        disabled={isConfirmed || busy}
-                                                        onChange={(event) => patchLine(line.key, 'quantity', event.target.value)}
-                                                    />
-                                                </td>
-                                                <td>
-                                                    <input
-                                                        type="number"
-                                                        min="0"
-                                                        className="form-control text-right"
-                                                        value={line.unit_cost}
-                                                        disabled={isConfirmed || busy}
-                                                        onChange={(event) => patchLine(line.key, 'unit_cost', event.target.value)}
-                                                    />
-                                                </td>
-                                                <td className="text-right">{numberFmt.format(total)}</td>
-                                                <td>
-                                                    <input
-                                                        className="form-control"
-                                                        value={line.batch_code}
-                                                        disabled={isConfirmed || busy}
-                                                        onChange={(event) => patchLine(line.key, 'batch_code', event.target.value.toUpperCase())}
-                                                    />
-                                                </td>
-                                                <td>
-                                                    <input
-                                                        type="date"
-                                                        className="form-control"
-                                                        value={line.expiry_date || ''}
-                                                        disabled={isConfirmed || busy}
-                                                        onChange={(event) => patchLine(line.key, 'expiry_date', event.target.value)}
-                                                    />
-                                                </td>
-                                                <td>
-                                                    <input
-                                                        className="form-control"
-                                                        value={line.location_code}
-                                                        disabled={isConfirmed || busy}
-                                                        onChange={(event) => patchLine(line.key, 'location_code', event.target.value.toUpperCase())}
-                                                    />
-                                                </td>
-                                                <td>
-                                                    <input
-                                                        className="form-control"
-                                                        value={line.note}
-                                                        disabled={isConfirmed || busy}
-                                                        onChange={(event) => patchLine(line.key, 'note', event.target.value)}
-                                                    />
-                                                </td>
+                        <div className="ps-voucher-entry-row">
+                            <div className="ps-voucher-entry-col ps-voucher-entry-col--12 form-group">
+                                <div className="ps-voucher-entry-table-wrap">
+                                    <table className="table table-bordered ps-voucher-entry-table">
+                                        <thead>
+                                            <tr>
+                                                <th>{t('operations.voucher_entry.col_index')}</th>
+                                                <th>{t('operations.voucher_entry.col_product')}</th>
+                                                <th>{t('operations.voucher_entry.col_sku')}</th>
+                                                <th>{t('operations.voucher_entry.col_uom')}</th>
+                                                <th>{t('operations.voucher_entry.col_doc_qty')}</th>
+                                                <th>{t('operations.voucher_entry.col_qty')}</th>
+                                                <th>{t('operations.voucher_entry.col_unit_cost')}</th>
+                                                <th>{t('operations.voucher_entry.col_total')}</th>
+                                                <th>{t('operations.voucher_entry.col_batch')}</th>
+                                                <th>{t('operations.voucher_entry.col_expiry')}</th>
+                                                <th>{t('operations.voucher_entry.col_location')}</th>
+                                                <th>{t('operations.voucher_entry.col_note')}</th>
+                                                <th className="hidden-print" />
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {lines.length === 0 ? (
+                                                <tr>
+                                                    <td colSpan={13} className="ps-voucher-entry-empty">
+                                                        {t('operations.voucher_entry.empty_lines')}
+                                                    </td>
+                                                </tr>
+                                            ) : lines.map((line, index) => {
+                                                const product = productById.get(String(line.product_id));
+                                                const total = (Number(line.quantity) || 0) * (Number(line.unit_cost) || 0);
+                                                return (
+                                                    <tr key={line.key}>
+                                                        <td className="text-center">{index + 1}</td>
+                                                        <td>{product?.name || line.product || '—'}</td>
+                                                        <td className="text-center">{product?.sku || line.sku || ''}</td>
+                                                        <td className="text-center">{product?.unit || line.uom || ''}</td>
+                                                        <td>
+                                                            <input
+                                                                type="number"
+                                                                min="0"
+                                                                className="form-control text-right"
+                                                                value={line.document_quantity}
+                                                                disabled={isConfirmed || busy}
+                                                                onChange={(event) => patchLine(line.key, 'document_quantity', event.target.value)}
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <input
+                                                                type="number"
+                                                                min="0"
+                                                                className="form-control text-right"
+                                                                value={line.quantity}
+                                                                disabled={isConfirmed || busy}
+                                                                onChange={(event) => patchLine(line.key, 'quantity', event.target.value)}
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <input
+                                                                type="number"
+                                                                min="0"
+                                                                className="form-control text-right"
+                                                                value={line.unit_cost}
+                                                                disabled={isConfirmed || busy}
+                                                                onChange={(event) => patchLine(line.key, 'unit_cost', event.target.value)}
+                                                            />
+                                                        </td>
+                                                        <td className="text-right">{numberFmt.format(total)}</td>
+                                                        <td>
+                                                            <input
+                                                                className="form-control"
+                                                                value={line.batch_code}
+                                                                disabled={isConfirmed || busy}
+                                                                onChange={(event) => patchLine(line.key, 'batch_code', event.target.value.toUpperCase())}
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <input
+                                                                type="date"
+                                                                className="form-control"
+                                                                value={line.expiry_date || ''}
+                                                                disabled={isConfirmed || busy}
+                                                                onChange={(event) => patchLine(line.key, 'expiry_date', event.target.value)}
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <input
+                                                                className="form-control"
+                                                                value={line.location_code}
+                                                                disabled={isConfirmed || busy}
+                                                                onChange={(event) => patchLine(line.key, 'location_code', event.target.value.toUpperCase())}
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <input
+                                                                className="form-control"
+                                                                value={line.note}
+                                                                disabled={isConfirmed || busy}
+                                                                onChange={(event) => patchLine(line.key, 'note', event.target.value)}
+                                                            />
+                                                        </td>
+                                                        <td className="text-center hidden-print">
+                                                            <button
+                                                                type="button"
+                                                                className="btn-icon text-orange"
+                                                                disabled={isConfirmed || busy}
+                                                                onClick={() => removeLine(line.key)}
+                                                                aria-label={t('operations.voucher_entry.remove_line')}
+                                                            >
+                                                                <i className="fa fa-trash" aria-hidden="true" />
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
+                                            <tr className="ps-voucher-entry-total-row">
+                                                <td colSpan={4} className="text-right">{t('operations.voucher_entry.total')}</td>
+                                                <td className="text-right">{numberFmt.format(totals.document_quantity)}</td>
+                                                <td className="text-right">{numberFmt.format(totals.quantity)}</td>
+                                                <td />
+                                                <td className="text-right">{numberFmt.format(totals.total)}</td>
+                                                <td colSpan={4} />
                                                 <td className="text-center hidden-print">
                                                     <button
                                                         type="button"
                                                         className="btn-icon text-orange"
-                                                        disabled={isConfirmed || busy}
-                                                        onClick={() => removeLine(line.key)}
-                                                        aria-label={t('operations.voucher_entry.remove_line')}
+                                                        disabled={isConfirmed || busy || !lines.length}
+                                                        onClick={clearLines}
+                                                        title={t('operations.voucher_entry.clear_lines')}
                                                     >
                                                         <i className="fa fa-trash" aria-hidden="true" />
                                                     </button>
                                                 </td>
                                             </tr>
-                                        );
-                                    })}
-                                    <tr className="ps-voucher-entry-total-row">
-                                        <td colSpan={4} className="text-right">{t('operations.voucher_entry.total')}</td>
-                                        <td className="text-right">{numberFmt.format(totals.document_quantity)}</td>
-                                        <td className="text-right">{numberFmt.format(totals.quantity)}</td>
-                                        <td />
-                                        <td className="text-right">{numberFmt.format(totals.total)}</td>
-                                        <td colSpan={4} />
-                                        <td className="text-center hidden-print">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="ps-voucher-entry-row ps-voucher-entry-row--footer">
+                            <div className="ps-voucher-entry-col ps-voucher-entry-col--6 form-group text-left">
+                                <div className="notice ps-voucher-entry-notice hidden-print">
+                                    <div>- {t('operations.voucher_entry.notice_confirmed')}</div>
+                                    <div>- {t('operations.voucher_entry.notice_import')}</div>
+                                </div>
+                            </div>
+                            <div className="ps-voucher-entry-col ps-voucher-entry-col--6 form-group text-right hidden-print">
+                                <div className="ps-voucher-entry-footer-actions">
+                                    <button
+                                        type="button"
+                                        className="btn btn-sm btn-danger"
+                                        disabled={busy || isConfirmed}
+                                        onClick={deleteVoucher}
+                                    >
+                                        <i className="fa fa-trash" aria-hidden="true" /> {t('operations.voucher_entry.delete')}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="btn btn-sm btn-success"
+                                        disabled={busy || isConfirmed}
+                                        onClick={completeVoucher}
+                                    >
+                                        <i className="fa fa-check-circle-o" aria-hidden="true" /> {t('operations.voucher_entry.complete')}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="btn btn-sm btn-primary"
+                                        disabled={busy || isConfirmed}
+                                        onClick={saveDraft}
+                                    >
+                                        <i className="fa fa-save" aria-hidden="true" /> {t('operations.voucher_entry.save')}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="btn btn-sm btn-primary"
+                                        disabled={busy}
+                                        onClick={() => window.print()}
+                                    >
+                                        <i className="fa fa-print" aria-hidden="true" /> {t('operations.voucher_entry.print')}
+                                    </button>
+                                </div>
+
+                                {canTesterTools ? (
+                                    <div className="ps-voucher-entry-tester">
+                                        <div className="ps-voucher-entry-tester-row">
+                                            <div className="ps-voucher-entry-col ps-voucher-entry-col--2">
+                                                <span className="h-label">{t('operations.voucher_entry.boost_below')}</span>
+                                            </div>
+                                            <div className="ps-voucher-entry-col ps-voucher-entry-col--2">
+                                                <input
+                                                    type="number"
+                                                    className="form-control"
+                                                    value={boostBelow}
+                                                    onChange={(event) => setBoostBelow(event.target.value)}
+                                                />
+                                            </div>
+                                            <div className="ps-voucher-entry-col ps-voucher-entry-col--2">
+                                                <span className="h-label">{t('operations.voucher_entry.boost_add')}</span>
+                                            </div>
+                                            <div className="ps-voucher-entry-col ps-voucher-entry-col--3">
+                                                <input
+                                                    type="number"
+                                                    className="form-control"
+                                                    value={boostAdd}
+                                                    onChange={(event) => setBoostAdd(event.target.value)}
+                                                />
+                                            </div>
+                                            <div className="ps-voucher-entry-col ps-voucher-entry-col--3">
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-sm btn-primary"
+                                                    disabled={busy}
+                                                    onClick={runBoostStock}
+                                                    title={t('operations.voucher_entry.boost_stock')}
+                                                >
+                                                    <i className="fa fa-plus" aria-hidden="true" /> {t('operations.voucher_entry.boost_stock')}
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div className="ps-voucher-entry-tester-reset">
+                                            <span className="ps-voucher-entry-tester-hint">{t('operations.voucher_entry.reset_hint')}</span>
                                             <button
                                                 type="button"
-                                                className="btn-icon text-orange"
-                                                disabled={isConfirmed || busy || !lines.length}
-                                                onClick={clearLines}
-                                                title={t('operations.voucher_entry.clear_lines')}
+                                                className="btn btn-sm btn-primary"
+                                                disabled={busy}
+                                                onClick={runResetStock}
+                                                title={t('operations.voucher_entry.reset_stock')}
                                             >
-                                                <i className="fa fa-trash" aria-hidden="true" />
+                                                <i className="fa fa-refresh" aria-hidden="true" /> {t('operations.voucher_entry.reset_stock')}
                                             </button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <div className="ps-voucher-entry-footer">
-                            <div className="ps-voucher-entry-notice">
-                                <div>- {t('operations.voucher_entry.notice_confirmed')}</div>
-                                <div>- {t('operations.voucher_entry.notice_import')}</div>
-                            </div>
-                            <div className="ps-voucher-entry-footer-actions">
-                                <button
-                                    type="button"
-                                    className="btn btn-sm btn-danger"
-                                    disabled={busy || isConfirmed}
-                                    onClick={deleteVoucher}
-                                >
-                                    <i className="fa fa-trash" aria-hidden="true" /> {t('operations.voucher_entry.delete')}
-                                </button>
-                                <button
-                                    type="button"
-                                    className="btn btn-sm btn-success"
-                                    disabled={busy || isConfirmed}
-                                    onClick={completeVoucher}
-                                >
-                                    <i className="fa fa-check-circle-o" aria-hidden="true" /> {t('operations.voucher_entry.complete')}
-                                </button>
-                                <button
-                                    type="button"
-                                    className="btn btn-sm btn-primary"
-                                    disabled={busy || isConfirmed}
-                                    onClick={saveDraft}
-                                >
-                                    <i className="fa fa-save" aria-hidden="true" /> {t('operations.voucher_entry.save')}
-                                </button>
-                                <button
-                                    type="button"
-                                    className="btn btn-sm btn-primary"
-                                    disabled={busy}
-                                    onClick={() => window.print()}
-                                >
-                                    <i className="fa fa-print" aria-hidden="true" /> {t('operations.voucher_entry.print')}
-                                </button>
+                                        </div>
+                                    </div>
+                                ) : null}
                             </div>
                         </div>
-
-                        {canTesterTools ? (
-                            <div className="ps-voucher-entry-tester">
-                                <div className="ps-voucher-entry-tester-row">
-                                    <label>{t('operations.voucher_entry.boost_below')}</label>
-                                    <input
-                                        type="number"
-                                        className="form-control"
-                                        value={boostBelow}
-                                        onChange={(event) => setBoostBelow(event.target.value)}
-                                    />
-                                    <label>{t('operations.voucher_entry.boost_add')}</label>
-                                    <input
-                                        type="number"
-                                        className="form-control"
-                                        value={boostAdd}
-                                        onChange={(event) => setBoostAdd(event.target.value)}
-                                    />
-                                    <button type="button" className="btn btn-sm btn-primary" disabled={busy} onClick={runBoostStock}>
-                                        <i className="fa fa-plus" aria-hidden="true" /> {t('operations.voucher_entry.boost_stock')}
-                                    </button>
-                                </div>
-                                <div className="ps-voucher-entry-tester-row ps-voucher-entry-tester-row--reset">
-                                    <span>{t('operations.voucher_entry.reset_hint')}</span>
-                                    <button type="button" className="btn btn-sm btn-primary" disabled={busy} onClick={runResetStock}>
-                                        <i className="fa fa-refresh" aria-hidden="true" /> {t('operations.voucher_entry.reset_stock')}
-                                    </button>
-                                </div>
-                            </div>
-                        ) : null}
                     </div>
                 </PushsalePageShell>
             </div>

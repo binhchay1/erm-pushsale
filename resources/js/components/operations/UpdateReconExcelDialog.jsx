@@ -1,12 +1,20 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useT } from '@/providers/I18nProvider';
 import { apiRequest, getCsrfToken } from '@/lib/api';
 
+function formatAmount(value) {
+    if (value === null || value === undefined || value === '') return '';
+    const num = Number(value);
+    if (!Number.isFinite(num)) return String(value);
+    return num.toLocaleString('vi-VN');
+}
+
 /**
- * FAB sliders cam — Đối soát đơn bằng Excel (accounting).
+ * FAB sliders cam — Cập nhật đối soát Excel (accounting).
+ * Wide two-panel dialog matching Pushsale sample.
  */
 export function UpdateReconExcelDialog({
     open,
@@ -16,7 +24,11 @@ export function UpdateReconExcelDialog({
 }) {
     const t = useT();
     const apiBase = `${actionApiBase}/reconciliation-bulk`;
+    const fileRef = useRef(null);
     const [isGhtk, setIsGhtk] = useState(false);
+    const [matchTotal, setMatchTotal] = useState(false);
+    const [matchCod, setMatchCod] = useState(false);
+    const [updateDsnbIfMatch, setUpdateDsnbIfMatch] = useState(false);
     const [file, setFile] = useState(null);
     const [busy, setBusy] = useState(false);
     const [batch, setBatch] = useState(null);
@@ -24,6 +36,12 @@ export function UpdateReconExcelDialog({
     const [rows, setRows] = useState([]);
     const [meta, setMeta] = useState(null);
     const [filters, setFilters] = useState({ search: '', process_status: '', result_status: '', page: 1 });
+
+    const applyOptions = () => ({
+        match_total: matchTotal,
+        match_cod: matchCod,
+        update_dsnb_if_match: updateDsnbIfMatch,
+    });
 
     const loadHistory = async (next = {}) => {
         const query = { ...filters, ...next, batch_id: batch?.id };
@@ -37,13 +55,24 @@ export function UpdateReconExcelDialog({
         setRows(data.rows?.data || []);
         setMeta(data.rows?.meta || null);
         setFilters((old) => ({ ...old, ...next }));
+        const opts = data.batch?.options || data.batch?.meta?.options;
+        if (opts) {
+            setMatchTotal(Boolean(opts.match_total));
+            setMatchCod(Boolean(opts.match_cod));
+            setUpdateDsnbIfMatch(Boolean(opts.update_dsnb_if_match));
+        }
+        if (typeof data.batch?.is_ghtk === 'boolean') setIsGhtk(data.batch.is_ghtk);
     };
 
     useEffect(() => {
         if (!open) return;
         setIsGhtk(false);
+        setMatchTotal(false);
+        setMatchCod(false);
+        setUpdateDsnbIfMatch(false);
         setFile(null);
         setBusy(false);
+        if (fileRef.current) fileRef.current.value = '';
         (async () => {
             try {
                 await loadHistory({ page: 1 });
@@ -60,6 +89,31 @@ export function UpdateReconExcelDialog({
         window.location.href = `${apiBase}/template`;
     };
 
+    const downloadHistory = () => {
+        const header = ['order_code', 'amount', 'message', 'process_status', 'result_status', 'processed_at'];
+        const lines = [header.join(',')];
+        rows.forEach((row) => {
+            const cells = [
+                row.order_code || '',
+                row.amount ?? '',
+                `"${String(row.message || '').replace(/"/g, '""')}"`,
+                row.process_status || '',
+                row.result_status || '',
+                row.processed_at || '',
+            ];
+            lines.push(cells.join(','));
+        });
+        const blob = new Blob([`\uFEFF${lines.join('\n')}`], { type: 'text/csv;charset=utf-8' });
+        const href = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = href;
+        a.download = `doi-soat-excel-${batch?.id || 'history'}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(href);
+    };
+
     const upload = async () => {
         if (!file) {
             toast.error(t('operations.recon_bulk.file_required'));
@@ -70,6 +124,9 @@ export function UpdateReconExcelDialog({
             const body = new FormData();
             body.append('file', file);
             body.append('is_ghtk', isGhtk ? '1' : '0');
+            body.append('match_total', matchTotal ? '1' : '0');
+            body.append('match_cod', matchCod ? '1' : '0');
+            body.append('update_dsnb_if_match', updateDsnbIfMatch ? '1' : '0');
             const response = await fetch(`${apiBase}/upload`, {
                 method: 'POST',
                 headers: {
@@ -91,6 +148,7 @@ export function UpdateReconExcelDialog({
             setMeta(hist.rows?.meta || null);
             setFilters((old) => ({ ...old, page: 1 }));
             setFile(null);
+            if (fileRef.current) fileRef.current.value = '';
         } catch (error) {
             toast.error(error.message);
         } finally {
@@ -121,7 +179,10 @@ export function UpdateReconExcelDialog({
         }
         setBusy(true);
         try {
-            const data = await apiRequest(`${apiBase}/batches/${batch.id}/apply`, { method: 'POST', body: {} });
+            const data = await apiRequest(`${apiBase}/batches/${batch.id}/apply`, {
+                method: 'POST',
+                body: applyOptions(),
+            });
             setBatch(data.batch);
             setCounts(data.counts || {});
             if ((data.counts?.error || 0) > 0) {
@@ -148,12 +209,6 @@ export function UpdateReconExcelDialog({
                     <DialogTitle>{t('operations.recon_bulk.excel_title')}</DialogTitle>
                 </DialogHeader>
 
-                <div className="ps-ttgh-excel-notice">
-                    <b>{t('operations.recon_bulk.excel_note_label')}</b>
-                    {' '}
-                    {t('operations.recon_bulk.excel_note', { max: 2000 })}
-                </div>
-
                 <div className="ps-ttgh-excel-layout">
                     <aside className="ps-ttgh-excel-side">
                         <div className="form-group">
@@ -166,25 +221,51 @@ export function UpdateReconExcelDialog({
                         </div>
                         <div className="form-group">
                             <span className="h-label">{t('operations.recon_bulk.choose_file')}</span>
-                            <input
-                                type="file"
-                                className="form-control"
-                                accept=".csv,.xls,.xlsx,.txt"
-                                onChange={(e) => setFile(e.target.files?.[0] || null)}
-                            />
+                            <div className="ps-ttgh-file-row">
+                                <input
+                                    ref={fileRef}
+                                    type="file"
+                                    className="form-control"
+                                    accept=".csv,.xls,.xlsx,.txt"
+                                    onChange={(e) => setFile(e.target.files?.[0] || null)}
+                                />
+                                <button
+                                    type="button"
+                                    className="btn btn-primary btn-sm"
+                                    title={t('operations.recon_bulk.choose_file')}
+                                    onClick={() => fileRef.current?.click()}
+                                >
+                                    <i className="fa fa-cloud-upload" />
+                                </button>
+                            </div>
                         </div>
-                        <label className="ps-ttgh-check">
-                            <input type="checkbox" checked={isGhtk} onChange={(e) => setIsGhtk(e.target.checked)} />
-                            {' '}
-                            {t('operations.recon_bulk.is_ghtk')}
-                        </label>
+
+                        <div className="ps-ttgh-excel-checks">
+                            <label className="ps-ttgh-check">
+                                <input type="checkbox" checked={isGhtk} onChange={(e) => setIsGhtk(e.target.checked)} />
+                                <span>{t('operations.recon_bulk.is_ghtk')}</span>
+                            </label>
+                            <label className="ps-ttgh-check">
+                                <input type="checkbox" checked={matchTotal} onChange={(e) => setMatchTotal(e.target.checked)} />
+                                <span>{t('operations.recon_bulk.match_total')}</span>
+                            </label>
+                            <label className="ps-ttgh-check">
+                                <input type="checkbox" checked={matchCod} onChange={(e) => setMatchCod(e.target.checked)} />
+                                <span>{t('operations.recon_bulk.match_cod')}</span>
+                            </label>
+                            <label className="ps-ttgh-check">
+                                <input type="checkbox" checked={updateDsnbIfMatch} onChange={(e) => setUpdateDsnbIfMatch(e.target.checked)} />
+                                <span>{t('operations.recon_bulk.update_dsnb_if_match')}</span>
+                            </label>
+                        </div>
+
                         <div className="ps-ttgh-excel-actions">
                             <button type="button" className="btn btn-primary btn-sm" disabled={busy} onClick={upload}>
                                 <i className="fa fa-cloud-upload" />
                                 {' '}
                                 {t('operations.recon_bulk.step_upload')}
                             </button>
-                            <button type="button" className="btn btn-danger btn-sm" disabled={busy || !batch} onClick={clearUpload}>
+                            <button type="button" className="btn btn-default btn-sm" disabled={busy || !batch} onClick={clearUpload}>
                                 <i className="fa fa-trash" />
                                 {' '}
                                 {t('operations.recon_bulk.clear')}
@@ -201,7 +282,7 @@ export function UpdateReconExcelDialog({
                             </tbody>
                         </table>
 
-                        <button type="button" className="btn btn-primary" disabled={busy || !batch} onClick={apply}>
+                        <button type="button" className="btn btn-primary ps-ttgh-excel-apply" disabled={busy || !batch} onClick={apply}>
                             <i className="fa fa-save" />
                             {' '}
                             {t('operations.recon_bulk.step_apply')}
@@ -240,37 +321,40 @@ export function UpdateReconExcelDialog({
                                 {' '}
                                 {t('operations.recon_bulk.search')}
                             </button>
+                            <button type="button" className="btn btn-default btn-sm" disabled={busy || rows.length === 0} onClick={downloadHistory}>
+                                <i className="fa fa-download" />
+                                {' '}
+                                {t('operations.recon_bulk.download')}
+                            </button>
                         </div>
 
-                        <table className="table table-bordered table-striped table-condensed">
-                            <thead>
-                                <tr>
-                                    <th style={{ width: 36 }} />
-                                    <th>{t('operations.recon_bulk.col_order')}</th>
-                                    <th>{t('operations.recon_bulk.col_status')}</th>
-                                    <th>{t('operations.recon_bulk.col_process')}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {rows.length === 0 ? (
-                                    <tr><td colSpan={4}>{t('operations.recon_bulk.empty_history')}</td></tr>
-                                ) : rows.map((row) => (
-                                    <tr key={row.id}>
-                                        <td className="text-center">
-                                            {row.result_status === 'success' ? <i className="fa fa-check-circle text-success" /> : null}
-                                            {row.result_status === 'error' ? <i className="fa fa-times-circle text-danger" /> : null}
-                                            {row.result_status === 'pending' ? <i className="fa fa-clock-o text-muted" /> : null}
-                                        </td>
-                                        <td>{row.order_code || '—'}</td>
-                                        <td>{row.reconciliation_status_label || '—'}</td>
-                                        <td>
-                                            <div>{row.process_status === 'processed' ? t('operations.recon_bulk.process_done') : t('operations.recon_bulk.process_pending')}</div>
-                                            <div className="text-primary small">{row.processed_at || row.message || ''}</div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                        <div className="ps-ttgh-excel-history">
+                            {rows.length === 0 ? (
+                                <div className="ps-ttgh-excel-history-empty">{t('operations.recon_bulk.empty_history')}</div>
+                            ) : rows.map((row) => (
+                                <div className="ps-ttgh-excel-history-row" key={row.id}>
+                                    <div className="text-center">
+                                        {row.result_status === 'success' ? <i className="fa fa-check-circle text-success" /> : null}
+                                        {row.result_status === 'error' ? <i className="fa fa-times-circle text-danger" /> : null}
+                                        {row.result_status === 'pending' ? <i className="fa fa-clock-o text-muted" /> : null}
+                                    </div>
+                                    <div className="ps-ttgh-order-link">{row.order_code || '—'}</div>
+                                    <div className="ps-ttgh-amount">{formatAmount(row.amount)}</div>
+                                    <div className="ps-ttgh-result">
+                                        {row.message
+                                            || row.reconciliation_status_label
+                                            || (row.process_status === 'processed'
+                                                ? t('operations.recon_bulk.process_done')
+                                                : t('operations.recon_bulk.process_pending'))}
+                                    </div>
+                                    <div className="ps-ttgh-processed">
+                                        {row.processed_at
+                                            ? t('operations.recon_bulk.processed_at', { time: row.processed_at })
+                                            : ''}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
 
                         <div className="ps-ttgh-excel-footer">
                             <span className="text-danger">{t('operations.recon_bulk.history_limit')}</span>
@@ -280,7 +364,7 @@ export function UpdateReconExcelDialog({
                                     {' - '}
                                     {meta.to || 0}
                                     {' / '}
-                                    {meta.total || 0}
+                                    {(meta.total || 0).toLocaleString('vi-VN')}
                                     {' '}
                                     <button type="button" className="btn btn-link btn-xs" disabled={busy || (meta.current_page || 1) <= 1} onClick={() => loadHistory({ page: (meta.current_page || 1) - 1 })}>
                                         <i className="fa fa-chevron-left" />

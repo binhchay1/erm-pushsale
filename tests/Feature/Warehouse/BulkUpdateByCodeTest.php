@@ -3,10 +3,14 @@
 namespace Tests\Feature\Warehouse;
 
 use App\Enums\DeliveryStatus;
+use App\Models\Company;
 use App\Models\Order;
+use App\Models\Shop;
 use App\Models\User;
 use App\Models\Warehouse;
+use App\Services\Shops\ShopProvisioningService;
 use App\Services\Warehouse\BulkUpdateByCodeService;
+use App\Support\TenantManager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -14,9 +18,33 @@ class BulkUpdateByCodeTest extends TestCase
 {
     use RefreshDatabase;
 
+    /**
+     * @return array{0:User,1:Shop,2:Company}
+     */
+    private function actingShopUser(string $role = User::ROLE_ADMIN): array
+    {
+        $company = Company::query()->firstOrCreate(
+            ['slug' => 'test-co'],
+            ['name' => 'Test Co', 'status' => Company::STATUS_ACTIVE, 'plan' => 'pro'],
+        );
+        app(TenantManager::class)->set($company->id);
+
+        $shop = app(ShopProvisioningService::class)->ensureDefaultShop($company);
+        app(TenantManager::class)->setShop($shop->id);
+
+        $user = User::factory()->create([
+            'role' => $role,
+            'company_id' => $company->id,
+            'default_shop_id' => $shop->id,
+        ]);
+        $shop->users()->syncWithoutDetaching([$user->id]);
+
+        return [$user, $shop, $company];
+    }
+
     public function test_admin_can_open_bulk_update_by_code_page(): void
     {
-        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        [$admin] = $this->actingShopUser();
 
         $this->actingAs($admin)
             ->get('/admin/warehouse/orders/update-by-code')
@@ -24,14 +52,34 @@ class BulkUpdateByCodeTest extends TestCase
             ->assertInertia(fn ($page) => $page
                 ->component('Admin/Warehouse/BulkUpdateByCode')
                 ->has('actions')
+                ->has('filterOptions.shippingServiceOptions')
                 ->where('pageTitle', 'Cập nhật contact theo mã pushsale'));
+    }
+
+    public function test_accounting_can_open_bulk_update_by_code_page(): void
+    {
+        [$user] = $this->actingShopUser(User::ROLE_ACCOUNTING);
+
+        $this->actingAs($user)
+            ->get('/accounting/orders/update-by-code')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Admin/Warehouse/BulkUpdateByCode')
+                ->where('activeMenuCode', '6.1')
+                ->where('executeUrl', '/accounting/orders/update-by-code'));
     }
 
     public function test_bulk_update_order_fields_by_pushsale_code(): void
     {
-        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
-        $warehouse = Warehouse::query()->create(['name' => 'Kho test']);
+        [$admin, $shop, $company] = $this->actingShopUser();
+        $warehouse = Warehouse::query()->create([
+            'company_id' => $company->id,
+            'shop_id' => $shop->id,
+            'name' => 'Kho test',
+        ]);
         $order = Order::query()->create([
+            'company_id' => $company->id,
+            'shop_id' => $shop->id,
             'order_code' => 'PS00184641173PS',
             'customer_name' => 'KH test',
             'customer_phone' => '0901234567',

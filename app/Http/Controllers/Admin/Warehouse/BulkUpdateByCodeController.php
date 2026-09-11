@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin\Warehouse;
 use App\Http\Controllers\Controller;
 use App\Services\FilterOptionsService;
 use App\Services\Warehouse\BulkUpdateByCodeService;
+use App\Support\ShippingProviders;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -33,6 +34,7 @@ class BulkUpdateByCodeController extends Controller
             'filterOptions' => [
                 'warehouses' => $options['warehouses'] ?? [],
                 'shippingProviders' => $options['shippingProviders'] ?? [],
+                'shippingServiceOptions' => ShippingProviders::serviceOptions(),
                 'deliveryStatuses' => $options['deliveryStatuses'] ?? [],
                 'reconciliationStatuses' => $options['reconciliationStatuses'] ?? [],
                 'warehouseCareStatuses' => $options['warehouseCareStatuses'] ?? [],

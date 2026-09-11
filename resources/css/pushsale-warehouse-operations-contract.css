@@ -234,29 +234,7 @@ html body.pushsale-app-body .ps-wh-page .ps-wh-filter-cell .form-control {
     width: 100% !important;
 }
 
-/* FAB — hidden until hover/open, fam-* tones */
-html body.pushsale-app-body .action-container.ps-wh-floating-actions .hidden-actions {
-    bottom: 70px !important;
-    display: none !important;
-    flex-direction: column !important;
-    gap: 10px !important;
-    left: 0 !important;
-    opacity: 1 !important;
-    filter: none !important;
-    pointer-events: none !important;
-    position: absolute !important;
-    transform: none !important;
-}
-
-html body.pushsale-app-body .action-container.ps-wh-floating-actions:hover .hidden-actions,
-html body.pushsale-app-body .action-container.ps-wh-floating-actions.open .hidden-actions {
-    display: flex !important;
-    margin-left: 5px !important;
-    opacity: 1 !important;
-    filter: none !important;
-    pointer-events: auto !important;
-}
-
+/* FAB tones (layout/alignment finalized at file end — Pushsale sample parity) */
 html body.pushsale-app-body .action-container.ps-wh-floating-actions .n-button.fam-primary {
     background: #0585e5 !important;
 }
@@ -271,11 +249,6 @@ html body.pushsale-app-body .action-container.ps-wh-floating-actions .n-button.f
 
 html body.pushsale-app-body .action-container.ps-wh-floating-actions .n-button.fam-danger {
     background: #c9332e !important;
-}
-
-html body.pushsale-app-body .action-container.ps-wh-floating-actions .main-action:hover,
-html body.pushsale-app-body .action-container.ps-wh-floating-actions .n-button:hover {
-    transform: scale(1.1) !important;
 }
 
 html body.pushsale-app-body .action-container.ps-wh-floating-actions .main-action {
@@ -768,6 +741,9 @@ html body.pushsale-app-body .action-container.ps-wh-floating-actions .icon-row >
     display: inline-flex !important;
     opacity: 1 !important;
     filter: none !important;
+    position: relative !important;
+    left: auto !important;
+    bottom: auto !important;
 }
 
 html body.pushsale-app-body .ps-dialog-form-error {
@@ -839,8 +815,27 @@ html body.pushsale-app-body .ps-ttgh-inspect ul {
     padding-left: 18px;
 }
 
-html body.pushsale-app-body .ps-ttgh-excel-dialog.wide {
-    max-width: min(1100px, 96vw);
+html body.pushsale-app-body .ps-ttgh-excel-dialog.wide,
+html body.pushsale-app-body [data-slot="dialog-content"].ps-ttgh-excel-dialog.wide {
+    width: min(96vw, 1280px) !important;
+    max-width: min(96vw, 1280px) !important;
+    min-width: min(1100px, 96vw) !important;
+    height: 85vh !important;
+    max-height: 85vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+html body.pushsale-app-body .ps-ttgh-excel-dialog.wide .ps-ttgh-excel-layout {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+}
+
+html body.pushsale-app-body .ps-ttgh-by-code-dialog.ps-ttgh-boxed,
+html body.pushsale-app-body [data-slot="dialog-content"].ps-ttgh-by-code-dialog.ps-ttgh-boxed {
+    width: min(860px, 94vw) !important;
+    max-width: min(860px, 94vw) !important;
 }
 
 html body.pushsale-app-body .ps-ttgh-excel-notice {
@@ -853,7 +848,44 @@ html body.pushsale-app-body .ps-ttgh-excel-notice {
 html body.pushsale-app-body .ps-ttgh-excel-layout {
     display: grid;
     gap: 14px;
-    grid-template-columns: 260px minmax(0, 1fr);
+    grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+    height: 100%;
+}
+
+html body.pushsale-app-body .ps-ttgh-excel-side {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 0;
+    overflow: auto;
+    padding-right: 4px;
+}
+
+html body.pushsale-app-body .ps-ttgh-excel-side .ps-ttgh-excel-checks {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 4px 0 8px;
+}
+
+html body.pushsale-app-body .ps-ttgh-excel-side .ps-ttgh-check {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    font-weight: 400;
+    margin: 0;
+    line-height: 1.35;
+}
+
+html body.pushsale-app-body .ps-ttgh-excel-side .ps-ttgh-file-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+html body.pushsale-app-body .ps-ttgh-excel-side .ps-ttgh-file-row input[type="file"] {
+    flex: 1 1 auto;
+    min-width: 0;
 }
 
 html body.pushsale-app-body .ps-ttgh-excel-side .ps-ttgh-excel-actions {
@@ -862,16 +894,76 @@ html body.pushsale-app-body .ps-ttgh-excel-side .ps-ttgh-excel-actions {
     margin-bottom: 10px;
 }
 
+html body.pushsale-app-body .ps-ttgh-excel-side .ps-ttgh-excel-apply {
+    align-self: flex-end;
+    margin-top: auto;
+}
+
 html body.pushsale-app-body .ps-ttgh-excel-stats td:last-child {
     text-align: right;
     font-weight: 600;
 }
 
+html body.pushsale-app-body .ps-ttgh-excel-main {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+
 html body.pushsale-app-body .ps-ttgh-excel-filters {
     display: grid;
     gap: 8px;
-    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr) auto auto;
     margin-bottom: 10px;
+}
+
+html body.pushsale-app-body .ps-ttgh-excel-history {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    border: 1px solid #d7dee8;
+}
+
+html body.pushsale-app-body .ps-ttgh-excel-history-row {
+    display: grid;
+    grid-template-columns: 28px minmax(120px, 1.2fr) minmax(70px, 0.6fr) minmax(0, 2.4fr) minmax(140px, 0.9fr);
+    gap: 8px;
+    align-items: start;
+    padding: 8px 10px;
+    border-bottom: 1px solid #e6ebf2;
+    font-size: 12px;
+}
+
+html body.pushsale-app-body .ps-ttgh-excel-history-row:last-child {
+    border-bottom: 0;
+}
+
+html body.pushsale-app-body .ps-ttgh-excel-history-row .ps-ttgh-order-link {
+    color: #0b68b7;
+    font-weight: 600;
+    word-break: break-all;
+}
+
+html body.pushsale-app-body .ps-ttgh-excel-history-row .ps-ttgh-amount {
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+html body.pushsale-app-body .ps-ttgh-excel-history-row .ps-ttgh-result {
+    color: #333;
+    line-height: 1.35;
+}
+
+html body.pushsale-app-body .ps-ttgh-excel-history-row .ps-ttgh-processed {
+    color: #0b68b7;
+    text-align: right;
+    white-space: nowrap;
+}
+
+html body.pushsale-app-body .ps-ttgh-excel-history-empty {
+    padding: 16px;
+    color: #8896a6;
 }
 
 html body.pushsale-app-body .ps-ttgh-excel-footer {
@@ -882,6 +974,56 @@ html body.pushsale-app-body .ps-ttgh-excel-footer {
     margin-top: 8px;
 }
 
+/* Boxed Pushsale form (by-code recon / TTGH) */
+html body.pushsale-app-body .ps-ttgh-boxed-form {
+    border: 1px solid #cfd6de;
+    background: #fff;
+}
+
+html body.pushsale-app-body .ps-ttgh-boxed-row {
+    display: grid;
+    grid-template-columns: 200px minmax(0, 1fr);
+    border-bottom: 1px solid #cfd6de;
+    min-height: 42px;
+}
+
+html body.pushsale-app-body .ps-ttgh-boxed-row:last-child {
+    border-bottom: 0;
+}
+
+html body.pushsale-app-body .ps-ttgh-boxed-label {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+    padding: 10px 12px;
+    background: #f3f5f8;
+    border-right: 1px solid #cfd6de;
+    color: #333;
+    font-weight: 600;
+    text-align: right;
+}
+
+html body.pushsale-app-body .ps-ttgh-boxed-label.is-blank {
+    background: #fff;
+}
+
+html body.pushsale-app-body .ps-ttgh-boxed-control {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    min-width: 0;
+}
+
+html body.pushsale-app-body .ps-ttgh-boxed-control textarea.form-control {
+    border-style: dashed;
+    min-height: 120px;
+}
+
+html body.pushsale-app-body .ps-ttgh-boxed-control .ps-ttgh-check {
+    margin: 0;
+}
+
 @media (max-width: 992px) {
     html body.pushsale-app-body .ps-wh-page .ps-wh-filter-row-main,
     html body.pushsale-app-body .ps-wh-page .ps-wh-filter-row-five,
@@ -889,7 +1031,6 @@ html body.pushsale-app-body .ps-ttgh-excel-footer {
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     }
 
-    html body.pushsale-app-body .ps-ttgh-excel-layout,
     html body.pushsale-app-body .ps-ttgh-excel-filters {
         grid-template-columns: 1fr;
     }
@@ -926,6 +1067,38 @@ html body.pushsale-app-body .ps-ttgh-excel-footer {
     html body.pushsale-app-body .ps-ttgh-excel-side .ps-ttgh-excel-actions {
         align-items: stretch !important;
         flex-direction: column !important;
+    }
+
+    html body.pushsale-app-body .ps-ttgh-excel-dialog.wide,
+    html body.pushsale-app-body [data-slot="dialog-content"].ps-ttgh-excel-dialog.wide,
+    html body.pushsale-app-body .ps-ttgh-by-code-dialog.ps-ttgh-boxed,
+    html body.pushsale-app-body [data-slot="dialog-content"].ps-ttgh-by-code-dialog.ps-ttgh-boxed {
+        width: 96vw !important;
+        min-width: 0 !important;
+        max-width: 96vw !important;
+        height: auto !important;
+        max-height: 92vh !important;
+    }
+
+    html body.pushsale-app-body .ps-ttgh-boxed-row {
+        grid-template-columns: 1fr !important;
+    }
+
+    html body.pushsale-app-body .ps-ttgh-boxed-label {
+        justify-content: flex-start !important;
+        text-align: left !important;
+        border-right: 0 !important;
+        border-bottom: 1px solid #cfd6de !important;
+    }
+
+    html body.pushsale-app-body .ps-ttgh-excel-history-row {
+        grid-template-columns: 28px minmax(0, 1fr) !important;
+    }
+
+    html body.pushsale-app-body .ps-ttgh-excel-history-row .ps-ttgh-amount,
+    html body.pushsale-app-body .ps-ttgh-excel-history-row .ps-ttgh-processed {
+        grid-column: 2;
+        text-align: left !important;
     }
 }
 
@@ -967,8 +1140,7 @@ html body.pushsale-app-body .ps-page-extra-filters[data-page-code="6.1"] .ps-wh-
 
 html body.pushsale-app-body .ps-wh-page .ps-wh-status-row,
 html body.pushsale-app-body .ps-acc-page .ps-wh-status-row {
-    margin-left: 0 !important;
-    margin-right: 0 !important;
+    /* Horizontal inset comes from unified gutter / .ps-acc-page padding — keep overflow only. */
     overflow: hidden !important;
 }
 
@@ -1094,27 +1266,6 @@ html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table td.c-customer-body 
 html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table th.c-address,
 html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table td.c-address-body { width: 200px !important; min-width: 160px !important; }
 
-html body.pushsale-app-body .ps-acc-page .action-container.ps-wh-floating-actions {
-    z-index: 1200 !important;
-    padding-left: 20px !important;
-    padding-bottom: 12px !important;
-}
-html body.pushsale-app-body .ps-acc-page .action-container.ps-wh-floating-actions .icon-row {
-    display: flex !important;
-    gap: 10px !important;
-    flex-wrap: nowrap !important;
-}
-html body.pushsale-app-body .ps-acc-page .action-container.ps-wh-floating-actions .n-button {
-    width: 50px !important;
-    height: 50px !important;
-    border-radius: 50% !important;
-    font-size: 22px !important;
-}
-html body.pushsale-app-body .ps-acc-page .action-container.ps-wh-floating-actions .main-action {
-    width: 60px !important;
-    height: 60px !important;
-    font-size: 24px !important;
-}
 html body.pushsale-app-body .ps-acc-page .ps-acc-recon-empty {
     color: #9aa4b2 !important;
     font-size: 16px !important;
@@ -1173,4 +1324,178 @@ html body.pushsale-app-body .ps-acc-page .ps-acc-recon-empty {
         min-width: 0 !important;
         width: 100% !important;
     }
+}
+
+/* -------------------------------------------------------------------------
+   FAB alignment � Pushsale sample parity (htmk1 ~4998-5011).
+   Flex column + consistent left edge; hamburger shares left/center with
+   first column of icon-row buttons (50px under 60px via margin-left: 5px).
+   Loads last among final-contract warehouse CSS so it wins over shared/
+   content-shell / filter-info absolute positioning.
+   ------------------------------------------------------------------------- */
+html body.pushsale-app-body nav.action-container.ps-wh-floating-actions,
+html body.pushsale-app-body .action-container.ps-wh-floating-actions,
+html body.pushsale-app-body .ps-wh-page .action-container.ps-wh-floating-actions,
+html body.pushsale-app-body .ps-acc-page .action-container.ps-wh-floating-actions {
+    position: fixed !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    top: auto !important;
+    right: auto !important;
+    z-index: 12000 !important;
+    width: auto !important;
+    height: auto !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    max-width: none !important;
+    max-height: none !important;
+    padding: 50px 100px 15px 20px !important;
+    margin: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    overflow: visible !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+html body.pushsale-app-body .action-container.ps-wh-floating-actions .hidden-actions,
+html body.pushsale-app-body .ps-wh-page .action-container.ps-wh-floating-actions .hidden-actions,
+html body.pushsale-app-body .ps-acc-page .action-container.ps-wh-floating-actions .hidden-actions {
+    position: static !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: auto !important;
+    width: max-content !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: none !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transform: none !important;
+    filter: none !important;
+    transition: opacity 0.3s ease, visibility 0.3s ease !important;
+}
+
+html body.pushsale-app-body .action-container.ps-wh-floating-actions:hover .hidden-actions,
+html body.pushsale-app-body .action-container.ps-wh-floating-actions.open .hidden-actions,
+html body.pushsale-app-body .action-container.ps-wh-floating-actions.is-open .hidden-actions,
+html body.pushsale-app-body .action-container.ps-wh-floating-actions:focus-within .hidden-actions,
+html body.pushsale-app-body .ps-wh-page .action-container.ps-wh-floating-actions:hover .hidden-actions,
+html body.pushsale-app-body .ps-wh-page .action-container.ps-wh-floating-actions.open .hidden-actions,
+html body.pushsale-app-body .ps-acc-page .action-container.ps-wh-floating-actions:hover .hidden-actions,
+html body.pushsale-app-body .ps-acc-page .action-container.ps-wh-floating-actions.open .hidden-actions {
+    display: flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    margin-left: 5px !important;
+    transform: none !important;
+    filter: none !important;
+}
+
+html body.pushsale-app-body .action-container.ps-wh-floating-actions .icon-row,
+html body.pushsale-app-body .ps-wh-page .action-container.ps-wh-floating-actions .icon-row,
+html body.pushsale-app-body .ps-acc-page .action-container.ps-wh-floating-actions .icon-row {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 10px !important;
+    width: max-content !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+html body.pushsale-app-body .action-container.ps-wh-floating-actions .main-action,
+html body.pushsale-app-body .action-container.ps-wh-floating-actions .ps-wh-main-action,
+html body.pushsale-app-body .action-container.ps-wh-floating-actions .n-button,
+html body.pushsale-app-body .action-container.ps-wh-floating-actions .ps-wh-action-button,
+html body.pushsale-app-body .ps-wh-page .action-container.ps-wh-floating-actions .main-action,
+html body.pushsale-app-body .ps-wh-page .action-container.ps-wh-floating-actions .n-button,
+html body.pushsale-app-body .ps-acc-page .action-container.ps-wh-floating-actions .main-action,
+html body.pushsale-app-body .ps-acc-page .action-container.ps-wh-floating-actions .n-button {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    position: relative !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: auto !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex: 0 0 auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 50% !important;
+    aspect-ratio: 1 / 1 !important;
+    clip-path: none !important;
+    overflow: visible !important;
+    color: #fff !important;
+    line-height: 1 !important;
+    text-align: center !important;
+    text-decoration: none !important;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2) !important;
+    transform: none !important;
+    transition: background-color 0.3s, transform 0.3s !important;
+}
+
+html body.pushsale-app-body .action-container.ps-wh-floating-actions .n-button,
+html body.pushsale-app-body .action-container.ps-wh-floating-actions .ps-wh-action-button,
+html body.pushsale-app-body .ps-wh-page .action-container.ps-wh-floating-actions .n-button,
+html body.pushsale-app-body .ps-acc-page .action-container.ps-wh-floating-actions .n-button {
+    width: 50px !important;
+    height: 50px !important;
+    min-width: 50px !important;
+    min-height: 50px !important;
+    max-width: 50px !important;
+    max-height: 50px !important;
+    font-size: 22px !important;
+}
+
+html body.pushsale-app-body .action-container.ps-wh-floating-actions .main-action,
+html body.pushsale-app-body .action-container.ps-wh-floating-actions .ps-wh-main-action,
+html body.pushsale-app-body .ps-wh-page .action-container.ps-wh-floating-actions .main-action,
+html body.pushsale-app-body .ps-acc-page .action-container.ps-wh-floating-actions .main-action {
+    width: 60px !important;
+    height: 60px !important;
+    min-width: 60px !important;
+    min-height: 60px !important;
+    max-width: 60px !important;
+    max-height: 60px !important;
+    margin-bottom: 0 !important;
+    font-size: 24px !important;
+    background: #007bff !important;
+}
+
+html body.pushsale-app-body .action-container.ps-wh-floating-actions .main-action:hover,
+html body.pushsale-app-body .action-container.ps-wh-floating-actions .n-button:hover:not(:disabled),
+html body.pushsale-app-body .ps-wh-page .action-container.ps-wh-floating-actions .main-action:hover,
+html body.pushsale-app-body .ps-acc-page .action-container.ps-wh-floating-actions .main-action:hover {
+    transform: scale(1.1) !important;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2) !important;
+}
+
+html body.pushsale-app-body .action-container.ps-wh-floating-actions .main-action:hover {
+    background: #0056b3 !important;
+}
+
+html body.pushsale-app-body .action-container.ps-wh-floating-actions .n-button .fa,
+html body.pushsale-app-body .action-container.ps-wh-floating-actions .main-action .fa,
+html body.pushsale-app-body .action-container.ps-wh-floating-actions .n-button i,
+html body.pushsale-app-body .action-container.ps-wh-floating-actions .main-action i {
+    color: #fff !important;
+    font-size: inherit !important;
+    line-height: 1 !important;
 }

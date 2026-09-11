@@ -126,8 +126,8 @@ class ReconciliationBulkService
         $sheet->setTitle('Mau');
         $sheet->fromArray([array_values($this->templateHeaders())], null, 'A1');
         $sheet->fromArray([
-            ['PS00000000001PS', '', 'reconciled', 'Đã đối soát'],
-            ['', 'TRACKING001', 'pending', ''],
+            ['PS00000000001PS', '', 'reconciled', '100000', '100000', 'Đã đối soát'],
+            ['', 'TRACKING001', 'pending', '', '', ''],
         ], null, 'A2');
 
         $legend = $spreadsheet->createSheet();
@@ -149,9 +149,10 @@ class ReconciliationBulkService
     }
 
     /**
+     * @param  array{match_total?:bool,match_cod?:bool,update_dsnb_if_match?:bool}  $options
      * @return array{batch:array<string,mixed>,counts:array<string,int>}
      */
-    public function uploadExcel(UploadedFile $file, bool $isGhtk, ?User $actor): array
+    public function uploadExcel(UploadedFile $file, bool $isGhtk, ?User $actor, array $options = []): array
     {
         $ext = strtolower($file->getClientOriginalExtension() ?: pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION));
         if (! in_array($ext, SpreadsheetLeadReader::ALLOWED, true)) {
@@ -177,7 +178,9 @@ class ReconciliationBulkService
             throw ValidationException::withMessages(['file' => 'Danh sách tối đa '.self::MAX_EXCEL_ROWS.' dòng.']);
         }
 
-        return DB::transaction(function () use ($parsed, $isGhtk, $actor, $file) {
+        $normalizedOptions = $this->normalizeApplyOptions($options);
+
+        return DB::transaction(function () use ($parsed, $isGhtk, $actor, $file, $normalizedOptions) {
             $batch = ReconciliationImportBatch::query()->create([
                 'created_by_user_id' => $actor?->id,
                 'batch_code' => 'TTDS-'.now()->format('YmdHis').'-'.Str::lower(Str::random(4)),
@@ -185,7 +188,10 @@ class ReconciliationBulkService
                 'is_ghtk' => $isGhtk,
                 'state' => 'uploaded',
                 'uploaded_at' => now(),
-                'meta' => ['headers' => $this->templateHeaders()],
+                'meta' => [
+                    'headers' => $this->templateHeaders(),
+                    'options' => $normalizedOptions,
+                ],
             ]);
 
             foreach ($parsed as $row) {
@@ -198,7 +204,7 @@ class ReconciliationBulkService
                     'tracking_number' => $row['tracking_number'] ?: $order?->tracking_number,
                     'reconciliation_status_raw' => $row['reconciliation_status'],
                     'reconciliation_status' => $status,
-                    'note' => $row['note'],
+                    'note' => $this->packRowNote($row['note'] ?? null, $row['excel_total'] ?? null, $row['excel_cod'] ?? null),
                     'process_status' => 'pending',
                     'result_status' => 'pending',
                     'message' => $order ? null : 'Chưa khớp đơn',
@@ -215,13 +221,24 @@ class ReconciliationBulkService
     }
 
     /**
+     * @param  array{match_total?:?bool,match_cod?:?bool,update_dsnb_if_match?:?bool}  $options
      * @return array{batch:array<string,mixed>,counts:array<string,int>,results:list<array<string,mixed>>}
      */
-    public function applyBatch(ReconciliationImportBatch $batch, ?User $actor): array
+    public function applyBatch(ReconciliationImportBatch $batch, ?User $actor, array $options = []): array
     {
         if ($batch->state === 'cleared') {
             throw ValidationException::withMessages(['batch' => 'Batch đã xóa.']);
         }
+
+        $meta = is_array($batch->meta) ? $batch->meta : [];
+        $stored = is_array($meta['options'] ?? null) ? $meta['options'] : [];
+        $applyOptions = $this->normalizeApplyOptions([
+            'match_total' => $options['match_total'] ?? $stored['match_total'] ?? false,
+            'match_cod' => $options['match_cod'] ?? $stored['match_cod'] ?? false,
+            'update_dsnb_if_match' => $options['update_dsnb_if_match'] ?? $stored['update_dsnb_if_match'] ?? false,
+        ]);
+        $meta['options'] = $applyOptions;
+        $batch->forceFill(['meta' => $meta])->save();
 
         $results = [];
         $rows = $batch->rows()->where('process_status', 'pending')->orderBy('id')->get();
@@ -244,12 +261,30 @@ class ReconciliationBulkService
                     throw ValidationException::withMessages(['reconciliation_status' => 'Thiếu trạng thái đối soát.']);
                 }
 
+                $packed = $this->unpackRowNote($row->note);
+                $checks = $this->evaluateAmountChecks($order, $packed, $applyOptions);
+                $shouldUpdate = ! $applyOptions['update_dsnb_if_match'] || $checks['all_ok'];
+
+                if (! $shouldUpdate) {
+                    $message = $this->formatCheckMessage('SKIP', $checks, $applyOptions);
+                    $row->forceFill([
+                        'order_id' => $order->id,
+                        'order_code' => $order->order_code,
+                        'process_status' => 'processed',
+                        'result_status' => 'error',
+                        'message' => $message,
+                        'processed_at' => now(),
+                    ])->save();
+                    $results[] = ['id' => $row->id, 'ok' => false, 'order_code' => $order->order_code, 'message' => $message];
+                    continue;
+                }
+
                 $payload = [
                     'action' => 'CAP_NHAT_TTDS',
                     'code_type' => 'MHT',
                     'codes' => (string) $order->order_code,
                     'reconciliation_status' => (string) $row->reconciliation_status,
-                    'note' => filled($row->note) ? (string) $row->note : null,
+                    'note' => $packed['text'],
                 ];
                 $result = $this->byCode->execute($payload, $actor);
                 if (($result['success_count'] ?? 0) < 1) {
@@ -257,16 +292,17 @@ class ReconciliationBulkService
                     throw ValidationException::withMessages(['reconciliation_status' => $message]);
                 }
 
+                $message = $this->formatCheckMessage('OK', $checks, $applyOptions);
                 $row->forceFill([
                     'order_id' => $order->id,
                     'order_code' => $order->order_code,
                     'process_status' => 'processed',
                     'result_status' => 'success',
-                    'message' => 'Đã cập nhật',
+                    'message' => $message,
                     'processed_at' => now(),
                 ])->save();
 
-                $results[] = ['id' => $row->id, 'ok' => true, 'order_code' => $order->order_code, 'message' => 'Đã cập nhật'];
+                $results[] = ['id' => $row->id, 'ok' => true, 'order_code' => $order->order_code, 'message' => $message];
             } catch (Throwable $e) {
                 $row->forceFill([
                     'process_status' => 'processed',
@@ -358,19 +394,25 @@ class ReconciliationBulkService
             'batch' => $this->presentBatch($batch),
             'counts' => $counts,
             'rows' => [
-                'data' => collect($paginator->items())->map(fn (ReconciliationImportRow $row) => [
-                    'id' => $row->id,
-                    'order_code' => $row->order_code,
-                    'tracking_number' => $row->tracking_number,
-                    'reconciliation_status' => $row->reconciliation_status,
-                    'reconciliation_status_label' => $row->reconciliation_status
-                        ? (ReconciliationStatus::tryFrom($row->reconciliation_status)?->label() ?? $row->reconciliation_status)
-                        : ($row->reconciliation_status_raw ?: '—'),
-                    'process_status' => $row->process_status,
-                    'result_status' => $row->result_status,
-                    'message' => $row->message,
-                    'processed_at' => $row->processed_at?->format('d/m/Y H:i'),
-                ])->values()->all(),
+                'data' => collect($paginator->items())->map(function (ReconciliationImportRow $row) {
+                    $packed = $this->unpackRowNote($row->note);
+                    $amount = $packed['excel_total'] ?? $packed['excel_cod'] ?? null;
+
+                    return [
+                        'id' => $row->id,
+                        'order_code' => $row->order_code,
+                        'tracking_number' => $row->tracking_number,
+                        'amount' => $amount,
+                        'reconciliation_status' => $row->reconciliation_status,
+                        'reconciliation_status_label' => $row->reconciliation_status
+                            ? (ReconciliationStatus::tryFrom($row->reconciliation_status)?->label() ?? $row->reconciliation_status)
+                            : ($row->reconciliation_status_raw ?: '—'),
+                        'process_status' => $row->process_status,
+                        'result_status' => $row->result_status,
+                        'message' => $row->message,
+                        'processed_at' => $row->processed_at?->format('d/m/Y H:i'),
+                    ];
+                })->values()->all(),
                 'meta' => [
                     'current_page' => $paginator->currentPage(),
                     'last_page' => $paginator->lastPage(),
@@ -400,6 +442,8 @@ class ReconciliationBulkService
             'order_code' => 'Mã đơn',
             'tracking_number' => 'Mã giao vận',
             'reconciliation_status' => 'Trạng thái đối soát',
+            'excel_total' => 'Tổng tiền',
+            'excel_cod' => 'Tiền thu hộ',
             'note' => 'Ghi chú',
         ];
     }
@@ -428,7 +472,7 @@ class ReconciliationBulkService
 
     /**
      * @param  list<list<string>>  $matrix
-     * @return list<array{order_code:?string,tracking_number:?string,reconciliation_status:?string,note:?string}>
+     * @return list<array{order_code:?string,tracking_number:?string,reconciliation_status:?string,excel_total:?float,excel_cod:?float,note:?string}>
      */
     private function parseSpreadsheetMatrix(array $matrix): array
     {
@@ -441,7 +485,14 @@ class ReconciliationBulkService
         $hasHeader = $map !== null;
         $start = $hasHeader ? 1 : 0;
         if (! $hasHeader) {
-            $map = ['order_code' => 0, 'tracking_number' => 1, 'reconciliation_status' => 2, 'note' => 3];
+            $map = [
+                'order_code' => 0,
+                'tracking_number' => 1,
+                'reconciliation_status' => 2,
+                'excel_total' => 3,
+                'excel_cod' => 4,
+                'note' => 5,
+            ];
         }
 
         $rows = [];
@@ -451,6 +502,8 @@ class ReconciliationBulkService
             $tracking = trim((string) ($line[$map['tracking_number']] ?? ''));
             $status = trim((string) ($line[$map['reconciliation_status']] ?? ''));
             $note = trim((string) ($line[$map['note']] ?? ''));
+            $excelTotal = $this->parseMoney($line[$map['excel_total']] ?? null);
+            $excelCod = $this->parseMoney($line[$map['excel_cod']] ?? null);
             if ($orderCode === '' && $tracking === '') {
                 continue;
             }
@@ -458,6 +511,8 @@ class ReconciliationBulkService
                 'order_code' => $orderCode !== '' ? $orderCode : null,
                 'tracking_number' => $tracking !== '' ? $tracking : null,
                 'reconciliation_status' => $status !== '' ? $status : null,
+                'excel_total' => $excelTotal,
+                'excel_cod' => $excelCod,
                 'note' => $note !== '' ? $note : null,
             ];
         }
@@ -467,7 +522,7 @@ class ReconciliationBulkService
 
     /**
      * @param  list<string>  $headerRow
-     * @return array{order_code:int,tracking_number:int,reconciliation_status:int,note:int}|null
+     * @return array{order_code:int,tracking_number:int,reconciliation_status:int,excel_total:int,excel_cod:int,note:int}|null
      */
     private function mapHeaderIndexes(array $headerRow): ?array
     {
@@ -478,6 +533,8 @@ class ReconciliationBulkService
                 'trạng thái đối soát', 'trang thai doi soat', 'reconciliation_status',
                 'trạng thái cập nhật', 'trang thai cap nhat', 'đối soát', 'doi soat', 'dsnb',
             ],
+            'excel_total' => ['tổng tiền', 'tong tien', 'tổng tiền đơn', 'tong tien don', 'total', 'order_total'],
+            'excel_cod' => ['tiền thu hộ', 'tien thu ho', 'cod', 'amount_to_collect', 'thu hộ', 'thu ho'],
             'note' => ['ghi chú', 'ghi chu', 'note'],
         ];
 
@@ -500,6 +557,8 @@ class ReconciliationBulkService
             'order_code' => $map['order_code'] ?? 999,
             'tracking_number' => $map['tracking_number'] ?? 999,
             'reconciliation_status' => $map['reconciliation_status'] ?? 999,
+            'excel_total' => $map['excel_total'] ?? 999,
+            'excel_cod' => $map['excel_cod'] ?? 999,
             'note' => $map['note'] ?? 999,
         ];
     }
@@ -557,14 +616,161 @@ class ReconciliationBulkService
     /** @return array<string,mixed> */
     private function presentBatch(ReconciliationImportBatch $batch): array
     {
+        $meta = is_array($batch->meta) ? $batch->meta : [];
+        $options = is_array($meta['options'] ?? null) ? $meta['options'] : [];
+
         return [
             'id' => $batch->id,
             'batch_code' => $batch->batch_code,
             'filename' => $batch->filename,
             'is_ghtk' => (bool) $batch->is_ghtk,
             'state' => $batch->state,
+            'options' => $this->normalizeApplyOptions($options),
+            'meta' => $meta,
             'uploaded_at' => $batch->uploaded_at?->format('d/m/Y H:i'),
             'applied_at' => $batch->applied_at?->format('d/m/Y H:i'),
         ];
+    }
+
+    /**
+     * @param  array<string,mixed>  $options
+     * @return array{match_total:bool,match_cod:bool,update_dsnb_if_match:bool}
+     */
+    private function normalizeApplyOptions(array $options): array
+    {
+        return [
+            'match_total' => (bool) ($options['match_total'] ?? false),
+            'match_cod' => (bool) ($options['match_cod'] ?? false),
+            'update_dsnb_if_match' => (bool) ($options['update_dsnb_if_match'] ?? false),
+        ];
+    }
+
+    private function packRowNote(?string $text, ?float $excelTotal, ?float $excelCod): ?string
+    {
+        if ($excelTotal === null && $excelCod === null) {
+            return $text;
+        }
+
+        return 'PSMETA:'.json_encode([
+            't' => $excelTotal,
+            'c' => $excelCod,
+            'n' => $text,
+        ], JSON_UNESCAPED_UNICODE);
+    }
+
+    /**
+     * @return array{text:?string,excel_total:?float,excel_cod:?float}
+     */
+    private function unpackRowNote(?string $note): array
+    {
+        if (! filled($note)) {
+            return ['text' => null, 'excel_total' => null, 'excel_cod' => null];
+        }
+        if (! str_starts_with((string) $note, 'PSMETA:')) {
+            return ['text' => (string) $note, 'excel_total' => null, 'excel_cod' => null];
+        }
+        $decoded = json_decode(substr((string) $note, 7), true);
+        if (! is_array($decoded)) {
+            return ['text' => (string) $note, 'excel_total' => null, 'excel_cod' => null];
+        }
+
+        return [
+            'text' => isset($decoded['n']) && filled($decoded['n']) ? (string) $decoded['n'] : null,
+            'excel_total' => isset($decoded['t']) && $decoded['t'] !== null ? (float) $decoded['t'] : null,
+            'excel_cod' => isset($decoded['c']) && $decoded['c'] !== null ? (float) $decoded['c'] : null,
+        ];
+    }
+
+    private function parseMoney(mixed $raw): ?float
+    {
+        if ($raw === null || $raw === '') {
+            return null;
+        }
+        if (is_numeric($raw)) {
+            return (float) $raw;
+        }
+        $normalized = preg_replace('/[^\d,.\-]/', '', str_replace(' ', '', (string) $raw));
+        if ($normalized === null || $normalized === '' || $normalized === '-' || $normalized === '.' || $normalized === ',') {
+            return null;
+        }
+        if (str_contains($normalized, ',') && str_contains($normalized, '.')) {
+            $normalized = str_replace(',', '', $normalized);
+        } elseif (str_contains($normalized, ',')) {
+            $normalized = str_replace(',', '.', $normalized);
+        }
+        if (! is_numeric($normalized)) {
+            return null;
+        }
+
+        return (float) $normalized;
+    }
+
+    /**
+     * @param  array{text:?string,excel_total:?float,excel_cod:?float}  $packed
+     * @param  array{match_total:bool,match_cod:bool,update_dsnb_if_match:bool}  $options
+     * @return array{total:?bool,cod:?bool,all_ok:bool}
+     */
+    private function evaluateAmountChecks(Order $order, array $packed, array $options): array
+    {
+        $totalOk = null;
+        $codOk = null;
+
+        if ($options['match_total']) {
+            if ($packed['excel_total'] === null) {
+                $totalOk = null;
+            } else {
+                $totalOk = abs(((float) ($order->total ?? 0)) - (float) $packed['excel_total']) < 0.5;
+            }
+        }
+        if ($options['match_cod']) {
+            if ($packed['excel_cod'] === null) {
+                $codOk = null;
+            } else {
+                $codOk = abs(((float) ($order->amount_to_collect ?? 0)) - (float) $packed['excel_cod']) < 0.5;
+            }
+        }
+
+        $failures = [];
+        if ($totalOk === false) {
+            $failures[] = 'total';
+        }
+        if ($codOk === false) {
+            $failures[] = 'cod';
+        }
+
+        return [
+            'total' => $totalOk,
+            'cod' => $codOk,
+            'all_ok' => $failures === [],
+        ];
+    }
+
+    /**
+     * @param  array{total:?bool,cod:?bool,all_ok:bool}  $checks
+     * @param  array{match_total:bool,match_cod:bool,update_dsnb_if_match:bool}  $options
+     */
+    private function formatCheckMessage(string $prefix, array $checks, array $options): string
+    {
+        $parts = [$prefix];
+        if ($options['match_total']) {
+            $parts[] = 'KT Tổng tiền đơn: '.$this->yesNoNa($checks['total']);
+        }
+        if ($options['match_cod']) {
+            $parts[] = 'KT tiền thu hộ: '.$this->yesNoNa($checks['cod']);
+        }
+        if ($options['update_dsnb_if_match']) {
+            $parts[] = 'Cập nhật ĐSNB: '.($prefix === 'OK' && $checks['all_ok'] ? 'YES' : 'NO');
+        }
+
+        return implode(' | ', $parts);
+    }
+
+    private function yesNoNa(?bool $value): string
+    {
+        if ($value === null) {
+            return 'N/A';
+        }
+
+        return $value ? 'YES' : 'NO';
     }
 }

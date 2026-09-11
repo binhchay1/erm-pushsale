@@ -73,18 +73,36 @@ class ReconciliationBulkController extends Controller
         $data = $request->validate([
             'file' => ['required', 'file', 'max:10240'],
             'is_ghtk' => ['sometimes', 'boolean'],
+            'match_total' => ['sometimes', 'boolean'],
+            'match_cod' => ['sometimes', 'boolean'],
+            'update_dsnb_if_match' => ['sometimes', 'boolean'],
         ]);
 
         return response()->json($service->uploadExcel(
             $data['file'],
             $request->boolean('is_ghtk'),
             $request->user(),
+            [
+                'match_total' => $request->boolean('match_total'),
+                'match_cod' => $request->boolean('match_cod'),
+                'update_dsnb_if_match' => $request->boolean('update_dsnb_if_match'),
+            ],
         ));
     }
 
     public function apply(Request $request, ReconciliationImportBatch $batch, ReconciliationBulkService $service): JsonResponse
     {
-        return response()->json($service->applyBatch($batch, $request->user()));
+        $data = $request->validate([
+            'match_total' => ['sometimes', 'boolean'],
+            'match_cod' => ['sometimes', 'boolean'],
+            'update_dsnb_if_match' => ['sometimes', 'boolean'],
+        ]);
+
+        return response()->json($service->applyBatch($batch, $request->user(), [
+            'match_total' => array_key_exists('match_total', $data) ? (bool) $data['match_total'] : null,
+            'match_cod' => array_key_exists('match_cod', $data) ? (bool) $data['match_cod'] : null,
+            'update_dsnb_if_match' => array_key_exists('update_dsnb_if_match', $data) ? (bool) $data['update_dsnb_if_match'] : null,
+        ]));
     }
 
     public function clear(ReconciliationImportBatch $batch, ReconciliationBulkService $service): JsonResponse

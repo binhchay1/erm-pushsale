@@ -1,5 +1,6 @@
 /**
  * Trang cập nhật nhiều đơn theo mã Pushsale (FAB gears → /orders/update-by-code).
+ * Layout khớp mẫu CapNhatContactNhieu: 2 cột, notice vàng bên trái, field phải theo action.
  * Scoped to .ps-wh-bulk-page only.
  */
 
@@ -10,40 +11,90 @@ html body.pushsale-app-body .ps-wh-bulk-page .ps-wh-bulk-body {
 
 html body.pushsale-app-body .ps-wh-bulk-page .h-label {
     display: block;
+    font-size: 13px;
     font-weight: 600;
     margin-bottom: 4px;
 }
 
-html body.pushsale-app-body .ps-wh-bulk-page .ps-wh-bulk-check {
-    display: block;
-    font-weight: 400;
-    margin: 0 0 12px;
+html body.pushsale-app-body .ps-wh-bulk-page .form-group {
+    margin-bottom: 12px;
 }
 
-html body.pushsale-app-body .ps-wh-bulk-page .ps-wh-bulk-notice {
-    background: #fffbe6;
-    border: 1px solid #f0e6a8;
-    margin-bottom: 14px;
+html body.pushsale-app-body .ps-wh-bulk-page .ps-wh-bulk-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 400;
+    margin: 6px 0 0;
+    white-space: normal;
+}
+
+html body.pushsale-app-body .ps-wh-bulk-page .ps-wh-bulk-check input[type='checkbox'] {
+    margin: 0;
+}
+
+html body.pushsale-app-body .ps-wh-bulk-page .ps-wh-bulk-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    padding: 4px 8px;
+}
+
+html body.pushsale-app-body .ps-wh-bulk-page .mr15 {
+    margin-right: 15px;
+}
+
+html body.pushsale-app-body .ps-wh-bulk-page .notice.ps-wh-bulk-notice {
+    background: #fffde8;
+    border: 1px solid #f39c12;
+    color: #111;
+    font-size: 14px;
+    font-style: normal;
+    line-height: 1.55;
+    margin: 0;
     padding: 10px 12px;
 }
 
-html body.pushsale-app-body .ps-wh-bulk-page .ps-wh-bulk-notice .text-danger {
+html body.pushsale-app-body .ps-wh-bulk-page .ps-wh-bulk-notice b {
+    font-weight: 700;
+}
+
+html body.pushsale-app-body .ps-wh-bulk-page .ps-wh-bulk-danger {
     color: #c00;
     font-size: 14px;
 }
 
-html body.pushsale-app-body .ps-wh-bulk-page textarea.form-control {
+html body.pushsale-app-body .ps-wh-bulk-page textarea.form-control.ps-wh-bulk-codes {
     line-height: 20px;
-    min-height: 220px;
+    min-height: 120px;
     resize: vertical;
 }
 
 html body.pushsale-app-body .ps-wh-bulk-page .ps-wh-bulk-results {
-    margin-top: 18px;
+    margin-top: 8px;
+}
+
+html body.pushsale-app-body .ps-wh-bulk-page .ps-wh-bulk-progress-sep {
+    border-top: 1px solid #ddd;
+    margin-bottom: 10px;
+}
+
+html body.pushsale-app-body .ps-wh-bulk-page .ps-wh-bulk-results-title {
+    color: #007bff;
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 10px;
 }
 
 html body.pushsale-app-body .ps-wh-bulk-page .ps-wh-bulk-results table td,
 html body.pushsale-app-body .ps-wh-bulk-page .ps-wh-bulk-results table th {
     font-size: 13px;
     vertical-align: top;
+}
+
+@media (max-width: 767px) {
+    html body.pushsale-app-body .ps-wh-bulk-page .col-sm-6 {
+        width: 100%;
+    }
 }

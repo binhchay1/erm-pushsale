@@ -6,6 +6,7 @@ import AppLayout from '@/layouts/AppLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { apiRequest } from '@/lib/api';
 import { useConfirm } from '@/hooks/use-confirm';
+import { useT } from '@/providers/I18nProvider';
 
 const ACTION_FIELDS = {
     CAP_NHAT_DON: ['warehouse', 'dims', 'shipping', 'notes'],
@@ -27,7 +28,7 @@ function optionList(items = []) {
 }
 
 export default function BulkUpdateByCode({
-    pageTitle = 'Cập nhật contact theo mã pushsale',
+    pageTitle,
     activeMenuCode = '5.1',
     backUrl = '/admin/warehouse/operations',
     executeUrl = '/admin/warehouse/orders/update-by-code',
@@ -35,7 +36,10 @@ export default function BulkUpdateByCode({
     actions = [],
     filterOptions = {},
 }) {
+    const t = useT();
     const { ask } = useConfirm();
+    const title = pageTitle || t('operations.bulk_update_by_code.title');
+
     const [codeType, setCodeType] = useState('MHT');
     const [isGhtk, setIsGhtk] = useState(false);
     const [codes, setCodes] = useState(initialCodes || '');
@@ -60,24 +64,34 @@ export default function BulkUpdateByCode({
     const [results, setResults] = useState([]);
 
     const visible = ACTION_FIELDS[action] || [];
+    const showRight = visible.length > 0;
     const warehouses = useMemo(() => optionList(filterOptions.warehouses), [filterOptions.warehouses]);
     const providers = useMemo(() => optionList(filterOptions.shippingProviders), [filterOptions.shippingProviders]);
     const deliveryStatuses = useMemo(() => optionList(filterOptions.deliveryStatuses), [filterOptions.deliveryStatuses]);
     const reconStatuses = useMemo(() => optionList(filterOptions.reconciliationStatuses), [filterOptions.reconciliationStatuses]);
     const careStatuses = useMemo(() => optionList(filterOptions.warehouseCareStatuses), [filterOptions.warehouseCareStatuses]);
+    const serviceOptions = filterOptions.shippingServiceOptions || {};
+    const transportOptions = useMemo(
+        () => optionList(serviceOptions[form.shipping_provider] || []),
+        [serviceOptions, form.shipping_provider],
+    );
 
     const setField = (key, value) => setForm((old) => ({ ...old, [key]: value }));
 
+    const onProviderChange = (value) => {
+        setForm((old) => ({ ...old, shipping_provider: value, shipping_method: '' }));
+    };
+
     const submit = async () => {
         if (!String(codes).trim()) {
-            toast.error('Nhập danh sách mã đơn.');
+            toast.error(t('operations.bulk_update_by_code.codes_required'));
             return;
         }
 
         const ok = await ask({
-            title: 'Xác nhận thực hiện',
-            description: 'PUSHSALE KHÔNG THỂ HỖ TRỢ KHÔI PHỤC LẠI NẾU BẠN CHỌN SAI VỚI MONG MUỐN. Vui lòng kiểm tra lại để đảm bảo rằng bạn đã lựa chọn đúng. Bạn chắc chắn muốn thực hiện?',
-            confirmLabel: 'Thực hiện',
+            title: t('operations.bulk_update_by_code.confirm_title'),
+            description: t('operations.bulk_update_by_code.confirm_body'),
+            confirmLabel: t('operations.bulk_update_by_code.execute'),
         });
         if (!ok) return;
 
@@ -106,12 +120,12 @@ export default function BulkUpdateByCode({
             const data = await apiRequest(executeUrl, { method: 'POST', body: payload });
             setResults(data.results || []);
             if (data.failed_count > 0) {
-                toast.warning(data.message || 'Hoàn tất với một số lỗi.');
+                toast.warning(data.message || t('operations.bulk_update_by_code.done_partial'));
             } else {
-                toast.success(data.message || 'Đã thực hiện.');
+                toast.success(data.message || t('operations.bulk_update_by_code.done_ok'));
             }
         } catch (error) {
-            toast.error(error.message || 'Không thực hiện được.');
+            toast.error(error.message || t('operations.bulk_update_by_code.done_fail'));
         } finally {
             setBusy(false);
         }
@@ -119,199 +133,272 @@ export default function BulkUpdateByCode({
 
     return (
         <AppLayout activeMenuCode={activeMenuCode}>
-            <Head title={pageTitle} />
-            <section className="ps-wh-bulk-page" data-page-code={activeMenuCode}>
+            <Head title={title} />
+            <section className="ps-wh-bulk-page pushsale-page" data-page-code={activeMenuCode}>
                 <PageHeader
-                    title={pageTitle}
+                    title={title}
                     pageCode={activeMenuCode}
                     actions={(
-                        <Link href={backUrl} className="btn btn-default btn-sm" title="Đóng">
-                            <i className="fa fa-close" />
+                        <Link href={backUrl} className="btn btn-default btn-sm ps-wh-bulk-close" title={t('operations.bulk_update_by_code.close')}>
+                            <i className="fa fa-close" aria-hidden="true" />
                         </Link>
                     )}
                 />
 
-                <div className="ps-wh-bulk-body">
+                <div className="box-body ps-wh-bulk-body">
                     <div className="row">
                         <div className="col-sm-6">
-                            <div className="form-group">
-                                <span className="h-label">Loại mã đơn</span>
-                                <select className="form-control" value={codeType} onChange={(e) => setCodeType(e.target.value)}>
-                                    <option value="MHT">Mã đơn PUSHSALE</option>
-                                    <option value="MGV">Mã vận đơn</option>
-                                </select>
-                            </div>
-                            {codeType === 'MGV' ? (
-                                <label className="ps-wh-bulk-check">
-                                    <input type="checkbox" checked={isGhtk} onChange={(e) => setIsGhtk(e.target.checked)} />
-                                    {' '}
-                                    Đơn vị GH là: Giao hàng tiết kiệm
-                                </label>
-                            ) : null}
-                            <div className="form-group">
-                                <span className="h-label">Danh sách mã đơn</span>
-                                <textarea
-                                    className="form-control"
-                                    rows={12}
-                                    value={codes}
-                                    onChange={(e) => setCodes(e.target.value)}
-                                    placeholder="PS001... hoặc mã vận đơn — cách nhau bằng ; hoặc xuống dòng"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="col-sm-6">
                             <div className="row">
-                                <div className="col-xs-8 form-group">
+                                <div className="col-xs-12">
+                                    <span className="h-label">{t('operations.bulk_update_by_code.code_type')}</span>
+                                </div>
+                                <div className="col-xs-6 form-group">
+                                    <select className="form-control" value={codeType} onChange={(e) => setCodeType(e.target.value)}>
+                                        <option value="MHT">{t('operations.bulk_update_by_code.code_type_mht')}</option>
+                                        <option value="MGV">{t('operations.bulk_update_by_code.code_type_mgv')}</option>
+                                    </select>
+                                </div>
+                                <div className="col-xs-6 form-group">
+                                    <label className="ps-wh-bulk-check">
+                                        <input type="checkbox" checked={isGhtk} onChange={(e) => setIsGhtk(e.target.checked)} />
+                                        {' '}
+                                        {t('operations.bulk_update_by_code.is_ghtk')}
+                                    </label>
+                                </div>
+
+                                <div className="col-xs-12">
+                                    <span className="h-label">{t('operations.bulk_update_by_code.codes')}</span>
+                                </div>
+                                <div className="col-xs-12 form-group">
+                                    <textarea
+                                        className="form-control ps-wh-bulk-codes"
+                                        rows={5}
+                                        value={codes}
+                                        onChange={(e) => setCodes(e.target.value)}
+                                        placeholder={t('operations.bulk_update_by_code.codes_placeholder')}
+                                    />
+                                </div>
+
+                                <div className="col-xs-6 form-group">
                                     <select className="form-control" value={action} onChange={(e) => setAction(e.target.value)}>
                                         {actions.map((item) => (
                                             <option key={item.value} value={item.value}>{item.label}</option>
                                         ))}
                                     </select>
                                 </div>
-                                <div className="col-xs-4 form-group">
-                                    <button type="button" className="btn btn-sm btn-primary" disabled={busy} onClick={submit}>
-                                        <i className="fa fa-gears" />
+                                <div className="col-xs-6 form-group">
+                                    <button type="button" className="btn btn-sm btn-primary mr15" disabled={busy} onClick={submit}>
+                                        <i className="fa fa-gears" aria-hidden="true" />
                                         {' '}
-                                        Thực hiện
+                                        {t('operations.bulk_update_by_code.execute')}
                                     </button>
                                 </div>
+
+                                <div className="col-xs-12 form-group">
+                                    <div className="notice ps-wh-bulk-notice">
+                                        <b>{t('operations.bulk_update_by_code.guide_title')}</b>
+                                        <br />
+                                        -
+                                        {' '}
+                                        <span className="ps-wh-bulk-danger">
+                                            {t('operations.bulk_update_by_code.guide_one_process')}
+                                        </span>
+                                        <br />
+                                        -
+                                        {' '}
+                                        {t('operations.bulk_update_by_code.guide_codes')}
+                                        <br />
+                                        -
+                                        {' '}
+                                        {t('operations.bulk_update_by_code.guide_update_order')}
+                                        {' '}
+                                        <span className="ps-wh-bulk-danger">
+                                            {t('operations.bulk_update_by_code.guide_update_order_warn')}
+                                        </span>
+                                        <br />
+                                        -
+                                        {' '}
+                                        {t('operations.bulk_update_by_code.guide_ttgh')}
+                                        {' '}
+                                        <span className="ps-wh-bulk-danger">
+                                            {t('operations.bulk_update_by_code.guide_ttgh_warn')}
+                                        </span>
+                                        <br />
+                                        -
+                                        {' '}
+                                        {t('operations.bulk_update_by_code.guide_cancel')}
+                                        <br />
+                                        -
+                                        {' '}
+                                        {t('operations.bulk_update_by_code.guide_cancel_no_api')}
+                                        {' '}
+                                        <span className="ps-wh-bulk-danger">
+                                            {t('operations.bulk_update_by_code.guide_cancel_no_api_warn')}
+                                        </span>
+                                        {t('operations.bulk_update_by_code.guide_cancel_no_api_tail')}
+                                    </div>
+                                </div>
                             </div>
-
-                            <div className="notice ps-wh-bulk-notice">
-                                <b>Chỉ dẫn:</b>
-                                <br />
-                                -
-                                {' '}
-                                <span className="text-danger">Mỗi đơn vị chỉ có thể chạy một tiến trình cập nhật tại một thời điểm. Không thể hỗ trợ khôi phục nếu bạn lựa chọn sai.</span>
-                                <br />
-                                - Nhập mã đơn cách nhau bằng dấu &quot;;&quot; hoặc xuống dòng
-                                <br />
-                                - Cập nhật đơn: cập nhật kích thước / PTGH / cân nặng giống nhau. Đơn đã đăng hoặc đối soát sẽ không được cập nhật.
-                                <br />
-                                - Cập nhật TTGH: không cập nhật đơn đã đối soát; không nhảy trạng thái trước/sau đăng đơn sai luồng.
-                                <br />
-                                - Hủy đăng đơn: gọi API hủy đối tác nếu thành công thì hủy trên hệ thống.
-                                <br />
-                                - Hủy đăng đơn (without API): chỉ hủy trên hệ thống — cần chắc chắn đã hủy bên đối tác.
-                            </div>
-
-                            {visible.includes('warehouse') ? (
-                                <div className="form-group">
-                                    <span className="h-label">Kho</span>
-                                    <select className="form-control" value={form.warehouse_id} onChange={(e) => setField('warehouse_id', e.target.value)}>
-                                        <option value="">--Chọn kho--</option>
-                                        {warehouses.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
-                                    </select>
-                                </div>
-                            ) : null}
-
-                            {visible.includes('notes') ? (
-                                <div className="form-group">
-                                    <span className="h-label">Ghi chú giao hàng</span>
-                                    <input className="form-control" value={form.shipping_notes} onChange={(e) => setField('shipping_notes', e.target.value)} />
-                                </div>
-                            ) : null}
-
-                            {visible.includes('dims') ? (
-                                <div className="row">
-                                    <div className="col-xs-4 form-group">
-                                        <span className="h-label">Chiều dài(cm)</span>
-                                        <input className="form-control" type="number" min="0" value={form.length_cm} onChange={(e) => setField('length_cm', e.target.value)} />
-                                    </div>
-                                    <div className="col-xs-4 form-group">
-                                        <span className="h-label">Chiều rộng(cm)</span>
-                                        <input className="form-control" type="number" min="0" value={form.width_cm} onChange={(e) => setField('width_cm', e.target.value)} />
-                                    </div>
-                                    <div className="col-xs-4 form-group">
-                                        <span className="h-label">Chiều cao(cm)</span>
-                                        <input className="form-control" type="number" min="0" value={form.height_cm} onChange={(e) => setField('height_cm', e.target.value)} />
-                                    </div>
-                                </div>
-                            ) : null}
-
-                            {visible.includes('shipping') ? (
-                                <div className="row">
-                                    <div className="col-xs-6 form-group">
-                                        <span className="h-label">Phương thức giao hàng</span>
-                                        <select className="form-control" value={form.shipping_provider} onChange={(e) => setField('shipping_provider', e.target.value)}>
-                                            <option value="">--Chọn PTGH--</option>
-                                            {providers.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
-                                        </select>
-                                    </div>
-                                    <div className="col-xs-6 form-group">
-                                        <span className="h-label">Giao hàng bằng</span>
-                                        <input className="form-control" value={form.shipping_method} onChange={(e) => setField('shipping_method', e.target.value)} placeholder="VD: VTK, standard..." />
-                                    </div>
-                                    <div className="col-xs-6 form-group">
-                                        <span className="h-label">Cân nặng(gram)</span>
-                                        <input className="form-control" type="number" min="0" value={form.weight_grams} onChange={(e) => setField('weight_grams', e.target.value)} />
-                                    </div>
-                                </div>
-                            ) : null}
-
-                            {visible.includes('delivery_status') ? (
-                                <div className="form-group">
-                                    <span className="h-label">Trạng thái giao hàng</span>
-                                    <select className="form-control" value={form.delivery_status} onChange={(e) => setField('delivery_status', e.target.value)}>
-                                        <option value="">--Chọn TTGH--</option>
-                                        {deliveryStatuses.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
-                                    </select>
-                                </div>
-                            ) : null}
-
-                            {visible.includes('reconciliation_status') ? (
-                                <div className="form-group">
-                                    <span className="h-label">Trạng thái đối soát</span>
-                                    <select className="form-control" value={form.reconciliation_status} onChange={(e) => setField('reconciliation_status', e.target.value)}>
-                                        <option value="">--Chọn--</option>
-                                        {reconStatuses.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
-                                    </select>
-                                </div>
-                            ) : null}
-
-                            {visible.includes('accounting_note') ? (
-                                <div className="form-group">
-                                    <span className="h-label">Ghi chú kho vận (kế toán)</span>
-                                    <textarea className="form-control" rows={4} value={form.accounting_note} onChange={(e) => setField('accounting_note', e.target.value)} />
-                                </div>
-                            ) : null}
-
-                            {visible.includes('care') ? (
-                                <div className="row">
-                                    <div className="col-xs-6 form-group">
-                                        <span className="h-label">Trạng thái care đơn</span>
-                                        <select className="form-control" value={form.warehouse_care_status} onChange={(e) => setField('warehouse_care_status', e.target.value)}>
-                                            <option value="">--Chọn--</option>
-                                            {careStatuses.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
-                                        </select>
-                                    </div>
-                                    <div className="col-xs-6 form-group">
-                                        <span className="h-label">Ghi chú care</span>
-                                        <input className="form-control" value={form.warehouse_care_note} onChange={(e) => setField('warehouse_care_note', e.target.value)} />
-                                    </div>
-                                </div>
-                            ) : null}
-
-                            {visible.includes('note') ? (
-                                <div className="form-group">
-                                    <span className="h-label">Ghi chú</span>
-                                    <input className="form-control" value={form.note} onChange={(e) => setField('note', e.target.value)} />
-                                </div>
-                            ) : null}
                         </div>
+
+                        {showRight ? (
+                            <div className="col-sm-6">
+                                {visible.includes('warehouse') || visible.includes('notes') ? (
+                                    <>
+                                        <div className="row">
+                                            <div className="col-xs-4">
+                                                <span className="h-label">{t('operations.bulk_update_by_code.warehouse')}</span>
+                                            </div>
+                                            <div className="col-xs-4">
+                                                <span className="h-label">{t('operations.bulk_update_by_code.shipping_notes')}</span>
+                                            </div>
+                                            <div className="col-xs-4">
+                                                <span className="h-label">&nbsp;</span>
+                                            </div>
+                                        </div>
+                                        <div className="row form-group">
+                                            <div className="col-xs-4">
+                                                {visible.includes('warehouse') ? (
+                                                    <select className="form-control" value={form.warehouse_id} onChange={(e) => setField('warehouse_id', e.target.value)}>
+                                                        <option value="">{t('operations.bulk_update_by_code.warehouse_placeholder')}</option>
+                                                        {warehouses.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+                                                    </select>
+                                                ) : null}
+                                            </div>
+                                            <div className="col-xs-4">
+                                                {visible.includes('notes') ? (
+                                                    <input className="form-control" value={form.shipping_notes} onChange={(e) => setField('shipping_notes', e.target.value)} />
+                                                ) : null}
+                                            </div>
+                                            <div className="col-xs-4" />
+                                        </div>
+                                    </>
+                                ) : null}
+
+                                {visible.includes('dims') ? (
+                                    <>
+                                        <div className="row">
+                                            <div className="col-xs-4">
+                                                <span className="h-label">{t('operations.bulk_update_by_code.length')}</span>
+                                            </div>
+                                            <div className="col-xs-4">
+                                                <span className="h-label">{t('operations.bulk_update_by_code.width')}</span>
+                                            </div>
+                                            <div className="col-xs-4">
+                                                <span className="h-label">{t('operations.bulk_update_by_code.height')}</span>
+                                            </div>
+                                        </div>
+                                        <div className="row form-group">
+                                            <div className="col-xs-4">
+                                                <input className="form-control" type="number" min="0" value={form.length_cm} onChange={(e) => setField('length_cm', e.target.value)} />
+                                            </div>
+                                            <div className="col-xs-4">
+                                                <input className="form-control" type="number" min="0" value={form.width_cm} onChange={(e) => setField('width_cm', e.target.value)} />
+                                            </div>
+                                            <div className="col-xs-4">
+                                                <input className="form-control" type="number" min="0" value={form.height_cm} onChange={(e) => setField('height_cm', e.target.value)} />
+                                            </div>
+                                        </div>
+                                    </>
+                                ) : null}
+
+                                {visible.includes('shipping') ? (
+                                    <>
+                                        <div className="row">
+                                            <div className="col-xs-4">
+                                                <span className="h-label">{t('operations.bulk_update_by_code.shipping_provider')}</span>
+                                            </div>
+                                            <div className="col-xs-4">
+                                                <span className="h-label">{t('operations.bulk_update_by_code.ship_via')}</span>
+                                            </div>
+                                            <div className="col-xs-4">
+                                                <span className="h-label">{t('operations.bulk_update_by_code.weight')}</span>
+                                            </div>
+                                        </div>
+                                        <div className="row form-group">
+                                            <div className="col-xs-4">
+                                                <select className="form-control" value={form.shipping_provider} onChange={(e) => onProviderChange(e.target.value)}>
+                                                    <option value="">{t('operations.bulk_update_by_code.shipping_provider_placeholder')}</option>
+                                                    {providers.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+                                                </select>
+                                            </div>
+                                            <div className="col-xs-4">
+                                                <select className="form-control" value={form.shipping_method} onChange={(e) => setField('shipping_method', e.target.value)}>
+                                                    <option value="">&nbsp;</option>
+                                                    {transportOptions.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+                                                </select>
+                                            </div>
+                                            <div className="col-xs-4">
+                                                <input className="form-control" type="number" min="0" value={form.weight_grams} onChange={(e) => setField('weight_grams', e.target.value)} />
+                                            </div>
+                                        </div>
+                                    </>
+                                ) : null}
+
+                                {visible.includes('delivery_status') ? (
+                                    <div className="form-group">
+                                        <span className="h-label">{t('operations.bulk_update_by_code.delivery_status')}</span>
+                                        <select className="form-control" value={form.delivery_status} onChange={(e) => setField('delivery_status', e.target.value)}>
+                                            <option value="">{t('operations.bulk_update_by_code.delivery_status_placeholder')}</option>
+                                            {deliveryStatuses.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+                                        </select>
+                                    </div>
+                                ) : null}
+
+                                {visible.includes('reconciliation_status') ? (
+                                    <div className="form-group">
+                                        <span className="h-label">{t('operations.bulk_update_by_code.reconciliation_status')}</span>
+                                        <select className="form-control" value={form.reconciliation_status} onChange={(e) => setField('reconciliation_status', e.target.value)}>
+                                            <option value="">{t('operations.bulk_update_by_code.select_placeholder')}</option>
+                                            {reconStatuses.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+                                        </select>
+                                    </div>
+                                ) : null}
+
+                                {visible.includes('accounting_note') ? (
+                                    <div className="form-group">
+                                        <span className="h-label">{t('operations.bulk_update_by_code.accounting_note')}</span>
+                                        <textarea className="form-control" rows={4} value={form.accounting_note} onChange={(e) => setField('accounting_note', e.target.value)} />
+                                    </div>
+                                ) : null}
+
+                                {visible.includes('care') ? (
+                                    <div className="row">
+                                        <div className="col-xs-6 form-group">
+                                            <span className="h-label">{t('operations.bulk_update_by_code.care_status')}</span>
+                                            <select className="form-control" value={form.warehouse_care_status} onChange={(e) => setField('warehouse_care_status', e.target.value)}>
+                                                <option value="">{t('operations.bulk_update_by_code.select_placeholder')}</option>
+                                                {careStatuses.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+                                            </select>
+                                        </div>
+                                        <div className="col-xs-6 form-group">
+                                            <span className="h-label">{t('operations.bulk_update_by_code.care_note')}</span>
+                                            <input className="form-control" value={form.warehouse_care_note} onChange={(e) => setField('warehouse_care_note', e.target.value)} />
+                                        </div>
+                                    </div>
+                                ) : null}
+
+                                {visible.includes('note') ? (
+                                    <div className="form-group">
+                                        <span className="h-label">{t('operations.bulk_update_by_code.note')}</span>
+                                        <input className="form-control" value={form.note} onChange={(e) => setField('note', e.target.value)} />
+                                    </div>
+                                ) : null}
+                            </div>
+                        ) : null}
                     </div>
 
                     {results.length > 0 ? (
                         <div className="ps-wh-bulk-results">
-                            <h4>Kết quả</h4>
+                            <div className="ps-wh-bulk-progress-sep" />
+                            <h4 className="ps-wh-bulk-results-title">{t('operations.bulk_update_by_code.results')}</h4>
                             <table className="table table-bordered table-striped">
                                 <thead>
                                     <tr>
-                                        <th>Mã nhập</th>
-                                        <th>Mã đơn</th>
-                                        <th>KQ</th>
-                                        <th>Chi tiết</th>
+                                        <th>{t('operations.bulk_update_by_code.col_input')}</th>
+                                        <th>{t('operations.bulk_update_by_code.col_order')}</th>
+                                        <th>{t('operations.bulk_update_by_code.col_result')}</th>
+                                        <th>{t('operations.bulk_update_by_code.col_detail')}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -319,14 +406,14 @@ export default function BulkUpdateByCode({
                                         <tr key={`${row.code}-${index}`} className={row.ok ? '' : 'danger'}>
                                             <td>{row.code}</td>
                                             <td>{row.order_code || '—'}</td>
-                                            <td>{row.ok ? 'OK' : 'Lỗi'}</td>
+                                            <td>{row.ok ? t('operations.bulk_update_by_code.result_ok') : t('operations.bulk_update_by_code.result_fail')}</td>
                                             <td>{row.message}</td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
                             <button type="button" className="btn btn-default btn-sm" onClick={() => router.visit(backUrl)}>
-                                Quay lại tác nghiệp
+                                {t('operations.bulk_update_by_code.back')}
                             </button>
                         </div>
                     ) : null}
