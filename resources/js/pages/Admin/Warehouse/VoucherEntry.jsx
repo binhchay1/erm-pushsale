@@ -140,6 +140,9 @@ export default function VoucherEntry({
         document_date: voucher?.document_date || todayIso(),
         partner: voucher?.partner || '',
         note: voucher?.note || '',
+        deliverer_name: voucher?.deliverer_name || '',
+        warehouse_keeper: voucher?.warehouse_keeper || '',
+        chief_accountant: voucher?.chief_accountant || '',
         creator_name: voucher?.created_by || authUser?.name || '',
     }));
     const [lines, setLines] = useState(() => {
@@ -159,16 +162,20 @@ export default function VoucherEntry({
         return [];
     });
     const [pendingProductId, setPendingProductId] = useState('');
+    const [pendingStockProductId, setPendingStockProductId] = useState('');
     const [status, setStatus] = useState(voucher?.status || 'draft');
     const [voucherId, setVoucherId] = useState(voucher?.id || null);
+    const [createdAtLabel, setCreatedAtLabel] = useState(voucher?.created_at || '');
     const [busy, setBusy] = useState(false);
     const [boostBelow, setBoostBelow] = useState(0);
     const [boostAdd, setBoostAdd] = useState(1000);
     /** Pushsale-style column apply radios: when on, edits propagate to every line / new lines inherit last values. */
     const [applyFlags, setApplyFlags] = useState({
+        quantity: false,
         unit_cost: false,
         batch_code: false,
         expiry_date: false,
+        location_code: false,
     });
 
     useEffect(() => { if (pageRuntimeError) toast.error(pageRuntimeError); }, [pageRuntimeError]);
@@ -199,6 +206,15 @@ export default function VoucherEntry({
         });
     };
 
+    const applyColumnLabelKey = (field) => {
+        if (field === 'quantity') return 'col_qty';
+        if (field === 'unit_cost') return 'col_unit_cost';
+        if (field === 'batch_code') return 'col_batch';
+        if (field === 'expiry_date') return 'col_expiry';
+        if (field === 'location_code') return 'col_location';
+        return 'col_note';
+    };
+
     const toggleApplyFlag = (field) => {
         setApplyFlags((prev) => {
             const next = !prev[field];
@@ -207,15 +223,31 @@ export default function VoucherEntry({
                     ?? lines[0]?.[field]
                     ?? '';
                 if (seed !== '' && seed !== undefined && seed !== null) {
-                    setLines((rows) => rows.map((line) => ({ ...line, [field]: seed })));
+                    setLines((rows) => rows.map((line) => (
+                        field === 'quantity'
+                            ? { ...line, quantity: seed, document_quantity: seed }
+                            : { ...line, [field]: seed }
+                    )));
                     toast.success(t('operations.voucher_entry.apply_column_ok', {
-                        column: t(`operations.voucher_entry.col_${field === 'unit_cost' ? 'unit_cost' : field === 'batch_code' ? 'batch' : 'expiry'}`),
+                        column: t(`operations.voucher_entry.${applyColumnLabelKey(field)}`),
                     }));
                 }
             }
             return { ...prev, [field]: next };
         });
     };
+
+    const renderApplyTick = (field) => (
+        <label className="ps-voucher-col-apply" title={t('operations.voucher_entry.apply_column_hint')}>
+            <input
+                type="checkbox"
+                className="ps-voucher-col-apply__tick"
+                checked={Boolean(applyFlags[field])}
+                disabled={isConfirmed || busy}
+                onChange={() => toggleApplyFlag(field)}
+            />
+        </label>
+    );
 
     const removeLine = (key) => setLines((prev) => prev.filter((line) => line.key !== key));
 
@@ -237,22 +269,27 @@ export default function VoucherEntry({
             return;
         }
         const last = lines[lines.length - 1];
+        const qtySeed = applyFlags.quantity && last ? Number(last.quantity) || 1 : 1;
         setLines((prev) => [
             ...prev,
             {
                 ...emptyLine(),
                 product_id: id,
+                document_quantity: qtySeed,
+                quantity: qtySeed,
                 unit_cost: applyFlags.unit_cost && last
                     ? Number(last.unit_cost) || 0
                     : Number(product.cost_price || product.unit_price || 0),
                 batch_code: applyFlags.batch_code && last ? (last.batch_code || '') : '',
                 expiry_date: applyFlags.expiry_date && last ? (last.expiry_date || '') : '',
+                location_code: applyFlags.location_code && last ? (last.location_code || '') : '',
                 product: product.name,
                 sku: product.sku,
                 uom: product.unit,
             },
         ]);
         setPendingProductId('');
+        setPendingStockProductId('');
     };
 
     const buildPayload = () => {
@@ -300,6 +337,7 @@ export default function VoucherEntry({
             note: next.note || '',
             creator_name: next.created_by || prev.creator_name,
         }));
+        if (next.created_at) setCreatedAtLabel(next.created_at);
         if (Array.isArray(next.lines)) {
             setLines(mapVoucherLines(next.lines));
         }
@@ -370,10 +408,14 @@ export default function VoucherEntry({
                 document_date: todayIso(),
                 partner: '',
                 note: '',
+                deliverer_name: '',
+                warehouse_keeper: '',
+                chief_accountant: '',
                 creator_name: authUser?.name || '',
             });
             setLines([]);
             setStatus('draft');
+            setCreatedAtLabel('');
             return;
         }
         const ok = await ask({
@@ -517,12 +559,16 @@ export default function VoucherEntry({
                         </button>
                     )}
                 >
-                    <div className="ps-voucher-entry-body box-body">
-                        <div className="ps-voucher-entry-row">
-                            <div className="ps-voucher-entry-col ps-voucher-entry-col--2 form-group">
+                    <div
+                        id="dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho_phInfo"
+                        className="ps-voucher-entry-body box-body"
+                    >
+                        {/* Row 1 — Loại phiếu / Trạng thái | Phiếu tạm | Kho */}
+                        <div className="row">
+                            <div className="col-xs-2 form-group">
                                 <span className="h-label">{t('operations.voucher_entry.type_status')}</span>
                             </div>
-                            <div className="ps-voucher-entry-col ps-voucher-entry-col--2 form-group">
+                            <div className="col-xs-2 form-group">
                                 <select
                                     className="form-control"
                                     value={form.type}
@@ -536,13 +582,13 @@ export default function VoucherEntry({
                                     ))}
                                 </select>
                             </div>
-                            <div className="ps-voucher-entry-col ps-voucher-entry-col--2 form-group text-right">
+                            <div className="col-xs-2 form-group text-right">
                                 <span className="h-text ps-voucher-entry-status">{statusLabel(status, t)}</span>
                             </div>
-                            <div className="ps-voucher-entry-col ps-voucher-entry-col--2 form-group">
+                            <div className="col-xs-2 form-group">
                                 <span className="h-label">{t('operations.voucher_entry.warehouse')}</span>
                             </div>
-                            <div className="ps-voucher-entry-col ps-voucher-entry-col--4 form-group">
+                            <div className="col-xs-4 form-group">
                                 <select
                                     className="form-control"
                                     value={form.warehouse_id}
@@ -559,20 +605,20 @@ export default function VoucherEntry({
                             </div>
                         </div>
 
-                        <div className="ps-voucher-entry-row">
-                            <div className="ps-voucher-entry-col ps-voucher-entry-col--2 form-group">
+                        {/* Row 2 — Mã phiếu / Ngày */}
+                        <div className="row">
+                            <div className="col-xs-2 form-group">
                                 <span className="h-label">{t('operations.voucher_entry.code_date')}</span>
                             </div>
-                            <div className="ps-voucher-entry-col ps-voucher-entry-col--2 form-group">
+                            <div className="col-xs-2 form-group">
                                 <input
                                     className="form-control ps-voucher-entry-code"
                                     value={form.code}
                                     disabled={isConfirmed || busy}
-                                    placeholder={t('operations.voucher_entry.code_placeholder')}
                                     onChange={(event) => patchForm('code', event.target.value.toUpperCase())}
                                 />
                             </div>
-                            <div className="ps-voucher-entry-col ps-voucher-entry-col--2 form-group">
+                            <div className="col-xs-2 form-group">
                                 <input
                                     type="date"
                                     className="form-control"
@@ -581,15 +627,27 @@ export default function VoucherEntry({
                                     onChange={(event) => patchForm('document_date', event.target.value)}
                                 />
                             </div>
-                            <div className="ps-voucher-entry-col ps-voucher-entry-col--2 form-group" aria-hidden="true" />
-                            <div className="ps-voucher-entry-col ps-voucher-entry-col--4 form-group" aria-hidden="true" />
+                            <div className="col-xs-2 form-group" />
+                            <div className="col-xs-4 form-group" />
                         </div>
 
-                        <div className="ps-voucher-entry-row">
-                            <div className="ps-voucher-entry-col ps-voucher-entry-col--2 form-group">
+                        {/* Row 3 — Họ tên người giao | Nhà cung cấp */}
+                        <div className="row">
+                            <div className="col-xs-2 form-group">
+                                <span className="h-label">{t('operations.voucher_entry.deliverer')}</span>
+                            </div>
+                            <div className="col-xs-4 form-group">
+                                <input
+                                    className="form-control"
+                                    value={form.deliverer_name}
+                                    disabled={isConfirmed || busy}
+                                    onChange={(event) => patchForm('deliverer_name', event.target.value)}
+                                />
+                            </div>
+                            <div className="col-xs-2 form-group">
                                 <span className="h-label">{t('operations.voucher_entry.partner')}</span>
                             </div>
-                            <div className="ps-voucher-entry-col ps-voucher-entry-col--4 form-group">
+                            <div className="col-xs-4 form-group">
                                 <input
                                     className="form-control"
                                     value={form.partner}
@@ -597,10 +655,46 @@ export default function VoucherEntry({
                                     onChange={(event) => patchForm('partner', event.target.value)}
                                 />
                             </div>
-                            <div className="ps-voucher-entry-col ps-voucher-entry-col--2 form-group">
+                        </div>
+
+                        {/* Row 4 — Người lập phiếu | Thủ kho */}
+                        <div className="row">
+                            <div className="col-xs-2 form-group">
+                                <span className="h-label">{t('operations.voucher_entry.creator')}</span>
+                            </div>
+                            <div className="col-xs-4 form-group">
+                                <input className="form-control" value={form.creator_name} disabled readOnly />
+                            </div>
+                            <div className="col-xs-2 form-group">
+                                <span className="h-label">{t('operations.voucher_entry.warehouse_keeper')}</span>
+                            </div>
+                            <div className="col-xs-4 form-group">
+                                <input
+                                    className="form-control"
+                                    value={form.warehouse_keeper}
+                                    disabled={isConfirmed || busy}
+                                    onChange={(event) => patchForm('warehouse_keeper', event.target.value)}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Row 5 — Kế toán trưởng | Ghi chú */}
+                        <div className="row">
+                            <div className="col-xs-2 form-group">
+                                <span className="h-label">{t('operations.voucher_entry.chief_accountant')}</span>
+                            </div>
+                            <div className="col-xs-4 form-group">
+                                <input
+                                    className="form-control"
+                                    value={form.chief_accountant}
+                                    disabled={isConfirmed || busy}
+                                    onChange={(event) => patchForm('chief_accountant', event.target.value)}
+                                />
+                            </div>
+                            <div className="col-xs-2 form-group">
                                 <span className="h-label">{t('operations.voucher_entry.note')}</span>
                             </div>
-                            <div className="ps-voucher-entry-col ps-voucher-entry-col--4 form-group">
+                            <div className="col-xs-4 form-group">
                                 <input
                                     className="form-control"
                                     value={form.note}
@@ -610,21 +704,12 @@ export default function VoucherEntry({
                             </div>
                         </div>
 
-                        <div className="ps-voucher-entry-row">
-                            <div className="ps-voucher-entry-col ps-voucher-entry-col--2 form-group">
-                                <span className="h-label">{t('operations.voucher_entry.creator')}</span>
-                            </div>
-                            <div className="ps-voucher-entry-col ps-voucher-entry-col--4 form-group">
-                                <input className="form-control" value={form.creator_name} disabled readOnly />
-                            </div>
-                            <div className="ps-voucher-entry-col ps-voucher-entry-col--6 form-group" aria-hidden="true" />
-                        </div>
-
-                        <div className="ps-voucher-entry-row ps-voucher-entry-row--product">
-                            <div className="ps-voucher-entry-col ps-voucher-entry-col--2 form-group">
+                        {/* Row 6 — Sản phẩm + Import/Xuất Excel */}
+                        <div className="row">
+                            <div className="col-xs-2 form-group">
                                 <span className="h-label">{t('operations.voucher_entry.product')}</span>
                             </div>
-                            <div className="ps-voucher-entry-col ps-voucher-entry-col--4 form-group">
+                            <div className="col-xs-4 form-group">
                                 <ProductSearchSelect
                                     products={products}
                                     value={pendingProductId}
@@ -636,33 +721,37 @@ export default function VoucherEntry({
                                     }}
                                 />
                             </div>
-                            <div className="ps-voucher-entry-col ps-voucher-entry-col--2 form-group" aria-hidden="true">
+                            <div className="col-xs-2 form-group">
                                 <span className="h-label">&nbsp;</span>
                             </div>
-                            <div className="ps-voucher-entry-col ps-voucher-entry-col--2 form-group">
-                                <button
-                                    type="button"
-                                    className="btn-icon btn-sm ps-voucher-entry-excel-btn hidden-print"
-                                    disabled={isConfirmed || busy}
-                                    onClick={() => importInputRef.current?.click()}
+                            <div className="col-xs-2 form-group">
+                                <a
+                                    href="#import-excel"
+                                    className="ps-voucher-excel-link hidden-print"
+                                    onClick={(event) => {
+                                        event.preventDefault();
+                                        if (!isConfirmed && !busy) importInputRef.current?.click();
+                                    }}
                                 >
-                                    <i className="fa fa-file-excel-o" aria-hidden="true" />
+                                    <i className="fa fa-cloud-download" aria-hidden="true" />
                                     {' '}
                                     {t('operations.voucher_entry.import_excel')}
-                                </button>
+                                </a>
                             </div>
-                            <div className="ps-voucher-entry-col ps-voucher-entry-col--2 form-group">
-                                <button
-                                    type="button"
-                                    className="btn-icon btn-sm ps-voucher-entry-excel-btn"
-                                    disabled={busy}
-                                    onClick={exportLines}
+                            <div className="col-xs-2 form-group">
+                                <a
+                                    href="#export-excel"
+                                    className="ps-voucher-excel-link"
+                                    onClick={(event) => {
+                                        event.preventDefault();
+                                        if (!busy) exportLines();
+                                    }}
                                     title={t('operations.voucher_entry.export_excel')}
                                 >
                                     <i className="fa fa-file-excel-o" aria-hidden="true" />
                                     {' '}
                                     {t('operations.voucher_entry.export_excel')}
-                                </button>
+                                </a>
                                 <input
                                     ref={importInputRef}
                                     type="file"
@@ -673,58 +762,54 @@ export default function VoucherEntry({
                             </div>
                         </div>
 
-                        <div className="ps-voucher-entry-row">
-                            <div className="ps-voucher-entry-col ps-voucher-entry-col--12 form-group">
-                                <div className="ps-voucher-entry-table-wrap">
-                                    <table className="table table-bordered ps-voucher-entry-table">
+                        {/* Row 7 — Sản phẩm trong kho */}
+                        <div className="row">
+                            <div className="col-xs-2 form-group">
+                                <span className="h-label">{t('operations.voucher_entry.stock_product')}</span>
+                            </div>
+                            <div className="col-xs-4 form-group">
+                                <ProductSearchSelect
+                                    products={products}
+                                    value={pendingStockProductId}
+                                    disabled={isConfirmed || busy}
+                                    placeholder={t('operations.voucher_entry.select_stock_product')}
+                                    onChange={(value) => {
+                                        setPendingStockProductId(value);
+                                        if (value) addProductLine(value);
+                                    }}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Row 8 — table */}
+                        <div className="row">
+                            <div className="col-xs-12 form-group">
+                                <div className="ps-voucher-entry-table-wrap dragscroll1 tableFixHead">
+                                    <table className="table table-bordered ps-voucher-entry-table pushsale-data-table" id="tableReportSale">
                                         <thead>
-                                            <tr>
-                                                <th>{t('operations.voucher_entry.col_index')}</th>
-                                                <th>{t('operations.voucher_entry.col_product')}</th>
-                                                <th>{t('operations.voucher_entry.col_sku')}</th>
-                                                <th>{t('operations.voucher_entry.col_uom')}</th>
-                                                <th>{t('operations.voucher_entry.col_doc_qty')}</th>
-                                                <th>{t('operations.voucher_entry.col_qty')}</th>
-                                                <th>
-                                                    <label className="ps-voucher-col-apply" title={t('operations.voucher_entry.apply_column_hint')}>
-                                                        <input
-                                                            type="checkbox"
-                                                            className="ps-voucher-col-apply__tick"
-                                                            checked={applyFlags.unit_cost}
-                                                            disabled={isConfirmed || busy}
-                                                            onChange={() => toggleApplyFlag('unit_cost')}
-                                                        />
-                                                        <span>{t('operations.voucher_entry.col_unit_cost')}</span>
-                                                    </label>
-                                                </th>
-                                                <th>{t('operations.voucher_entry.col_total')}</th>
-                                                <th>
-                                                    <label className="ps-voucher-col-apply" title={t('operations.voucher_entry.apply_column_hint')}>
-                                                        <input
-                                                            type="checkbox"
-                                                            className="ps-voucher-col-apply__tick"
-                                                            checked={applyFlags.batch_code}
-                                                            disabled={isConfirmed || busy}
-                                                            onChange={() => toggleApplyFlag('batch_code')}
-                                                        />
-                                                        <span>{t('operations.voucher_entry.col_batch')}</span>
-                                                    </label>
-                                                </th>
-                                                <th>
-                                                    <label className="ps-voucher-col-apply" title={t('operations.voucher_entry.apply_column_hint')}>
-                                                        <input
-                                                            type="checkbox"
-                                                            className="ps-voucher-col-apply__tick"
-                                                            checked={applyFlags.expiry_date}
-                                                            disabled={isConfirmed || busy}
-                                                            onChange={() => toggleApplyFlag('expiry_date')}
-                                                        />
-                                                        <span>{t('operations.voucher_entry.col_expiry')}</span>
-                                                    </label>
-                                                </th>
-                                                <th>{t('operations.voucher_entry.col_location')}</th>
-                                                <th>{t('operations.voucher_entry.col_note')}</th>
-                                                <th className="hidden-print" />
+                                            <tr className="ps-voucher-head-labels">
+                                                <th style={{ width: 50 }}>{t('operations.voucher_entry.col_index')}</th>
+                                                <th className="no-wrap" style={{ minWidth: 130 }}>{t('operations.voucher_entry.col_product')}</th>
+                                                <th className="no-wrap text-center" style={{ width: 100 }}>{t('operations.voucher_entry.col_sku')}</th>
+                                                <th className="no-wrap text-center" style={{ width: 60 }}>{t('operations.voucher_entry.col_uom')}</th>
+                                                <th className="no-wrap text-center" style={{ width: 70 }}>{t('operations.voucher_entry.col_doc_qty')}</th>
+                                                <th className="no-wrap text-center" style={{ width: 70 }}>{t('operations.voucher_entry.col_qty')}</th>
+                                                <th className="no-wrap text-center" style={{ width: 90 }}>{t('operations.voucher_entry.col_unit_cost')}</th>
+                                                <th className="no-wrap text-center" style={{ width: 100 }}>{t('operations.voucher_entry.col_total')}</th>
+                                                <th className="no-wrap text-center" style={{ width: 80 }}>{t('operations.voucher_entry.col_batch')}</th>
+                                                <th className="no-wrap text-center" style={{ width: 100 }}>{t('operations.voucher_entry.col_expiry')}</th>
+                                                <th className="no-wrap text-center">{t('operations.voucher_entry.col_location')}</th>
+                                                <th className="no-wrap text-center">{t('operations.voucher_entry.col_note')}</th>
+                                                <th className="no-wrap text-center hidden-print" style={{ width: 40 }} />
+                                            </tr>
+                                            {/* Tick apply-all: second header row under labels (not inline with titles) */}
+                                            <tr className="ps-voucher-apply-row">
+                                                <th colSpan={6} />
+                                                <th className="text-center">{renderApplyTick('unit_cost')}</th>
+                                                <th />
+                                                <th className="text-center">{renderApplyTick('batch_code')}</th>
+                                                <th className="text-center">{renderApplyTick('expiry_date')}</th>
+                                                <th colSpan={3} />
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -846,18 +931,29 @@ export default function VoucherEntry({
                             </div>
                         </div>
 
-                        <div className="ps-voucher-entry-row ps-voucher-entry-row--footer">
-                            <div className="ps-voucher-entry-col ps-voucher-entry-col--6 form-group text-left">
+                        {/* Footer — notice + actions + tester tools */}
+                        <div className="row ps-voucher-entry-row--footer">
+                            <div className="col-xs-6 form-group text-left">
                                 <div className="notice ps-voucher-entry-notice hidden-print">
-                                    <div>- {t('operations.voucher_entry.notice_confirmed')}</div>
-                                    <div>- {t('operations.voucher_entry.notice_import')}</div>
+                                    - {t('operations.voucher_entry.notice_confirmed')}
+                                    <br />
+                                    - {t('operations.voucher_entry.notice_import')}
                                 </div>
+                                {(createdAtLabel || form.creator_name) ? (
+                                    <span className="ps-voucher-entry-logs">
+                                        <br />
+                                        - {t('operations.voucher_entry.created_meta', {
+                                            user: form.creator_name || '—',
+                                            time: createdAtLabel || '—',
+                                        })}
+                                    </span>
+                                ) : null}
                             </div>
-                            <div className="ps-voucher-entry-col ps-voucher-entry-col--6 form-group text-right hidden-print">
+                            <div className="col-xs-6 form-group text-right hidden-print">
                                 <div className="ps-voucher-entry-footer-actions">
                                     <button
                                         type="button"
-                                        className="btn btn-sm btn-danger"
+                                        className="btn btn-sm btn-danger mr15"
                                         disabled={busy || isConfirmed}
                                         onClick={deleteVoucher}
                                     >
@@ -865,7 +961,7 @@ export default function VoucherEntry({
                                     </button>
                                     <button
                                         type="button"
-                                        className="btn btn-sm btn-success"
+                                        className="btn btn-sm btn-success mr15"
                                         disabled={busy || isConfirmed}
                                         onClick={completeVoucher}
                                     >
@@ -881,7 +977,7 @@ export default function VoucherEntry({
                                     </button>
                                     <button
                                         type="button"
-                                        className="btn btn-sm btn-primary"
+                                        className="btn btn-sm btn-primary btn-in mr15"
                                         disabled={busy}
                                         onClick={() => window.print()}
                                     >
@@ -891,11 +987,11 @@ export default function VoucherEntry({
 
                                 {canTesterTools ? (
                                     <div className="ps-voucher-entry-tester">
-                                        <div className="ps-voucher-entry-tester-row">
-                                            <div className="ps-voucher-entry-col ps-voucher-entry-col--2">
+                                        <div className="row">
+                                            <div className="col-xs-2">
                                                 <span className="h-label">{t('operations.voucher_entry.boost_below')}</span>
                                             </div>
-                                            <div className="ps-voucher-entry-col ps-voucher-entry-col--2">
+                                            <div className="col-xs-2">
                                                 <input
                                                     type="number"
                                                     className="form-control"
@@ -903,10 +999,10 @@ export default function VoucherEntry({
                                                     onChange={(event) => setBoostBelow(event.target.value)}
                                                 />
                                             </div>
-                                            <div className="ps-voucher-entry-col ps-voucher-entry-col--2">
+                                            <div className="col-xs-2">
                                                 <span className="h-label">{t('operations.voucher_entry.boost_add')}</span>
                                             </div>
-                                            <div className="ps-voucher-entry-col ps-voucher-entry-col--3">
+                                            <div className="col-xs-3">
                                                 <input
                                                     type="number"
                                                     className="form-control"
@@ -914,7 +1010,7 @@ export default function VoucherEntry({
                                                     onChange={(event) => setBoostAdd(event.target.value)}
                                                 />
                                             </div>
-                                            <div className="ps-voucher-entry-col ps-voucher-entry-col--3">
+                                            <div className="col-xs-3">
                                                 <button
                                                     type="button"
                                                     className="btn btn-sm btn-primary"

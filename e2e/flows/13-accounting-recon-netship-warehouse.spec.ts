@@ -166,17 +166,17 @@ test.describe('13 — Kế toán đối soát + NetShip + Kho', () => {
         await expect(page).not.toHaveURL(/\/login/);
         await expect(page.locator('body')).not.toContainText(/Server Error|Whoops|SQLSTATE/i);
 
-        const importBtn = page.locator('.ps-voucher-entry-excel-btn, button.ps-voucher-entry-excel-btn, label.ps-voucher-entry-excel-btn')
+        const importBtn = page.locator('.ps-voucher-excel-link, .ps-voucher-entry-excel-btn')
             .filter({ hasText: /Import Excel/i })
             .first();
-        const exportBtn = page.locator('.ps-voucher-entry-excel-btn, button.ps-voucher-entry-excel-btn, label.ps-voucher-entry-excel-btn')
+        const exportBtn = page.locator('.ps-voucher-excel-link, .ps-voucher-entry-excel-btn')
             .filter({ hasText: /Xuất Excel/i })
             .first();
         await expect(importBtn).toBeVisible({ timeout: 20_000 });
         await expect(exportBtn).toBeVisible({ timeout: 10_000 });
 
         const box = await importBtn.boundingBox();
-        expect((box?.width ?? 0) > 60, `Import Excel button too narrow: ${box?.width}`).toBeTruthy();
+        expect((box?.width ?? 0) > 60, `Import Excel link too narrow: ${box?.width}`).toBeTruthy();
     });
 
     test('NetShip: cấu hình đối tác + ShopID kho không 500', async ({ page }) => {

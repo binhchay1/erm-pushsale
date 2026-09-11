@@ -696,6 +696,7 @@ class PageResourceManager
             'note' => $voucher->note,
             'status' => (string) $voucher->status,
             'created_by' => $voucher->creator?->name,
+            'created_at' => $voucher->created_at?->format('d/m/Y H:i:s'),
             'approved_by' => $voucher->approver?->name,
             'warehouse_name' => $voucher->warehouse?->name,
             'lines' => $voucher->lines->values()->map(fn (WarehouseVoucherLine $line): array => [

@@ -777,61 +777,65 @@ html body.pushsale-app-body .pushsale-page[data-page-code="5.3.1"] .box-body {
     }
 }
 
-/* React voucher entry form (5.3.1) — sample CapNhatPhieuXuatNhapKho row/col rhythm */
+/* React voucher entry form (5.3.1) — mirror CapNhatPhieuXuatNhapKho Bootstrap row/col */
 .pushsale-page.ps-voucher-entry-page .ps-page-shell__body {
-    /* Page already uses --ps-header-x; keep body flush with title. */
-    padding-top: 12px !important;
+    padding-top: 8px !important;
     padding-left: 0 !important;
     padding-right: 0 !important;
 }
 
 .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-body {
-    display: block;
-    max-width: none;
-    width: 100%;
-    margin: 0;
-    padding: 4px 0 28px;
+    display: block !important;
+    width: auto !important;
+    max-width: 1200px !important;
+    margin: 0 0 0 14px !important;
+    padding: 0 0 24px !important;
     box-sizing: border-box;
 }
 
-.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-error {
-    max-width: none;
-    margin: 0 0 10px;
-    padding: 0;
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-body > .row {
+    display: block !important;
+    margin-left: -7px !important;
+    margin-right: -7px !important;
+    margin-bottom: 4px !important;
 }
 
-/* Compact left-aligned form (Pushsale density) — table/footer stay full width. */
-.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-row:not(.ps-voucher-entry-row--footer) {
-    display: grid;
-    grid-template-columns: repeat(12, minmax(0, 78px));
-    justify-content: start;
-    gap: 6px 10px;
-    align-items: center;
-    margin: 0 0 8px;
-    max-width: 100%;
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-body > .row::before,
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-body > .row::after {
+    content: " ";
+    display: table;
 }
 
-.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-row:has(.ps-voucher-entry-table-wrap),
-.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-row--footer {
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    justify-content: stretch;
-    width: 100%;
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-body > .row::after {
+    clear: both;
 }
 
-.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-col {
-    min-width: 0;
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-body > .row > [class*="col-xs-"] {
+    float: left !important;
+    position: relative;
+    min-height: 1px;
+    padding-left: 7px !important;
+    padding-right: 7px !important;
+    box-sizing: border-box;
+    margin-bottom: 4px !important;
 }
 
-.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-col.form-group {
-    margin-bottom: 0;
-}
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-body > .row > .col-xs-1 { width: 8.33333333% !important; }
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-body > .row > .col-xs-2 { width: 16.66666667% !important; }
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-body > .row > .col-xs-3 { width: 25% !important; }
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-body > .row > .col-xs-4 { width: 33.33333333% !important; }
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-body > .row > .col-xs-5 { width: 41.66666667% !important; }
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-body > .row > .col-xs-6 { width: 50% !important; }
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-body > .row > .col-xs-7 { width: 58.33333333% !important; }
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-body > .row > .col-xs-8 { width: 66.66666667% !important; }
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-body > .row > .col-xs-9 { width: 75% !important; }
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-body > .row > .col-xs-10 { width: 83.33333333% !important; }
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-body > .row > .col-xs-11 { width: 91.66666667% !important; }
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-body > .row > .col-xs-12 { width: 100% !important; }
 
-.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-col--1 { grid-column: span 1; }
-.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-col--2 { grid-column: span 2; }
-.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-col--3 { grid-column: span 3; }
-.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-col--4 { grid-column: span 4; }
-.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-col--6 { grid-column: span 6; }
-.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-col--12 { grid-column: span 12; }
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-body .form-group {
+    margin-bottom: 0 !important;
+}
 
 .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-body .h-label,
 .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-body .h-text {
@@ -851,62 +855,96 @@ html body.pushsale-app-body .pushsale-page[data-page-code="5.3.1"] .box-body {
 
 .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-body .form-control,
 .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-body .ps-product-search-select {
-    width: 100%;
+    width: 100% !important;
     max-width: 100%;
+    height: 31px !important;
+    min-height: 31px !important;
+    font-size: 12px !important;
 }
 
 .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-code {
     text-transform: uppercase;
 }
 
-.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-excel-btn {
+/* Excel = text links (not blue pills) */
+.pushsale-page.ps-voucher-entry-page .ps-voucher-excel-link {
     display: inline-flex !important;
     align-items: center;
-    justify-content: flex-start;
-    gap: 6px;
-    width: auto;
-    max-width: 100%;
+    gap: 5px;
     min-height: 30px;
-    padding: 5px 10px !important;
+    line-height: 30px;
+    padding: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    color: #2675bf !important;
+    font-size: 12px !important;
+    font-weight: 600;
+    text-decoration: none !important;
     white-space: nowrap;
-    overflow: visible;
-    text-overflow: clip;
-    vertical-align: middle;
+    cursor: pointer;
 }
 
-.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-row--product .ps-voucher-entry-excel-btn {
-    margin-top: 0;
+.pushsale-page.ps-voucher-entry-page .ps-voucher-excel-link .fa-cloud-download {
+    color: #2675bf;
+}
+
+.pushsale-page.ps-voucher-entry-page .ps-voucher-excel-link .fa-file-excel-o {
+    color: #1d7a3a;
+}
+
+.pushsale-page.ps-voucher-entry-page .ps-voucher-excel-link:hover {
+    text-decoration: underline !important;
 }
 
 .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-table-wrap {
     overflow-x: auto;
-    margin: 4px 0 8px;
+    margin: 6px 0 8px;
+    max-height: 420px;
 }
 
 .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-table {
     width: 100%;
     min-width: 980px;
     background: #fff;
+    margin-bottom: 0;
 }
 
 .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-table th {
     white-space: nowrap;
     text-align: center;
     vertical-align: middle;
-    background: #2675bf;
-    color: #fff;
+    background: #2675bf !important;
+    color: #fff !important;
+    border-color: #1f63a3 !important;
+    font-size: 12px !important;
+    font-weight: 700;
+    padding: 6px 7px !important;
+}
+
+.pushsale-page.ps-voucher-entry-page .ps-voucher-head-labels th {
+    padding-bottom: 2px !important;
 }
 
 .pushsale-page.ps-voucher-entry-page .ps-voucher-col-apply {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
     margin: 0;
-    font-weight: 600;
     cursor: pointer;
     user-select: none;
     color: inherit;
+    line-height: 1;
+}
+
+/* Apply ticks: second thead row under labels */
+.pushsale-page.ps-voucher-entry-page .ps-voucher-apply-row th {
+    background: #2675bf !important;
+    border-color: #1f63a3 !important;
+    color: #fff !important;
+    padding: 0 6px 6px !important;
+    height: 22px;
+    vertical-align: middle;
+    font-weight: 400;
 }
 
 .pushsale-page.ps-voucher-entry-page .ps-voucher-col-apply__tick {
@@ -934,11 +972,12 @@ html body.pushsale-app-body .pushsale-page[data-page-code="5.3.1"] .box-body {
 
 .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-table td {
     vertical-align: middle;
+    font-size: 12px;
 }
 
 .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-table .form-control {
     min-width: 70px;
-    height: 30px;
+    height: 30px !important;
     padding: 2px 6px;
 }
 
@@ -955,15 +994,27 @@ html body.pushsale-app-body .pushsale-page[data-page-code="5.3.1"] .box-body {
 }
 
 .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-row--footer {
-    align-items: flex-start;
-    margin-top: 4px;
+    margin-top: 6px !important;
 }
 
 .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-notice {
+    display: inline-block;
+    max-width: 100%;
+    padding: 8px 10px;
+    background: #fff8dc;
+    border: 1px solid #f0e0a0;
     color: #555;
     font-size: 12px;
     font-style: italic;
     line-height: 1.55;
+}
+
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-logs {
+    display: inline-block;
+    margin-top: 2px;
+    color: #555;
+    font-size: 12px;
+    line-height: 1.45;
 }
 
 .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-footer-actions {
@@ -979,28 +1030,54 @@ html body.pushsale-app-body .pushsale-page[data-page-code="5.3.1"] .box-body {
     margin-right: 0;
 }
 
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-footer-actions .mr15 {
+    margin-right: 15px !important;
+}
+
 .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-tester {
     margin-top: 15px;
     text-align: left;
+    padding-top: 0;
 }
 
-.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-tester-row {
-    display: grid;
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    gap: 6px 10px;
-    align-items: center;
-    margin-bottom: 12px;
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-tester > .row {
+    display: block !important;
+    margin-left: -7px !important;
+    margin-right: -7px !important;
+    margin-bottom: 12px !important;
 }
 
-.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-tester-row .h-label {
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-tester > .row::before,
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-tester > .row::after {
+    content: " ";
+    display: table;
+}
+
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-tester > .row::after {
+    clear: both;
+}
+
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-tester > .row > [class*="col-xs-"] {
+    float: left !important;
+    position: relative;
+    min-height: 1px;
+    padding-left: 7px !important;
+    padding-right: 7px !important;
+    box-sizing: border-box;
+}
+
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-tester > .row > .col-xs-2 { width: 16.66666667% !important; }
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-tester > .row > .col-xs-3 { width: 25% !important; }
+
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-tester .h-label {
     text-align: left;
 }
 
-.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-tester-row .form-control {
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-tester .form-control {
     width: 100%;
 }
 
-.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-tester-row .btn {
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-tester .btn {
     width: 100%;
     justify-content: center;
 }
@@ -1023,6 +1100,7 @@ html body.pushsale-app-body .pushsale-page[data-page-code="5.3.1"] .box-body {
 
 .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-tester-reset .btn {
     flex: 0 0 auto;
+    width: auto;
     white-space: nowrap;
 }
 
@@ -1042,26 +1120,26 @@ html body.pushsale-app-body .pushsale-page[data-page-code="5.3.1"] .box-body {
     display: none !important;
 }
 
+/* Row trash icons must stay orange — override .btn-icon blue fill on 5.3 */
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-table .btn-icon.text-orange {
+    background: transparent !important;
+    border: 0 !important;
+    color: darkorange !important;
+    min-height: auto !important;
+    padding: 0 4px !important;
+}
+
 @media (max-width: 991px) {
-    .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-row,
-    .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-tester-row {
-        grid-template-columns: 1fr 1fr;
-        gap: 8px 10px;
+    .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-body {
+        margin-left: 8px !important;
+        margin-right: 8px !important;
+        max-width: none !important;
     }
 
-    .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-col--1,
-    .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-col--2,
-    .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-col--3,
-    .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-col--4,
-    .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-col--6,
-    .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-col--12 {
-        grid-column: auto;
-    }
-
-    .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-row--product .ps-voucher-entry-col--4,
-    .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-row .ps-voucher-entry-col--12,
-    .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-row--footer .ps-voucher-entry-col--6 {
-        grid-column: 1 / -1;
+    .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-body > .row > [class*="col-xs-"],
+    .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-tester > .row > [class*="col-xs-"] {
+        float: none !important;
+        width: 100% !important;
     }
 
     .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-tester-reset {
@@ -1077,7 +1155,7 @@ html body.pushsale-app-body .pushsale-page[data-page-code="5.3.1"] .box-body {
 @media print {
     .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-footer-actions,
     .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-tester,
-    .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-excel-btn,
+    .pushsale-page.ps-voucher-entry-page .ps-voucher-excel-link,
     .pushsale-page.ps-voucher-entry-page .hidden-print,
     .pushsale-page.ps-voucher-entry-page .ps-header-close-icon {
         display: none !important;

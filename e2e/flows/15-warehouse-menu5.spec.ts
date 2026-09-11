@@ -81,15 +81,25 @@ test.describe('15 — Menu 5 Kho (pages + phiếu NXK)', () => {
         const closeBox = await close.boundingBox();
         expect((closeBox?.width ?? 99) <= 28, `Close button still large: ${closeBox?.width}`).toBeTruthy();
 
-        await expect(page.locator('.ps-voucher-entry-excel-btn').filter({ hasText: /Import Excel/i })).toBeVisible();
-        await expect(page.locator('.ps-voucher-entry-excel-btn').filter({ hasText: /Xuất Excel/i })).toBeVisible();
+        await expect(page.getByText(/Họ tên người giao/i).first()).toBeVisible();
+        await expect(page.getByText(/Thủ kho/i).first()).toBeVisible();
+        await expect(page.getByText(/Kế toán trưởng/i).first()).toBeVisible();
+        await expect(page.getByText(/Sản phẩm trong kho/i).first()).toBeVisible();
 
-        const unitCostApply = page.locator('label.ps-voucher-col-apply').filter({ hasText: /Giá nhập/i }).locator('input.ps-voucher-col-apply__tick');
-        const batchApply = page.locator('label.ps-voucher-col-apply').filter({ hasText: /^Lô$/i }).locator('input.ps-voucher-col-apply__tick');
-        const expiryApply = page.locator('label.ps-voucher-col-apply').filter({ hasText: /Ngày hết hạn/i }).locator('input.ps-voucher-col-apply__tick');
+        await expect(page.locator('.ps-voucher-excel-link').filter({ hasText: /Import Excel/i })).toBeVisible();
+        await expect(page.locator('.ps-voucher-excel-link').filter({ hasText: /Xuất Excel/i })).toBeVisible();
+
+        await expect(page.getByText(/SL chứng từ/i).first()).toBeVisible();
+
+        const unitCostApply = page.locator('tr.ps-voucher-apply-row label.ps-voucher-col-apply').nth(0).locator('input.ps-voucher-col-apply__tick');
+        const batchApply = page.locator('tr.ps-voucher-apply-row label.ps-voucher-col-apply').nth(1).locator('input.ps-voucher-col-apply__tick');
+        const expiryApply = page.locator('tr.ps-voucher-apply-row label.ps-voucher-col-apply').nth(2).locator('input.ps-voucher-col-apply__tick');
         await expect(unitCostApply).toBeVisible();
         await expect(batchApply).toBeVisible();
         await expect(expiryApply).toBeVisible();
+        // Labels row has text only; ticks live on the row below
+        await expect(page.locator('tr.ps-voucher-head-labels label.ps-voucher-col-apply')).toHaveCount(0);
+        await expect(page.locator('tr.ps-voucher-apply-row')).toBeVisible();
 
         const control = page.locator('.ps-voucher-entry-body button.ps-select__control, .ps-product-search-select button').first();
         if (await control.isVisible().catch(() => false)) {
@@ -101,7 +111,8 @@ test.describe('15 — Menu 5 Kho (pages + phiếu NXK)', () => {
             }
         }
 
-        const costInputs = page.locator('.ps-voucher-entry-table tbody tr input[type="number"]').nth(2);
+        // number inputs per data row: document_quantity, quantity, unit_cost
+        const costInputs = page.locator('.ps-voucher-entry-table tbody tr:not(.ps-voucher-entry-total-row) input[type="number"]').nth(2);
         if (await costInputs.isVisible().catch(() => false)) {
             await costInputs.fill('12345');
             await unitCostApply.check();
