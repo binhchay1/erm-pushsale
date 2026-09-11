@@ -16,7 +16,7 @@ const ROLE_QUICK_LINKS = {
         { href: '/admin/marketing/dashboard', label: 'Dashboard MKT', icon: 'fa-line-chart' },
     ],
     warehouse: [
-        { href: '/warehouse/operations', label: 'Kho tác nghiệp', icon: 'fa-truck' },
+        { href: '/warehouse/workspace', label: 'Kho tác nghiệp', icon: 'fa-truck' },
         { href: '/warehouse/inventory', label: 'Tồn kho', icon: 'fa-cubes' },
         { href: '/warehouse/incidents', label: 'Sự cố', icon: 'fa-exclamation-triangle' },
     ],
