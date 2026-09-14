@@ -50,28 +50,22 @@ export function ShopSwitcher() {
     }
 
     const label = current?.name ?? list[0]?.name ?? t('shops.switcher_placeholder');
-
-    if (list.length === 1) {
-        return (
-            <span className="pushsale-shop-switcher is-single" title={t('shops.switcher_title')}>
-                <i className="fa fa-store" aria-hidden="true" />
-                <span className="pushsale-shop-switcher__label">{label}</span>
-            </span>
-        );
-    }
+    const canSwitch = list.length > 1;
 
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <button
                     type="button"
-                    className="pushsale-shop-switcher"
-                    title={t('shops.switcher_title')}
+                    className={`pushsale-shop-switcher ${canSwitch ? '' : 'is-single'}`.trim()}
+                    title={label}
                     aria-label={t('shops.switcher_title')}
                 >
                     <i className="fa fa-store" aria-hidden="true" />
                     <span className="pushsale-shop-switcher__label">{label}</span>
-                    <i className="fa fa-caret-down pushsale-shop-switcher__caret" aria-hidden="true" />
+                    {canSwitch ? (
+                        <i className="fa fa-caret-down pushsale-shop-switcher__caret" aria-hidden="true" />
+                    ) : null}
                 </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" sideOffset={4} className="pushsale-shop-switcher-dropdown">
@@ -80,6 +74,7 @@ export function ShopSwitcher() {
                         key={shop.id}
                         className={`pushsale-shop-switcher-item ${current?.id === shop.id ? 'is-active' : ''}`}
                         onClick={() => switchTo(shop.id)}
+                        disabled={!canSwitch && current?.id === shop.id}
                     >
                         <i className={`fa ${current?.id === shop.id ? 'fa-check' : 'fa-circle-o'}`} aria-hidden="true" />
                         <span>{shop.name}</span>

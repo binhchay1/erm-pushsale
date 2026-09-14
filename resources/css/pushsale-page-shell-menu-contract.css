@@ -686,7 +686,7 @@ html body.pushsale-app-body .ps-page-viewport .ps-login-toolbar .form-control {
     html body.pushsale-app-body .pushsale-header-brand,
     html body.pushsale-app-body .pushsale-wrapper.sidebar-open .pushsale-header-brand,
     html body.pushsale-app-body .pushsale-wrapper.sidebar-collapse .pushsale-header-brand {
-        max-width: min(38vw, 132px) !important;
+        max-width: min(36vw, 128px) !important;
     }
 
     html body.pushsale-app-body .pushsale-user-copy {
