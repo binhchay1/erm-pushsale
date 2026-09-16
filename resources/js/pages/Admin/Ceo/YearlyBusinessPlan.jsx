@@ -1,8 +1,10 @@
 import { Head, router } from '@inertiajs/react';
 import { Fragment, useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
 import { CeoPlanToolbar, ceoMonthOptions, ceoNumberValue } from '@/components/ceo/CeoPlanToolbar';
 import AppLayout from '@/layouts/AppLayout';
+import { useT } from '@/providers/I18nProvider';
 
 const monthOptions = ceoMonthOptions();
 
@@ -128,6 +130,7 @@ function NoteDialog({ open, onClose, note }) {
 }
 
 function PlannedDataDialog({ open, filters, onClose, routeUrl }) {
+    const t = useT();
     const [payload, setPayload] = useState({
         year: filters.year,
         months: filters.months?.length ? filters.months : [new Date().getMonth() + 1],
@@ -162,7 +165,15 @@ function PlannedDataDialog({ open, filters, onClose, routeUrl }) {
         setSaving(true);
         router.post(`${routeUrl}/planned-data`, payload, {
             preserveScroll: true,
-            onSuccess: onClose,
+            onSuccess: () => {
+                toast.success(t('ceo.save_data'));
+                onClose();
+            },
+            onError: (errors) => {
+                const message = Object.values(errors || {}).flat().join(' ')
+                    || t('ceo.save_failed');
+                toast.error(message);
+            },
             onFinish: () => setSaving(false),
         });
     };
@@ -172,18 +183,18 @@ function PlannedDataDialog({ open, filters, onClose, routeUrl }) {
             <div className="modal-dialog modal-lg ps-year-plan-data-dialog">
                 <div className="modal-content">
                     <div className="modal-header">
-                        <button type="button" className="close" aria-label="Close" onClick={onClose}><span aria-hidden="true">×</span></button>
-                        <h4 className="modal-title">THÊM DỮ LIỆU KẾ HOẠCH NĂM</h4>
+                        <button type="button" className="close" aria-label={t('ceo.close')} onClick={onClose}><span aria-hidden="true">×</span></button>
+                        <h4 className="modal-title">{t('ceo.dialog_title')}</h4>
                     </div>
                     <div className="modal-body">
                         <div className="ps-year-plan-dialog-note">
-                            Nhập các chỉ số gốc, hệ thống tự tính theo công thức của màn hình: số đơn, doanh số, ngân sách, chi phí và lợi nhuận cho từng tháng được chọn.
+                            {t('ceo.dialog_note')}
                         </div>
                         <div className="ps-year-plan-form-grid">
-                            <label><span>Năm</span><input className="form-control" value={payload.year} onChange={(e) => setField('year', ceoNumberValue(e.target.value))} /></label>
+                            <label><span>{t('ceo.year')}</span><input className="form-control" value={payload.year} onChange={(e) => setField('year', ceoNumberValue(e.target.value))} /></label>
                             <div className="ps-year-plan-month-picker">
-                                <span>Tháng áp dụng</span>
-                                <div>{monthOptions.map((month) => <label key={month}><input type="checkbox" checked={(payload.months ?? []).includes(month)} onChange={() => toggleMonth(month)} /> Tháng {month}</label>)}</div>
+                                <span>{t('ceo.apply_months')}</span>
+                                <div>{monthOptions.map((month) => <label key={month}><input type="checkbox" checked={(payload.months ?? []).includes(month)} onChange={() => toggleMonth(month)} /> {t('ceo.month')} {month}</label>)}</div>
                             </div>
                             <label><span>Số contact (3)</span><input className="form-control" value={payload.contacts} onChange={(e) => setField('contacts', ceoNumberValue(e.target.value))} /></label>
                             <label><span>Tỉ lệ chốt (4)</span><input className="form-control" value={payload.close_rate} onChange={(e) => setField('close_rate', ceoNumberValue(e.target.value))} /></label>
@@ -199,9 +210,9 @@ function PlannedDataDialog({ open, filters, onClose, routeUrl }) {
                         </div>
                     </div>
                     <div className="modal-footer">
-                        <button type="button" className="btn btn-default btn-sm" onClick={onClose}>Đóng</button>
+                        <button type="button" className="btn btn-default btn-sm" onClick={onClose}>{t('ceo.close')}</button>
                         <button type="button" className="btn btn-primary btn-sm" disabled={saving || !(payload.months ?? []).length} onClick={submit}>
-                            <i className={`fa ${saving ? 'fa-spinner fa-spin' : 'fa-save'}`} /> {saving ? 'Đang lưu' : 'Lưu dữ liệu'}
+                            <i className={`fa ${saving ? 'fa-spinner fa-spin' : 'fa-save'}`} /> {saving ? t('ceo.saving') : t('ceo.save_data')}
                         </button>
                     </div>
                 </div>
@@ -211,6 +222,7 @@ function PlannedDataDialog({ open, filters, onClose, routeUrl }) {
 }
 
 export default function YearlyBusinessPlanPage({ schema, rows = [], chart = {}, note = {}, summary = {}, filters: initialFilters, routeUrl = '/admin/ceo/business-plan/yearly' }) {
+    const t = useT();
     const now = new Date();
     const [filters, setFilters] = useState(() => queryFilters({
         year: String(initialFilters?.year ?? now.getFullYear()),
@@ -220,6 +232,7 @@ export default function YearlyBusinessPlanPage({ schema, rows = [], chart = {}, 
     const [showNote, setShowNote] = useState(false);
     const [showData, setShowData] = useState(false);
     const [showToast, setShowToast] = useState(Boolean(summary?.toast));
+    const [monthsOpen, setMonthsOpen] = useState(false);
 
     useEffect(() => {
         setShowToast(Boolean(summary?.toast));
@@ -228,42 +241,92 @@ export default function YearlyBusinessPlanPage({ schema, rows = [], chart = {}, 
         return () => window.clearTimeout(timer);
     }, [summary?.toast]);
 
+    useEffect(() => {
+        setFilters(queryFilters({
+            year: String(initialFilters?.year ?? now.getFullYear()),
+            months: initialFilters?.months ?? monthOptions,
+            discount_mode: initialFilters?.discount_mode ?? 'after_discount',
+        }));
+    }, [initialFilters?.year, initialFilters?.discount_mode, initialFilters?.months]);
+
+    useEffect(() => {
+        if (!monthsOpen) return undefined;
+        const onDocClick = (event) => {
+            if (!event.target?.closest?.('.ps-year-plan-month-select')) {
+                setMonthsOpen(false);
+            }
+        };
+        document.addEventListener('click', onDocClick);
+        return () => document.removeEventListener('click', onDocClick);
+    }, [monthsOpen]);
+
     const years = useMemo(() => [now.getFullYear() + 1, now.getFullYear(), now.getFullYear() - 1, now.getFullYear() - 2, now.getFullYear() - 3, now.getFullYear() - 4, now.getFullYear() - 5], [now]);
-    const runSearch = () => router.get(routeUrl, buildQuery(filters), { preserveScroll: false });
+    const visibleMonths = useMemo(() => {
+        const selected = (filters.months ?? []).map(Number).filter((month) => month >= 1 && month <= 12);
+        return selected.length ? selected : monthOptions;
+    }, [filters.months]);
+    const runSearch = () => {
+        setMonthsOpen(false);
+        router.get(routeUrl, buildQuery(filters), { preserveScroll: false });
+    };
     const toggleMonth = (month) => setFilters((current) => {
         const set = new Set(current.months ?? []);
         if (set.has(month)) set.delete(month); else set.add(month);
         return { ...current, months: [...set].sort((a, b) => a - b) };
     });
+    const toastClass = summary?.toast_type === 'error' ? 'ps-year-plan-toast-danger' : 'ps-year-plan-toast-warning';
 
     return (
         <AppLayout>
             <Head title={schema?.title ?? 'Lập kế hoạch kinh doanh'} />
-            <div className="ps-year-plan-page">
+            <div className="ps-year-plan-page" data-page-code="7.1.2">
                 {showToast && (
-                    <div className="ps-year-plan-toast ps-year-plan-toast-warning">
+                    <div className={`ps-year-plan-toast ${toastClass}`}>
                         <button type="button" onClick={() => setShowToast(false)}>×</button>
-                        <i className="fa fa-warning" />
+                        <i className={`fa ${summary?.toast_type === 'error' ? 'fa-exclamation-circle' : 'fa-warning'}`} />
                         <span>{summary.toast}</span>
                     </div>
                 )}
                 <CeoPlanToolbar
                     title={schema?.title ?? 'Lập kế hoạch kinh doanh'}
-                    className="ps-year-plan-toolbar"
+                    pageCode="7.1.2"
+                    className="ps-year-plan-header"
                     filtersSlot={(
                         <>
                             <select className="form-control" value={filters.year} onChange={(event) => setFilters((current) => ({ ...current, year: event.target.value }))}>
-                                {years.map((year) => <option key={year} value={year}>Năm {year}</option>)}
+                                {years.map((year) => <option key={year} value={year}>{t('ceo.year')} {year}</option>)}
                             </select>
-                            <div className="ps-year-plan-month-select">
-                                <button type="button" className="form-control">{(filters.months ?? []).length === 12 ? 'Chọn tháng' : `Đã chọn ${(filters.months ?? []).length} tháng`}</button>
+                            <div className={`ps-year-plan-month-select${monthsOpen ? ' is-open' : ''}`}>
+                                <button
+                                    type="button"
+                                    className="form-control"
+                                    aria-expanded={monthsOpen}
+                                    onClick={(event) => {
+                                        event.stopPropagation();
+                                        setMonthsOpen((open) => !open);
+                                    }}
+                                >
+                                    {(filters.months ?? []).length === 12 || !(filters.months ?? []).length
+                                        ? t('ceo.select_months')
+                                        : t('ceo.months_selected', { count: (filters.months ?? []).length })}
+                                </button>
                                 <div className="ps-year-plan-month-dropdown">
-                                    {monthOptions.map((month) => <label key={month}><input type="checkbox" checked={(filters.months ?? []).includes(month)} onChange={() => toggleMonth(month)} /> Tháng {month}</label>)}
+                                    {monthOptions.map((month) => (
+                                        <label key={month}>
+                                            <input
+                                                type="checkbox"
+                                                checked={(filters.months ?? []).map(Number).includes(month)}
+                                                onChange={() => toggleMonth(month)}
+                                            />
+                                            {' '}
+                                            {t('ceo.month')} {month}
+                                        </label>
+                                    ))}
                                 </div>
                             </div>
                             <select className="form-control" value={filters.discount_mode} onChange={(event) => setFilters((current) => ({ ...current, discount_mode: event.target.value }))}>
-                                <option value="after_discount">Sau chiết khấu</option>
-                                <option value="before_discount">Trước chiết khấu</option>
+                                <option value="after_discount">{t('ceo.after_discount')}</option>
+                                <option value="before_discount">{t('ceo.before_discount')}</option>
                             </select>
                         </>
                     )}
@@ -272,23 +335,29 @@ export default function YearlyBusinessPlanPage({ schema, rows = [], chart = {}, 
                     exportFilters={buildQuery(filters)}
                     actionsExtra={(
                         <div className="ps-year-plan-actions">
-                            <button type="button" className="btn btn-primary btn-sm" onClick={() => setShowData(true)}><i className="fa fa-plus" /> Thêm dữ liệu</button>
-                            <button type="button" className="ps-year-plan-note-button" title="Chú thích" onClick={() => setShowNote(true)}><i className="fa fa-question-circle" /></button>
+                            <button type="button" className="btn btn-primary btn-sm" onClick={() => setShowData(true)}>
+                                <i className="fa fa-plus" /> {t('ceo.add_data')}
+                            </button>
                         </div>
                     )}
                 />
+
+                <button type="button" className="ps-year-plan-guide-link" onClick={() => setShowNote(true)}>
+                    <i className="fa fa-book" aria-hidden="true" />
+                    {t('ceo.guide_link')}
+                </button>
 
                 <div className="ps-year-plan-table-wrap">
                     <table id="tblData" className="table table-bordered table-multi-select tabledata ps-year-plan-table">
                         <thead>
                             <tr>
-                                <th rowSpan={2}>Tên</th>
-                                <th colSpan={3}>Tổng</th>
-                                {monthOptions.map((month) => <th key={month} colSpan={3}>Tháng {month}</th>)}
+                                <th rowSpan={2}>{t('ceo.col_name')}</th>
+                                <th colSpan={3}>{t('ceo.col_total')}</th>
+                                {visibleMonths.map((month) => <th key={month} colSpan={3}>{t('ceo.month')} {month}</th>)}
                             </tr>
                             <tr>
-                                <th>Dự kiến</th><th>Thực tế</th><th>Tỉ lệ</th>
-                                {monthOptions.map((month) => <Fragment key={`header-${month}`}><th>Dự kiến</th><th>Thực tế</th><th>Tỉ lệ</th></Fragment>)}
+                                <th>{t('ceo.col_planned')}</th><th>{t('ceo.col_actual')}</th><th>{t('ceo.col_ratio')}</th>
+                                {visibleMonths.map((month) => <Fragment key={`header-${month}`}><th>{t('ceo.col_planned')}</th><th>{t('ceo.col_actual')}</th><th>{t('ceo.col_ratio')}</th></Fragment>)}
                             </tr>
                         </thead>
                         <tbody>
@@ -298,7 +367,7 @@ export default function YearlyBusinessPlanPage({ schema, rows = [], chart = {}, 
                                     <td>{formatMetric(row.total?.planned, row.format)}</td>
                                     <td>{formatMetric(row.total?.actual, row.format)}</td>
                                     <td>{percent(row.total?.ratio)}</td>
-                                    {monthOptions.map((month) => (
+                                    {visibleMonths.map((month) => (
                                         <Fragment key={`${row.code}-${month}`}>
                                             <td>{formatMetric(row.months?.[month]?.planned, row.format)}</td>
                                             <td>{formatMetric(row.months?.[month]?.actual, row.format)}</td>
@@ -318,3 +387,4 @@ export default function YearlyBusinessPlanPage({ schema, rows = [], chart = {}, 
         </AppLayout>
     );
 }
+

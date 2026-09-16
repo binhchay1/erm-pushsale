@@ -6,18 +6,24 @@
     font-size: 12px;
 }
 
-.ps-year-plan-toolbar {
-    display: grid;
-    grid-template-columns: 300px 300px 300px 1fr;
-    gap: 30px;
+/* Do NOT restyle .m-header-wrap — PageHeader contract owns padding/shadow.
+ * Only tune filter/action controls inside the shared header. */
+.ps-year-plan-page .ps-page-header .ps-page-header__filters {
+    display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    padding: 26px 16px 18px;
-    background: #fff;
-    border-bottom: 1px solid #ddd;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.13);
+    gap: 8px;
+    min-width: 0;
 }
 
-.ps-year-plan-toolbar .form-control,
+.ps-year-plan-page .ps-page-header .ps-page-header__filters > .form-control,
+.ps-year-plan-page .ps-year-plan-month-select {
+    width: 160px;
+    max-width: 100%;
+    flex: 0 1 auto;
+}
+
+.ps-year-plan-page .ps-page-header .form-control,
 .ps-year-plan-month-select > .form-control {
     height: 30px;
     border-radius: 0;
@@ -30,11 +36,10 @@
 }
 
 .ps-year-plan-actions {
-    display: flex;
+    display: inline-flex;
     justify-content: flex-end;
     align-items: center;
     gap: 8px;
-    min-width: 410px;
 }
 
 .ps-year-plan-actions .btn {
@@ -45,16 +50,22 @@
     white-space: nowrap;
 }
 
-.ps-year-plan-note-button {
+.ps-year-plan-guide-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 8px var(--ps-header-x, 14px) 0;
+    padding: 0;
     border: 0;
     background: transparent;
-    padding: 0 0 0 8px;
-    line-height: 1;
     color: #0c509a;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
 }
 
-.ps-year-plan-note-button .fa {
-    font-size: 30px;
+.ps-year-plan-guide-link .fa {
+    font-size: 14px;
 }
 
 .ps-year-plan-month-select {
@@ -64,7 +75,7 @@
 .ps-year-plan-month-dropdown {
     display: none;
     position: absolute;
-    z-index: 20;
+    z-index: 40;
     left: 0;
     top: 31px;
     width: 100%;
@@ -76,8 +87,7 @@
     padding: 6px 0;
 }
 
-.ps-year-plan-month-select:hover .ps-year-plan-month-dropdown,
-.ps-year-plan-month-select:focus-within .ps-year-plan-month-dropdown {
+.ps-year-plan-month-select.is-open .ps-year-plan-month-dropdown {
     display: block;
 }
 
@@ -94,12 +104,13 @@
 .ps-year-plan-table-wrap {
     width: 100%;
     overflow: auto;
-    padding: 14px 16px 0;
+    padding: 14px var(--ps-header-x, 14px) 0;
     border-bottom: 1px solid #ccc;
 }
 
 .ps-year-plan-table {
-    min-width: 2700px;
+    min-width: 900px;
+    width: max-content;
     table-layout: fixed;
     margin-bottom: 0;
 }
@@ -285,6 +296,10 @@
     background: #f89406;
 }
 
+.ps-year-plan-toast-danger {
+    background: #d9534f;
+}
+
 .ps-year-plan-toast .fa {
     font-size: 24px;
 }
@@ -408,27 +423,37 @@
     font-weight: 400;
 }
 
-@media (max-width: 1260px) {
-    .ps-year-plan-toolbar {
-        grid-template-columns: repeat(3, minmax(220px, 1fr));
-    }
-    .ps-year-plan-actions {
-        grid-column: 1 / -1;
-        justify-content: flex-end;
+@media (max-width: 1100px) {
+    .ps-year-plan-page .ps-page-header .ps-page-header__filters > .form-control,
+    .ps-year-plan-page .ps-year-plan-month-select {
+        width: 140px;
     }
 }
 
 @media (max-width: 800px) {
-    .ps-year-plan-toolbar,
+    .ps-year-plan-page .ps-page-header .ps-page-header__filters {
+        width: 100%;
+    }
+
+    .ps-year-plan-page .ps-page-header .ps-page-header__filters > .form-control,
+    .ps-year-plan-page .ps-year-plan-month-select {
+        width: calc(50% - 4px);
+        min-width: 120px;
+        flex: 1 1 120px;
+    }
+
     .ps-year-plan-form-grid {
         grid-template-columns: 1fr;
     }
+
     .ps-year-plan-month-picker {
         grid-column: auto;
     }
+
     .ps-year-plan-month-picker > div {
         grid-template-columns: repeat(2, 1fr);
     }
+
     .ps-year-plan-actions {
         min-width: 0;
         flex-wrap: wrap;

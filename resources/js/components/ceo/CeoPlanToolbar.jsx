@@ -1,6 +1,7 @@
 import { PageHeader } from '@/components/layout/PageHeader';
 import { ReportExportControl } from '@/components/reports/ReportExportControl';
 import { PushsaleSearchButton } from '@/components/actions/PushsaleSearchButton';
+import { useT } from '@/providers/I18nProvider';
 
 /**
  * Shared CEO plan/KPI filter chrome (DRY #8).
@@ -14,28 +15,31 @@ export function CeoPlanToolbar({
     routeUrl,
     exportFilters,
     showExport = true,
-    exportLabel = 'Xuất Excel',
+    exportLabel,
     actionsExtra = null,
     notice = null,
     className = '',
     searchDisabled = false,
 }) {
+    const t = useT();
+    const searchLabel = t('ceo.search');
+    const resolvedExportLabel = exportLabel || t('ceo.export_excel');
+
     return (
         <PageHeader
             title={title}
             pageCode={pageCode}
             className={className}
             filters={filtersSlot}
-            notice={notice}
             actions={(
                 <>
-                    <PushsaleSearchButton onClick={onSearch} label="Tìm kiếm" disabled={searchDisabled} />
+                    <PushsaleSearchButton onClick={onSearch} label={searchLabel} disabled={searchDisabled} />
                     {showExport ? (
                         <ReportExportControl
                             mode="visit"
                             routeUrl={routeUrl}
                             filters={exportFilters}
-                            label={exportLabel}
+                            label={resolvedExportLabel}
                         />
                     ) : null}
                     {actionsExtra}

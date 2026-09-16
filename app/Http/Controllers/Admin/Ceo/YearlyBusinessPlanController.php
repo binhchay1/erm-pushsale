@@ -12,9 +12,12 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Throwable;
 
 final class YearlyBusinessPlanController extends BasePushsalePageController
 {
@@ -26,7 +29,17 @@ final class YearlyBusinessPlanController extends BasePushsalePageController
         $year = $this->yearFromRequest($request);
         $months = $this->monthsFromRequest($request);
         $discountMode = (string) $request->query('discount_mode', 'after_discount');
-        $payload = $this->buildPayload($year, $months, $discountMode);
+        $pageRuntimeError = null;
+
+        try {
+            $payload = $this->buildPayload($year, $months, $discountMode);
+        } catch (Throwable $exception) {
+            report($exception);
+            $payload = $this->emptyPayload($months);
+            $pageRuntimeError = (bool) config('app.debug')
+                ? 'Không tải được kế hoạch năm: '.$exception->getMessage()
+                : 'Không tải được số liệu thực tế. Vui lòng thử lại hoặc liên hệ quản trị hệ thống.';
+        }
 
         if ($request->boolean('export')) {
             return $this->exportYearlyPlan($year, $payload['rows']);
@@ -36,7 +49,7 @@ final class YearlyBusinessPlanController extends BasePushsalePageController
             'schema' => [
                 'code' => '7.1.2',
                 'title' => 'Lập kế hoạch kinh doanh',
-                'component' => 'Page_7_1_2',
+                'component' => 'Admin/Ceo/YearlyBusinessPlan',
             ],
             'rows' => $payload['rows'],
             'chart' => $payload['chart'],
@@ -50,7 +63,9 @@ final class YearlyBusinessPlanController extends BasePushsalePageController
             ],
             'summary' => [
                 'has_planned_data' => $payload['has_planned_data'],
-                'toast' => $payload['has_planned_data'] ? null : 'Mời bạn thêm số liệu dự kiến trước khi xem!',
+                'toast' => $pageRuntimeError
+                    ?: ($payload['has_planned_data'] ? null : 'Mời bạn thêm số liệu dự kiến trước khi xem!'),
+                'toast_type' => $pageRuntimeError ? 'error' : 'warning',
             ],
             'filters' => [
                 'year' => $year,
@@ -59,6 +74,7 @@ final class YearlyBusinessPlanController extends BasePushsalePageController
             ],
             'routeUrl' => '/'.$request->path(),
             'activeMenuCode' => $this->pageCode,
+            'pageRuntimeError' => $pageRuntimeError,
         ]);
     }
 
@@ -82,31 +98,46 @@ final class YearlyBusinessPlanController extends BasePushsalePageController
             'cost_of_goods_percent' => ['nullable', 'numeric', 'min:0'],
         ]);
 
-        $definitions = AnnualBusinessPlanMetric::metricDefinitions();
-        $values = AnnualBusinessPlanMetric::plannedValuesFromInput($validated);
-        $months = collect($validated['months'])->map(fn ($month): int => (int) $month)->unique()->sort()->values();
-        $saved = 0;
+        try {
+            $definitions = AnnualBusinessPlanMetric::metricDefinitions();
+            $values = AnnualBusinessPlanMetric::plannedValuesFromInput($validated);
+            $months = collect($validated['months'])->map(fn ($month): int => (int) $month)->unique()->sort()->values();
+            $saved = 0;
 
-        DB::transaction(function () use ($months, $validated, $definitions, $values, $request, &$saved): void {
-            foreach ($months as $month) {
-                foreach ($definitions as $code => $definition) {
-                    AnnualBusinessPlanMetric::query()->updateOrCreate(
-                        [
-                            'year' => (int) $validated['year'],
-                            'month' => $month,
-                            'metric_code' => (string) $code,
-                        ],
-                        [
-                            'metric_name' => $definition['label'],
-                            'planned_value' => $values[(string) $code] ?? 0,
-                            'updated_by_user_id' => $request->user()?->id,
-                            'created_by_user_id' => $request->user()?->id,
-                        ]
-                    );
-                    $saved++;
+            DB::transaction(function () use ($months, $validated, $definitions, $values, $request, &$saved): void {
+                foreach ($months as $month) {
+                    foreach ($definitions as $code => $definition) {
+                        AnnualBusinessPlanMetric::query()->updateOrCreate(
+                            [
+                                'year' => (int) $validated['year'],
+                                'month' => $month,
+                                'metric_code' => (string) $code,
+                            ],
+                            [
+                                'metric_name' => $definition['label'],
+                                'planned_value' => $values[(string) $code] ?? 0,
+                                'updated_by_user_id' => $request->user()?->id,
+                                'created_by_user_id' => $request->user()?->id,
+                            ]
+                        );
+                        $saved++;
+                    }
                 }
+            });
+        } catch (ValidationException $exception) {
+            throw $exception;
+        } catch (Throwable $exception) {
+            report($exception);
+            $message = (bool) config('app.debug')
+                ? $exception->getMessage()
+                : 'Không lưu được dữ liệu kế hoạch. Vui lòng kiểm tra lại chỉ số và thử lại.';
+
+            if ($request->expectsJson()) {
+                return response()->json(['ok' => false, 'message' => $message], 422);
             }
-        });
+
+            throw ValidationException::withMessages(['year' => $message]);
+        }
 
         return $request->expectsJson()
             ? response()->json(['ok' => true, 'message' => "Đã lưu {$saved} chỉ số dự kiến."])
@@ -141,14 +172,50 @@ final class YearlyBusinessPlanController extends BasePushsalePageController
     }
 
     /** @return array{rows:array<int,array<string,mixed>>,chart:array<string,mixed>,has_planned_data:bool} */
+    private function emptyPayload(array $months): array
+    {
+        $definitions = AnnualBusinessPlanMetric::metricDefinitions();
+        $rows = [];
+        foreach ($definitions as $code => $definition) {
+            $monthCells = [];
+            foreach (range(1, 12) as $month) {
+                $monthCells[$month] = ['planned' => 0.0, 'actual' => 0.0, 'ratio' => null];
+            }
+            $rows[] = [
+                'code' => (string) $code,
+                'name' => $definition['label'],
+                'format' => $definition['format'],
+                'total' => ['planned' => 0.0, 'actual' => 0.0, 'ratio' => null],
+                'months' => $monthCells,
+            ];
+        }
+
+        $selectedMonths = array_values(array_intersect(range(1, 12), $months)) ?: range(1, 12);
+
+        return [
+            'rows' => $rows,
+            'chart' => [
+                'categories' => array_map(fn (int $month): string => 'Tháng '.$month, $selectedMonths),
+                'revenue_planned' => array_fill(0, count($selectedMonths), 0.0),
+                'revenue_actual' => array_fill(0, count($selectedMonths), 0.0),
+                'profit_planned' => array_fill(0, count($selectedMonths), 0.0),
+                'profit_actual' => array_fill(0, count($selectedMonths), 0.0),
+            ],
+            'has_planned_data' => false,
+        ];
+    }
+
+    /** @return array{rows:array<int,array<string,mixed>>,chart:array<string,mixed>,has_planned_data:bool} */
     private function buildPayload(int $year, array $months, string $discountMode): array
     {
         $definitions = AnnualBusinessPlanMetric::metricDefinitions();
-        $plans = AnnualBusinessPlanMetric::query()
-            ->where('year', $year)
-            ->whereIn('month', range(1, 12))
-            ->get()
-            ->groupBy(fn (AnnualBusinessPlanMetric $metric): string => $metric->metric_code.'.'.$metric->month);
+        $plans = Schema::hasTable('annual_business_plan_metrics')
+            ? AnnualBusinessPlanMetric::query()
+                ->where('year', $year)
+                ->whereIn('month', range(1, 12))
+                ->get()
+                ->groupBy(fn (AnnualBusinessPlanMetric $metric): string => $metric->metric_code.'.'.$metric->month)
+            : collect();
         $actual = $this->actualMetricMatrix($year, $discountMode);
         $hasPlanned = $plans->isNotEmpty();
 
@@ -198,44 +265,59 @@ final class YearlyBusinessPlanController extends BasePushsalePageController
     private function actualMetricMatrix(int $year, string $discountMode): array
     {
         $matrix = [];
+        if (! Schema::hasTable('orders')) {
+            foreach (range(1, 12) as $month) {
+                $matrix[$month] = $this->emptyActualMonth();
+            }
+
+            return $matrix;
+        }
+
         foreach (range(1, 12) as $month) {
             $start = CarbonImmutable::create($year, $month, 1)->startOfDay();
             $end = $start->endOfMonth();
-            $orders = Order::query()
-                ->with('items:id,order_id,quantity,unit_price')
+
+            $base = Order::query()
                 ->where(function ($query) use ($start, $end): void {
                     $query->whereBetween('data_arrived_at', [$start, $end])
                         ->orWhere(function ($fallback) use ($start, $end): void {
                             $fallback->whereNull('data_arrived_at')->whereBetween('created_at', [$start, $end]);
                         });
-                })
-                ->get();
+                });
 
-            $leads = LeadIngestion::query()
-                ->whereBetween('created_at', [$start, $end])
-                ->count();
-            $contacts = max($leads, (int) $orders->sum(fn (Order $order): int => max(1, (int) $order->contact_count)));
-            $closedOrders = $orders->filter(fn (Order $order): bool => $order->closed_at !== null || in_array((string) $order->closing_status, ['closed', 'confirmed', 'success'], true));
-            if ($closedOrders->isEmpty() && $orders->isNotEmpty()) {
-                $closedOrders = $orders;
+            $agg = (clone $base)
+                ->selectRaw('COUNT(*) as order_count')
+                ->selectRaw('COALESCE(SUM(GREATEST(COALESCE(contact_count, 1), 1)), 0) as contact_sum')
+                ->selectRaw('COALESCE(SUM(COALESCE(discount, 0)), 0) as discount_sum')
+                ->selectRaw('COALESCE(SUM(COALESCE(carrier_service_fee, 0) + COALESCE(carrier_return_fee, 0) + COALESCE(carrier_other_fee, 0) + COALESCE(cod_fee, 0) + COALESCE(shipping_support_fee, 0) + COALESCE(cod_support, 0)), 0) as service_cost')
+                ->selectRaw('COALESCE(SUM(CASE WHEN closed_at IS NOT NULL OR closing_status IN (\'closed\', \'confirmed\', \'success\') THEN 1 ELSE 0 END), 0) as closed_count')
+                ->selectRaw($discountMode === 'before_discount'
+                    ? 'COALESCE(SUM(COALESCE(NULLIF(subtotal, 0), total + discount)), 0) as revenue'
+                    : 'COALESCE(SUM(COALESCE(NULLIF(total, 0), GREATEST(0, COALESCE(subtotal, 0) - COALESCE(discount, 0) + COALESCE(shipping_fee_collected, 0)))), 0) as revenue')
+                ->first();
+
+            $orderCount = (int) ($agg->order_count ?? 0);
+            $closedCount = (int) ($agg->closed_count ?? 0);
+            $revenue = (float) ($agg->revenue ?? 0);
+            $marketingBudget = (float) ($agg->discount_sum ?? 0);
+            $serviceCost = (float) ($agg->service_cost ?? 0);
+
+            $leads = Schema::hasTable('lead_ingestions')
+                ? LeadIngestion::query()->whereBetween('created_at', [$start, $end])->count()
+                : 0;
+            $contacts = max($leads, (int) ($agg->contact_sum ?? 0));
+
+            $productQty = 0.0;
+            if ($orderCount > 0 && Schema::hasTable('order_items')) {
+                $productQty = (float) DB::table('order_items')
+                    ->whereIn('order_id', (clone $base)->select('id'))
+                    ->sum('quantity');
             }
 
-            $revenue = (float) $orders->sum(function (Order $order) use ($discountMode): int|float {
-                $subtotal = (int) ($order->subtotal ?: ($order->total + $order->discount));
-                if ($discountMode === 'before_discount') {
-                    return $subtotal;
-                }
-
-                return (int) ($order->total ?: max(0, $subtotal - (int) $order->discount + (int) $order->shipping_fee_collected));
-            });
-            $productQty = (float) $orders->sum(fn (Order $order): int => (int) $order->items->sum('quantity'));
-            $orderCount = max(1, $orders->count());
-            $closedCount = $closedOrders->count();
-            $productsPerOrder = $orders->isNotEmpty() ? $productQty / $orderCount : 0;
+            $safeOrderCount = max(1, $orderCount);
+            $productsPerOrder = $orderCount > 0 ? $productQty / $safeOrderCount : 0;
             $avgUnit = $productQty > 0 ? $revenue / $productQty : 0;
-            $avgOrder = $orders->isNotEmpty() ? $revenue / $orderCount : 0;
-            $marketingBudget = (float) $orders->sum('discount');
-            $serviceCost = (float) $orders->sum(fn (Order $order): int => (int) $order->carrier_service_fee + (int) $order->carrier_return_fee + (int) $order->carrier_other_fee + (int) $order->cod_fee + (int) $order->shipping_support_fee + (int) $order->cod_support);
+            $avgOrder = $orderCount > 0 ? $revenue / $orderCount : 0;
             $costOfGoods = $revenue * 0.38;
             $cost = $marketingBudget + $serviceCost + $costOfGoods;
             $profit = $revenue - $cost;
@@ -263,6 +345,12 @@ final class YearlyBusinessPlanController extends BasePushsalePageController
         }
 
         return $matrix;
+    }
+
+    /** @return array<string, float> */
+    private function emptyActualMonth(): array
+    {
+        return array_fill_keys(array_map('strval', range(1, 18)), 0.0);
     }
 
     /** @param array<int, array<string,mixed>> $rows */

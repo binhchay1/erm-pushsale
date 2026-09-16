@@ -24,7 +24,8 @@ async function globalSetup(config: FullConfig): Promise<void> {
     const browser = await chromium.launch();
     const page = await browser.newPage({ locale: 'vi-VN' });
 
-    await page.goto(`${baseURL}/login`, { waitUntil: 'networkidle' });
+    await page.goto(`${baseURL}/login`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#email').waitFor({ state: 'visible', timeout: 45_000 });
     await page.locator('#email').fill(email);
     await page.locator('#password').fill(password);
     await page.locator('button.public-login-submit').click();

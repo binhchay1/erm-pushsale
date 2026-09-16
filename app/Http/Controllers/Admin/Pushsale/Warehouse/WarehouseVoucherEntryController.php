@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -91,119 +92,183 @@ final class WarehouseVoucherEntryController extends BasePushsalePageController
 
     public function store(Request $request): RedirectResponse|JsonResponse
     {
-        $this->authorizePage($request);
-        $resourceKey = $this->mainResourceKey();
-        abort_unless($resourceKey, 405);
-        $payload = $this->payload($request);
-        /** @var WarehouseVoucher $record */
-        $record = $this->resources->create($resourceKey, $payload, $request->user());
+        try {
+            $this->authorizePage($request);
+            $resourceKey = $this->mainResourceKey();
+            abort_unless($resourceKey, 405);
+            $payload = $this->payload($request);
+            /** @var WarehouseVoucher $record */
+            $record = $this->resources->create($resourceKey, $payload, $request->user());
 
-        return $this->voucherSavedResponse($request, $record, 201, 'Đã lưu phiếu tạm.');
+            return $this->voucherSavedResponse($request, $record, 201, 'Đã lưu phiếu tạm.');
+        } catch (ValidationException $exception) {
+            throw $exception;
+        } catch (Throwable $exception) {
+            return $this->voucherFailureResponse($request, $exception, 'Không lưu được phiếu kho. Kiểm tra kho, sản phẩm và số lượng rồi thử lại.');
+        }
     }
 
     public function update(Request $request, int $record): RedirectResponse|JsonResponse
     {
-        $this->authorizePage($request);
-        $resourceKey = $this->mainResourceKey();
-        abort_unless($resourceKey, 405);
-        $model = $this->resources->find($resourceKey, $record);
-        /** @var WarehouseVoucher $model */
-        $model = $this->resources->update($resourceKey, $model, $this->payload($request), $request->user());
+        try {
+            $this->authorizePage($request);
+            $resourceKey = $this->mainResourceKey();
+            abort_unless($resourceKey, 405);
+            $model = $this->resources->find($resourceKey, $record);
+            /** @var WarehouseVoucher $model */
+            $model = $this->resources->update($resourceKey, $model, $this->payload($request), $request->user());
 
-        return $this->voucherSavedResponse($request, $model, 200, 'Đã cập nhật phiếu tạm.');
+            return $this->voucherSavedResponse($request, $model, 200, 'Đã cập nhật phiếu tạm.');
+        } catch (ValidationException $exception) {
+            throw $exception;
+        } catch (Throwable $exception) {
+            return $this->voucherFailureResponse($request, $exception, 'Không cập nhật được phiếu kho. Phiếu có thể đã hoàn thành hoặc dữ liệu không hợp lệ.');
+        }
     }
 
     public function complete(Request $request, int $record): RedirectResponse|JsonResponse
     {
-        $this->authorizePage($request);
-        /** @var WarehouseVoucher $voucher */
-        $voucher = $this->resources->find('5.3.1', $record);
-        /** @var User $actor */
-        $actor = $request->user();
-        $voucher = $this->resources->completeWarehouseVoucher($voucher, $actor);
+        try {
+            $this->authorizePage($request);
+            /** @var WarehouseVoucher $voucher */
+            $voucher = $this->resources->find('5.3.1', $record);
+            /** @var User $actor */
+            $actor = $request->user();
+            $voucher = $this->resources->completeWarehouseVoucher($voucher, $actor);
 
-        return $this->voucherSavedResponse($request, $voucher, 200, 'Đã hoàn thành phiếu kho.');
+            return $this->voucherSavedResponse($request, $voucher, 200, 'Đã hoàn thành phiếu kho.');
+        } catch (ValidationException $exception) {
+            throw $exception;
+        } catch (Throwable $exception) {
+            return $this->voucherFailureResponse($request, $exception, 'Không hoàn thành được phiếu. Kiểm tra tồn kho / trạng thái phiếu rồi thử lại.');
+        }
     }
 
     public function import(Request $request): JsonResponse
     {
-        $this->authorizePage($request);
-        $request->validate([
-            'file' => ['required', 'file', 'max:5120', 'mimes:csv,txt'],
-            'voucher_id' => ['nullable', 'integer', 'exists:warehouse_vouchers,id'],
-        ]);
+        try {
+            $this->authorizePage($request);
+            $request->validate([
+                'file' => ['required', 'file', 'max:5120', 'mimes:csv,txt'],
+                'voucher_id' => ['nullable', 'integer', 'exists:warehouse_vouchers,id'],
+            ]);
 
-        $lines = $this->resources->parseWarehouseVoucherImport($request->file('file'));
-        $voucherId = (int) $request->input('voucher_id', 0);
-        $voucherPayload = null;
+            $lines = $this->resources->parseWarehouseVoucherImport($request->file('file'));
+            $voucherId = (int) $request->input('voucher_id', 0);
+            $voucherPayload = null;
 
-        if ($voucherId > 0) {
-            /** @var WarehouseVoucher $voucher */
-            $voucher = $this->resources->find('5.3.1', $voucherId);
-            abort_if($voucher->status === 'confirmed', 422, 'Phiếu đã hoàn thành không thể import.');
-            $payload = [
-                'warehouse_id' => $voucher->warehouse_id,
-                'code' => $voucher->code,
-                'type' => $voucher->type,
-                'document_date' => $voucher->document_date?->toDateString(),
-                'partner' => $voucher->partner,
-                'note' => $voucher->note,
+            if ($voucherId > 0) {
+                /** @var WarehouseVoucher $voucher */
+                $voucher = $this->resources->find('5.3.1', $voucherId);
+                if ($voucher->status === 'confirmed') {
+                    throw ValidationException::withMessages([
+                        'voucher_id' => 'Phiếu đã hoàn thành không thể import. Hãy tạo phiếu mới hoặc mở phiếu tạm.',
+                    ]);
+                }
+                $payload = [
+                    'warehouse_id' => $voucher->warehouse_id,
+                    'code' => $voucher->code,
+                    'type' => $voucher->type,
+                    'document_date' => $voucher->document_date?->toDateString(),
+                    'partner' => $voucher->partner,
+                    'note' => $voucher->note,
+                    'lines' => $lines,
+                ];
+                /** @var WarehouseVoucher $voucher */
+                $voucher = $this->resources->update('5.3.1', $voucher, $payload, $request->user());
+                $voucherPayload = $this->resources->serializeWarehouseVoucher($voucher);
+            }
+
+            return response()->json([
+                'ok' => true,
+                'message' => 'Đã import dòng sản phẩm.',
                 'lines' => $lines,
-            ];
-            /** @var WarehouseVoucher $voucher */
-            $voucher = $this->resources->update('5.3.1', $voucher, $payload, $request->user());
-            $voucherPayload = $this->resources->serializeWarehouseVoucher($voucher);
-        }
+                'voucher' => $voucherPayload,
+            ]);
+        } catch (ValidationException $exception) {
+            throw $exception;
+        } catch (Throwable $exception) {
+            report($exception);
+            $message = (bool) config('app.debug')
+                ? $exception->getMessage()
+                : 'Không import được file. Kiểm tra định dạng CSV và dữ liệu sản phẩm.';
 
-        return response()->json([
-            'ok' => true,
-            'message' => 'Đã import dòng sản phẩm.',
-            'lines' => $lines,
-            'voucher' => $voucherPayload,
-        ]);
+            return response()->json(['ok' => false, 'message' => $message], 422);
+        }
     }
 
     public function boostStock(Request $request): JsonResponse
     {
-        $this->authorizePage($request);
-        $data = $request->validate([
-            'warehouse_id' => ['required', 'integer', 'exists:warehouses,id'],
-            'below_quantity' => ['nullable', 'integer'],
-            'add_quantity' => ['required', 'integer', 'min:1'],
-        ]);
+        try {
+            $this->authorizePage($request);
+            $data = $request->validate([
+                'warehouse_id' => ['required', 'integer', 'exists:warehouses,id'],
+                'below_quantity' => ['nullable', 'integer'],
+                'add_quantity' => ['required', 'integer', 'min:1'],
+            ]);
 
-        /** @var User $actor */
-        $actor = $request->user();
-        $result = $this->resources->boostWarehouseStock(
-            (int) $data['warehouse_id'],
-            (int) ($data['below_quantity'] ?? 0),
-            (int) $data['add_quantity'],
-            $actor,
-        );
+            /** @var User $actor */
+            $actor = $request->user();
+            $result = $this->resources->boostWarehouseStock(
+                (int) $data['warehouse_id'],
+                (int) ($data['below_quantity'] ?? 0),
+                (int) $data['add_quantity'],
+                $actor,
+            );
 
-        return response()->json([
-            'ok' => true,
-            'message' => "Đã cộng tồn cho {$result['updated']} sản phẩm.",
-            'updated' => $result['updated'],
-        ]);
+            $updated = (int) ($result['updated'] ?? 0);
+            $message = $updated > 0
+                ? "Đã cộng tồn cho {$updated} sản phẩm."
+                : 'Không có sản phẩm nào khớp điều kiện để cộng tồn.';
+
+            return response()->json([
+                'ok' => true,
+                'message' => $message,
+                'updated' => $updated,
+            ]);
+        } catch (ValidationException $exception) {
+            throw $exception;
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return response()->json([
+                'ok' => false,
+                'message' => (bool) config('app.debug') ? $exception->getMessage() : 'Không cộng được tồn kho. Kiểm tra kho và thử lại.',
+            ], 422);
+        }
     }
 
     public function resetStock(Request $request): JsonResponse
     {
-        $this->authorizePage($request);
-        $data = $request->validate([
-            'warehouse_id' => ['required', 'integer', 'exists:warehouses,id'],
-        ]);
+        try {
+            $this->authorizePage($request);
+            $data = $request->validate([
+                'warehouse_id' => ['required', 'integer', 'exists:warehouses,id'],
+            ]);
 
-        /** @var User $actor */
-        $actor = $request->user();
-        $result = $this->resources->resetNegativeWarehouseStock((int) $data['warehouse_id'], $actor);
+            /** @var User $actor */
+            $actor = $request->user();
+            $result = $this->resources->resetNegativeWarehouseStock((int) $data['warehouse_id'], $actor);
+            $updated = (int) ($result['updated'] ?? 0);
+            $message = $updated > 0
+                ? "Đã reset tồn về 0 cho {$updated} sản phẩm."
+                : 'Không có sản phẩm tồn âm để reset.';
 
-        return response()->json([
-            'ok' => true,
-            'message' => "Đã reset tồn về 0 cho {$result['updated']} sản phẩm.",
-            'updated' => $result['updated'],
-        ]);
+            return response()->json([
+                'ok' => true,
+                'message' => $message,
+                'updated' => $updated,
+            ]);
+        } catch (ValidationException $exception) {
+            throw $exception;
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return response()->json([
+                'ok' => false,
+                'message' => (bool) config('app.debug') ? $exception->getMessage() : 'Không reset được tồn kho. Kiểm tra kho và thử lại.',
+            ], 422);
+        }
     }
 
     private function voucherSavedResponse(Request $request, WarehouseVoucher $voucher, int $status, string $message): RedirectResponse|JsonResponse
@@ -215,5 +280,17 @@ final class WarehouseVoucherEntryController extends BasePushsalePageController
             : redirect()
                 ->to('/admin/warehouse/vouchers/entry?id='.$voucher->id)
                 ->with('success', $message);
+    }
+
+    private function voucherFailureResponse(Request $request, Throwable $exception, string $fallback): RedirectResponse|JsonResponse
+    {
+        report($exception);
+        $message = (bool) config('app.debug') ? $exception->getMessage() : $fallback;
+
+        if ($request->expectsJson()) {
+            return response()->json(['ok' => false, 'message' => $message], 422);
+        }
+
+        throw ValidationException::withMessages(['voucher' => $message]);
     }
 }

@@ -1744,7 +1744,7 @@ class PushsalePageService
         }
 
         try {
-            $query = MonthlyKpiPlan::withoutTenant()->with('user:id,name,email,role,team_id,is_team_leader');
+            $query = MonthlyKpiPlan::query()->with('user:id,name,email,role,team_id,is_team_leader');
             $resourceKey = $code === '7.1.1' ? '7.1.1' : '6.3.5';
 
             if ($code === '7.1.1') {

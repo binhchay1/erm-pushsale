@@ -132,6 +132,7 @@ export default function MonthlyKpiPlanPage({ schema, rows = [], summary = {}, ro
 
                 <CeoPlanToolbar
                     title="Thiết lập KPI theo tháng"
+                    pageCode="7.1.1"
                     className="ps-monthly-kpi-header"
                     filtersSlot={(
                         <>

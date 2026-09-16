@@ -464,7 +464,11 @@ class PageResourceManager
      */
     private function updateWarehouseVoucher(WarehouseVoucher $voucher, array $validated, ?User $actor): WarehouseVoucher
     {
-        abort_if($voucher->status === 'confirmed', 422, 'Phiếu kho đã xác nhận không thể sửa trực tiếp. Hãy tạo phiếu điều chỉnh mới.');
+        if ($voucher->status === 'confirmed') {
+            throw ValidationException::withMessages([
+                'status' => 'Phiếu kho đã xác nhận không thể sửa trực tiếp. Hãy tạo phiếu điều chỉnh mới.',
+            ]);
+        }
 
         $type = $this->normalizeWarehouseVoucherType($validated['type'] ?? $voucher->type);
         $lines = $this->normalizeWarehouseVoucherLines($validated);
@@ -493,8 +497,16 @@ class PageResourceManager
      */
     public function completeWarehouseVoucher(WarehouseVoucher $voucher, User $actor): WarehouseVoucher
     {
-        abort_if($voucher->status === 'confirmed', 422, 'Phiếu kho đã hoàn thành.');
-        abort_if($voucher->status === 'cancelled', 422, 'Phiếu kho đã hủy không thể hoàn thành.');
+        if ($voucher->status === 'confirmed') {
+            throw ValidationException::withMessages([
+                'status' => 'Phiếu kho đã hoàn thành.',
+            ]);
+        }
+        if ($voucher->status === 'cancelled') {
+            throw ValidationException::withMessages([
+                'status' => 'Phiếu kho đã hủy không thể hoàn thành.',
+            ]);
+        }
 
         $voucher->loadMissing('lines');
         $lines = $voucher->lines->map(fn (WarehouseVoucherLine $line): array => [

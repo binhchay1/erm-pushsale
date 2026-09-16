@@ -17,6 +17,7 @@ import activity from './activity.js';
 import labels from './labels.js';
 import permissions from './permissions.js';
 import shops from './shops.js';
+import ceo from './ceo.js';
 import { mergeLocales } from '../../merge.js';
 
 export default mergeLocales(base, {
@@ -38,4 +39,5 @@ export default mergeLocales(base, {
     activity,
     permissions,
     shops,
+    ceo,
 });

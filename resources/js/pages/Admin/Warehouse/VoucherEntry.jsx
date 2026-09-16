@@ -14,7 +14,7 @@ function csrfToken() {
     return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
 }
 
-async function requestJson(url, method, payload) {
+async function requestJson(url, method, payload, tFallback = 'Request failed') {
     const response = await fetch(url, {
         method,
         credentials: 'same-origin',
@@ -30,13 +30,13 @@ async function requestJson(url, method, payload) {
     const body = await response.json().catch(() => ({}));
     if (!response.ok) {
         const errors = Object.values(body.errors ?? {}).flat().join(' ');
-        throw new Error(errors || body.message || 'Request failed');
+        throw new Error(errors || body.message || tFallback);
     }
 
     return body;
 }
 
-async function requestFormData(url, formData) {
+async function requestFormData(url, formData, tFallback = 'Import failed') {
     const response = await fetch(url, {
         method: 'POST',
         credentials: 'same-origin',
@@ -50,7 +50,7 @@ async function requestFormData(url, formData) {
     const body = await response.json().catch(() => ({}));
     if (!response.ok) {
         const errors = Object.values(body.errors ?? {}).flat().join(' ');
-        throw new Error(errors || body.message || 'Import failed');
+        throw new Error(errors || body.message || tFallback);
     }
     return body;
 }
@@ -356,16 +356,17 @@ export default function VoucherEntry({
         const payload = buildPayload();
         if (!form.code) patchForm('code', payload.code);
         const body = voucherId
-            ? await requestJson(`${routeUrl}/records/${voucherId}`, 'PUT', { payload })
-            : await requestJson(`${routeUrl}/records`, 'POST', { payload });
+            ? await requestJson(`${routeUrl}/records/${voucherId}`, 'PUT', { payload }, t('operations.voucher_entry.request_failed'))
+            : await requestJson(`${routeUrl}/records`, 'POST', { payload }, t('operations.voucher_entry.request_failed'));
         applyVoucherResponse(body);
-        return body?.voucher || body?.record || null;
+        return body;
     };
 
     const saveDraft = async () => {
         setBusy(true);
         try {
-            await persistDraft();
+            const body = await persistDraft();
+            toast.success(body?.message || t('operations.voucher_entry.save_ok'));
         } catch (exception) {
             toast.error(exception.message);
         } finally {
@@ -377,6 +378,7 @@ export default function VoucherEntry({
         const ok = await ask({
             title: t('operations.voucher_entry.confirm_complete_title'),
             message: t('operations.voucher_entry.confirm_complete'),
+            confirmLabel: t('operations.voucher_entry.complete'),
         });
         if (!ok) return;
 
@@ -385,13 +387,14 @@ export default function VoucherEntry({
             let currentId = voucherId;
             if (!isConfirmed) {
                 const saved = await persistDraft();
-                currentId = saved?.id || currentId;
+                currentId = saved?.voucher?.id || saved?.record?.id || currentId;
             }
             if (!currentId) {
                 throw new Error(t('operations.voucher_entry.lines_required'));
             }
-            const body = await requestJson(`${routeUrl}/records/${currentId}/complete`, 'POST');
+            const body = await requestJson(`${routeUrl}/records/${currentId}/complete`, 'POST', undefined, t('operations.voucher_entry.request_failed'));
             applyVoucherResponse(body);
+            toast.success(body?.message || t('operations.voucher_entry.complete_ok'));
         } catch (exception) {
             toast.error(exception.message);
         } finally {
@@ -470,7 +473,7 @@ export default function VoucherEntry({
             const formData = new FormData();
             formData.append('file', file);
             if (voucherId) formData.append('voucher_id', String(voucherId));
-            const body = await requestFormData(`${routeUrl}/import`, formData);
+            const body = await requestFormData(`${routeUrl}/import`, formData, t('operations.voucher_entry.import_failed'));
             if (body.voucher) {
                 applyVoucherResponse(body);
             } else if (Array.isArray(body.lines)) {
@@ -484,6 +487,7 @@ export default function VoucherEntry({
                     };
                 })));
             }
+            toast.success(body.message || t('operations.voucher_entry.import_ok'));
         } catch (exception) {
             toast.error(exception.message);
         } finally {
@@ -563,6 +567,20 @@ export default function VoucherEntry({
                         id="dnn_ctr1658_Main_CapNhatPhieuXuatNhapKho_phInfo"
                         className="ps-voucher-entry-body box-body"
                     >
+                        {!warehouses.length ? (
+                            <div className="alert alert-warning ps-voucher-entry-empty-master" role="status">
+                                {t('operations.voucher_entry.empty_warehouses')}
+                                {' '}
+                                <a href="/admin/warehouses">{t('operations.voucher_entry.create_warehouse')}</a>
+                            </div>
+                        ) : null}
+                        {!products.length ? (
+                            <div className="alert alert-warning ps-voucher-entry-empty-master" role="status">
+                                {t('operations.voucher_entry.empty_products')}
+                                {' '}
+                                <a href="/admin/products">{t('operations.voucher_entry.create_product')}</a>
+                            </div>
+                        ) : null}
                         {/* Row 1 — Loại phiếu / Trạng thái | Phiếu tạm | Kho */}
                         <div className="row">
                             <div className="col-xs-2 form-group">

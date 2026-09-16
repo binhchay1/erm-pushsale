@@ -162,6 +162,7 @@ export default function KpiCatalogPage({ schema, rows = [], routeUrl = '/admin/c
 
                 <CeoPlanToolbar
                     title="(Unit admin) Danh mục KPI"
+                    pageCode="7.1.3"
                     className="ps-kpi-catalog-header"
                     filtersSlot={(
                         <select className="form-control" value={filters.position_key} onChange={(event) => setFilter('position_key', event.target.value)}>

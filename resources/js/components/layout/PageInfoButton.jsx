@@ -52,13 +52,13 @@ export function PageInfoButton({ className = '' }) {
     const [open, setOpen] = useState(false);
 
     const pathname = url.split('?')[0];
-    const hideBecausePageHasNativeGuide = new Set(['/admin/ceo/business-plan/yearly']).has(pathname);
     const guide = useMemo(
         () => findPageGuide(pathname, locale) ?? fallbackGuide(pathname, locale, t),
         [pathname, locale, t],
     );
 
-    if (hideBecausePageHasNativeGuide) return null;
+    // Yearly plan has its own in-page formula guide — hide global info icon to avoid duplicate chrome.
+    if (pathname === '/admin/ceo/business-plan/yearly') return null;
 
     return (
         <>

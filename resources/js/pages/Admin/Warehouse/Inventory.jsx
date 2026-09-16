@@ -7,6 +7,7 @@ import { PushsalePageShell } from '@/components/layout/PushsalePageShell';
 import AppLayout from '@/layouts/AppLayout';
 import { PushsaleDialog } from '@/components/ui/pushsale-dialog';
 import { useConfirm } from '@/hooks/use-confirm';
+import { useT } from '@/providers/I18nProvider';
 
 const number = new Intl.NumberFormat('vi-VN');
 
@@ -25,6 +26,7 @@ function DialogShell({ open, onClose, children }) {
 }
 
 export default function Inventory({ report, filterOptions = {}, intakeUrl, exportUrl, approverOptions = [] }) {
+    const t = useT();
     const { ask } = useConfirm();
     const f = report?.filters ?? {};
     const rows = report?.rows?.data ?? [];
@@ -47,8 +49,8 @@ export default function Inventory({ report, filterOptions = {}, intakeUrl, expor
             is_discontinued: nextChecked ? 1 : 0,
         }, {
             preserveScroll: true,
-            onSuccess: () => toast.success(nextChecked ? 'Đã đánh dấu ngừng KD.' : 'Đã mở lại kinh doanh.'),
-            onError: () => toast.error('Không cập nhật được trạng thái Ngừng KD.'),
+            onSuccess: () => toast.success(nextChecked ? t('operations.inventory.discontinued_on') : t('operations.inventory.discontinued_off')),
+            onError: () => toast.error(t('operations.inventory.discontinued_failed')),
             onFinish: () => setDiscontinuedBusyId(null),
         });
     };
