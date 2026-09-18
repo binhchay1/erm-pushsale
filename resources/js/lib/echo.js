@@ -42,18 +42,63 @@ export function getEcho(reverb) {
             authEndpoint: '/broadcasting/auth',
             auth: {
                 headers: {
+                    Accept: 'application/json',
                     'X-CSRF-TOKEN': csrf,
                     'X-Requested-With': 'XMLHttpRequest',
                 },
             },
+            authorizer: (channel) => ({
+                authorize: (socketId, callback) => {
+                    const token =
+                        document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? csrf;
+                    window
+                        .fetch('/broadcasting/auth', {
+                            method: 'POST',
+                            credentials: 'same-origin',
+                            headers: {
+                                Accept: 'application/json',
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': token,
+                                'X-Requested-With': 'XMLHttpRequest',
+                            },
+                            body: JSON.stringify({
+                                socket_id: socketId,
+                                channel_name: channel.name,
+                            }),
+                        })
+                        .then(async (response) => {
+                            if (!response.ok) {
+                                // Auth fail (403/419): dừng retry để khỏi spam console.
+                                echoUnavailable = true;
+                                const error = new Error(`Broadcast auth ${response.status}`);
+                                callback(error, null);
+                                return;
+                            }
+                            callback(null, await response.json());
+                        })
+                        .catch((error) => {
+                            echoUnavailable = true;
+                            callback(error, null);
+                        });
+                },
+            }),
         });
 
         const connection = echoInstance.connector?.pusher?.connection;
         // Nuốt lỗi kết nối (host sai, Reverb chưa chạy, auth 403...) — không throw.
-        connection?.bind('error', () => {});
-        connection?.bind('unavailable', () => {});
+        connection?.bind('error', () => {
+            echoUnavailable = true;
+        });
+        connection?.bind('unavailable', () => {
+            echoUnavailable = true;
+        });
         connection?.bind('failed', () => {
             echoUnavailable = true;
+        });
+        connection?.bind('state_change', (states) => {
+            if (states?.current === 'failed' || states?.current === 'unavailable') {
+                echoUnavailable = true;
+            }
         });
     } catch {
         echoUnavailable = true;

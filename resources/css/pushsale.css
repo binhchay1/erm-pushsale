@@ -2315,7 +2315,7 @@ body.pushsale-app-body .ps-col-check { width: 50px; min-width: 50px; }
 body.pushsale-app-body .ps-col-code { width: 72px; min-width: 72px; }
 body.pushsale-app-body .ps-col-source { width: 160px; min-width: 130px; max-width: 200px; }
 body.pushsale-app-body .ps-col-customer { width: 160px; min-width: 150px; }
-body.pushsale-app-body .ps-col-message { width: 190px; min-width: 150px; max-width: 240px; }
+body.pushsale-app-body .ps-col-message { width: 320px; min-width: 280px; max-width: 380px; }
 body.pushsale-app-body .ps-col-sale { width: 150px; min-width: 130px; }
 body.pushsale-app-body .ps-col-operation { width: 120px; min-width: 110px; }
 body.pushsale-app-body .ps-col-result { width: 180px; min-width: 160px; max-width: 210px; }
@@ -2396,7 +2396,7 @@ body.pushsale-app-body .item-md { display: block; color: #007bff; font-weight: 7
 body.pushsale-app-body .item-md:empty { min-height: 4px; }
 
 body.pushsale-app-body .ps-message-cell {
-    max-width: 240px;
+    max-width: 380px;
     white-space: pre-line;
     word-break: break-word;
 }
@@ -2752,7 +2752,7 @@ body.pushsale-app-body .ps-sale-select {
 
 body.pushsale-app-body .ps-sale-search-wrap {
     display: grid;
-    grid-template-columns: minmax(210px, 1fr) 95px 24px;
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
     gap: 8px;
 }
@@ -2949,7 +2949,7 @@ body.pushsale-app-body .ps-row-actions [data-slot='button'] {
     color: #cae7fb !important;
     box-shadow: none !important;
 }
-body.pushsale-app-body .td-message { display: inline-block; min-width: 150px; max-width: 248px; white-space: pre-wrap; word-break: break-word; }
+body.pushsale-app-body .td-message { display: inline-block; min-width: 280px; max-width: 380px; white-space: pre-wrap; word-break: break-word; }
 
 body.pushsale-app-body .ps-operation-note-editor {
     position: relative;

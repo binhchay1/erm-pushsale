@@ -270,8 +270,9 @@ html body.pushsale-app-body .ps-sale-workspace-page .ps-message-cell .ps-msg-blo
     flex-direction: column !important;
     align-items: stretch !important;
     gap: 0 !important;
-    max-width: 250px;
-    min-width: 150px;
+    max-width: 380px;
+    min-width: 280px;
+    width: 100%;
     overflow-wrap: anywhere;
     white-space: pre-wrap;
     word-break: break-word;
@@ -779,16 +780,24 @@ html body.pushsale-app-body .ps-sale-workspace-page .ps-order-upsale-icon {
 html body.pushsale-app-body .ps-sale-workspace-page .td-message {
     cursor: pointer;
     display: inline-block;
-    max-width: 250px;
-    min-width: 150px;
+    max-width: 380px;
+    min-width: 280px;
     overflow-wrap: anywhere;
     white-space: pre-wrap;
     word-break: break-word;
 }
 
 html body.pushsale-app-body .ps-sale-workspace-page .td-793 {
-    width: 150px !important;
-    max-width: 150px !important;
+    width: 320px !important;
+    min-width: 280px !important;
+    max-width: 380px !important;
+}
+
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table th.ps-col-message,
+html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table td.ps-message-cell {
+    width: 320px !important;
+    min-width: 280px !important;
+    max-width: 380px !important;
 }
 
 /* TN cần — Pushsale mof textarea (fallback block; primary rules above) */
@@ -1103,8 +1112,16 @@ html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-pagination > li.dis
 
     html body.pushsale-app-body .ps-sale-workspace-page .ps-message-cell .td-message,
     html body.pushsale-app-body .ps-sale-workspace-page .ps-message-cell .ps-msg-block {
-        max-width: 210px !important;
-        min-width: 120px !important;
+        max-width: 300px !important;
+        min-width: 220px !important;
+    }
+
+    html body.pushsale-app-body .ps-sale-workspace-page .td-793,
+    html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table th.ps-col-message,
+    html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table td.ps-message-cell {
+        width: 260px !important;
+        min-width: 220px !important;
+        max-width: 300px !important;
     }
 }
 
@@ -1156,10 +1173,11 @@ html body.pushsale-app-body .ps-page-header[data-page-code="4.1"] .ps-sale-prima
 html body.pushsale-app-body .ps-page-header.ps-sale-workspace-header .ps-sale-search-wrap,
 html body.pushsale-app-body .ps-page-header[data-page-code="4.1"] .ps-sale-search-wrap {
     display: grid !important;
-    grid-template-columns: minmax(190px, 1fr) auto !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
     gap: 8px !important;
-    min-width: min(360px, 100%) !important;
+    min-width: 0 !important;
     width: 100% !important;
+    max-width: 100% !important;
 }
 
 html body.pushsale-app-body .ps-page-extra-filters.ps-sale-workspace-header .ps-sale-extra-filters,

@@ -819,10 +819,38 @@ html body.pushsale-app-body .pslc-header .pslc-advanced-row > .form-control {
     }
 }
 
-/* Sale tác nghiệp (4.1): header portal ra ngoài .ps-page-shell — style theo .ps-page-header. */
+/* Sale tác nghiệp (4.1): header portal ra ngoài .ps-page-shell — style theo .ps-page-header.
+ * Filters + search phải co trong ô grid, không tràn đè nhau (sale select ↔ ô tìm kiếm). */
+html body.pushsale-app-body .ps-page-header.ps-sale-workspace-header > .m-header,
+html body.pushsale-app-body .ps-page-header[data-page-code="4.1"] > .m-header,
+html body.pushsale-app-body .ps-page-header.ps-sale-workspace-header .ps-page-header__row,
+html body.pushsale-app-body .ps-page-header[data-page-code="4.1"] .ps-page-header__row {
+    grid-template-columns: max-content minmax(0, 1fr) minmax(260px, 340px) !important;
+    column-gap: 12px !important;
+}
+
+html body.pushsale-app-body .ps-page-header.ps-sale-workspace-header .ps-page-header__filters,
+html body.pushsale-app-body .ps-page-header[data-page-code="4.1"] .ps-page-header__filters {
+    justify-self: stretch !important;
+    justify-content: flex-start !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+}
+
+html body.pushsale-app-body .ps-page-header.ps-sale-workspace-header .ps-page-header__actions,
+html body.pushsale-app-body .ps-page-header[data-page-code="4.1"] .ps-page-header__actions {
+    justify-self: end !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    white-space: normal !important;
+}
+
 html body.pushsale-app-body .ps-page-header .ps-sale-primary-filters {
     display: grid !important;
-    grid-template-columns: repeat(3, minmax(140px, 1fr)) !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
     gap: 8px !important;
     width: 100% !important;
     min-width: 0 !important;
@@ -830,11 +858,29 @@ html body.pushsale-app-body .ps-page-header .ps-sale-primary-filters {
     padding: 0 !important;
 }
 
+html body.pushsale-app-body .ps-page-header .ps-sale-primary-filters > .form-control,
+html body.pushsale-app-body .ps-page-header .ps-sale-primary-filters > select,
+html body.pushsale-app-body .ps-page-header .ps-sale-primary-filters .ps-sale-select {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+}
+
 html body.pushsale-app-body .ps-page-header .ps-sale-search-wrap {
     display: grid !important;
-    grid-template-columns: minmax(180px, 260px) auto !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
     gap: 8px !important;
     align-items: center !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+}
+
+html body.pushsale-app-body .ps-page-header .ps-sale-search-wrap > .form-control,
+html body.pushsale-app-body .ps-page-header .ps-sale-search-wrap > input {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
 }
 
 html body.pushsale-app-body .ps-page-header .ps-sale-extra-filters {

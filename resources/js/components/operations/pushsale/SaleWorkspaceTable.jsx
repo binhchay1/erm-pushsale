@@ -208,7 +208,7 @@ export function SaleWorkspaceTable({
                                     {t('operations.ops_table.col_desired_at')}
                                 </span>
                             </th>
-                            <th className="text-center no-wrap area1 hidden-xs">
+                            <th className="text-center no-wrap area1 hidden-xs ps-col-message">
                                 <span className="span-col td-message td-793">{t('operations.ops_table.col_message')}</span>
                             </th>
                             <th className="text-center no-wrap area2 hidden-xs">
