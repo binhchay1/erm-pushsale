@@ -393,10 +393,17 @@ export function SaleOrderDialog({
     const validate = () => {
         if (!form.marketing_source_id && !order) return t('operations.sale_order.source_required');
         if (!form.name.trim()) return t('operations.sale_order.name_required');
-        const phoneError = vietnamesePhoneError(form.phone, { required: true });
+        const phoneError = vietnamesePhoneError(form.phone, {
+            required: true,
+            emptyMessage: t('operations.sale_order.phone_required'),
+        });
         if (phoneError) return phoneError;
         if (!form.receiver_is_customer) {
-            const receiverError = vietnamesePhoneError(form.receiver_phone, { required: true });
+            if (!form.receiver_name.trim()) return t('operations.sale_order.receiver_name_required');
+            const receiverError = vietnamesePhoneError(form.receiver_phone, {
+                required: true,
+                emptyMessage: t('operations.sale_order.receiver_phone_required'),
+            });
             if (receiverError) return receiverError;
         }
         if (form.items.some((item) => item.base_product_id && !item.product_id && (catalog.byParent.get(String(item.base_product_id)) ?? []).length > 0)) {
@@ -675,7 +682,20 @@ export function SaleOrderDialog({
                         <div className="ps-order-field"><FieldLabel>{t('operations.sale_order.ship_via')}</FieldLabel><Select value={form.shipping_service} onChange={(value) => update('shipping_service', value)} disabled={editDisabled}><option value="">{t('operations.sale_order.manual_carrier')}</option>{services.map((item) => <option key={item.value ?? item.code} value={item.value ?? item.code}>{item.label ?? item.name}</option>)}</Select></div>
                         <div className="ps-order-field ps-full"><FieldLabel>{t('operations.sale_order.shipping_note_template')}</FieldLabel><Select value="" disabled={editDisabled}><option value="">--{t('operations.sale_order.note_template')}--</option></Select></div>
                         <div className="ps-order-field ps-full"><FieldLabel>{t('operations.sale_order.shipping_notes')}</FieldLabel><textarea className="form-control" rows={2} value={form.shipping_notes} onChange={(event) => update('shipping_notes', event.target.value)} disabled={editDisabled} /></div>
-                        <label className="ps-order-checkbox ps-full"><input type="checkbox" checked={form.receiver_is_customer} onChange={(event) => update('receiver_is_customer', event.target.checked)} disabled={editDisabled} /> {t('operations.sale_order.receiver_is_customer')}</label>
+                        <label className="ps-order-checkbox ps-full"><input type="checkbox" checked={form.receiver_is_customer} onChange={(event) => {
+                            const checked = event.target.checked;
+                            setForm((current) => ({
+                                ...current,
+                                receiver_is_customer: checked,
+                                // Bỏ tick → prefill từ khách nếu đang trống, tránh báo "SĐT bắt buộc" khó hiểu.
+                                receiver_name: checked
+                                    ? current.receiver_name
+                                    : (current.receiver_name.trim() || current.name.trim()),
+                                receiver_phone: checked
+                                    ? current.receiver_phone
+                                    : (current.receiver_phone.trim() || current.phone.trim()),
+                            }));
+                        }} disabled={editDisabled} /> {t('operations.sale_order.receiver_is_customer')}</label>
                         {!form.receiver_is_customer && <><div className="ps-order-field"><FieldLabel>{t('operations.sale_order.receiver_name')}</FieldLabel><input className="form-control" value={form.receiver_name} onChange={(event) => update('receiver_name', event.target.value)} disabled={editDisabled} /></div><div className="ps-order-field"><FieldLabel>{t('operations.sale_order.receiver_phone')}</FieldLabel><input className="form-control" value={form.receiver_phone} onChange={(event) => update('receiver_phone', event.target.value)} disabled={editDisabled} /></div></>}
                         <label className="ps-order-checkbox"><input type="checkbox" checked={form.address_mode === 'new'} onChange={(event) => update('address_mode', event.target.checked ? 'new' : 'old')} disabled={editDisabled} /> {t('operations.sale_order.address_2_level')}</label>
                         <label className="ps-order-checkbox"><input type="checkbox" checked={form.address_mode === 'new'} readOnly disabled title={t('operations.sale_order.address_suggest_title')} /> {t('operations.sale_order.address_suggest')}</label>

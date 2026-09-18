@@ -36,10 +36,10 @@ export function isValidVnPhone(value) {
 }
 
 /** Cho phép trống khi trường optional; có giá trị thì phải hợp lệ. */
-export function vietnamesePhoneError(raw, { required = false } = {}) {
+export function vietnamesePhoneError(raw, { required = false, emptyMessage = 'Số điện thoại bắt buộc.' } = {}) {
     const value = String(raw ?? '').trim();
     if (!value) {
-        return required ? 'Số điện thoại bắt buộc.' : '';
+        return required ? emptyMessage : '';
     }
     if (!isValidVietnamesePhone(value)) {
         return 'Số điện thoại di động VN không hợp lệ. Dùng 9 số (912345678), 10 số (0912345678) hoặc +84.';
