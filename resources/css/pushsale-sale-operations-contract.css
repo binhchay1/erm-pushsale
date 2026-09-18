@@ -1163,21 +1163,34 @@ html body.pushsale-app-body .ps-sale-workspace-shell {
 
 html body.pushsale-app-body .ps-page-header.ps-sale-workspace-header .ps-sale-primary-filters,
 html body.pushsale-app-body .ps-page-header[data-page-code="4.1"] .ps-sale-primary-filters {
-    display: grid !important;
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
     gap: 8px !important;
-    width: 100% !important;
+    width: auto !important;
     min-width: 0 !important;
+    grid-template-columns: none !important;
+}
+
+html body.pushsale-app-body .ps-page-header.ps-sale-workspace-header .ps-sale-primary-filters > .form-control,
+html body.pushsale-app-body .ps-page-header.ps-sale-workspace-header .ps-sale-primary-filters > select,
+html body.pushsale-app-body .ps-page-header[data-page-code="4.1"] .ps-sale-primary-filters > .form-control,
+html body.pushsale-app-body .ps-page-header[data-page-code="4.1"] .ps-sale-primary-filters > select {
+    width: 148px !important;
+    min-width: 132px !important;
+    max-width: 160px !important;
+    flex: 0 0 148px !important;
 }
 
 html body.pushsale-app-body .ps-page-header.ps-sale-workspace-header .ps-sale-search-wrap,
 html body.pushsale-app-body .ps-page-header[data-page-code="4.1"] .ps-sale-search-wrap {
     display: grid !important;
-    grid-template-columns: minmax(0, 1fr) auto !important;
+    grid-template-columns: 170px auto !important;
     gap: 8px !important;
+    width: auto !important;
     min-width: 0 !important;
-    width: 100% !important;
-    max-width: 100% !important;
+    max-width: none !important;
 }
 
 html body.pushsale-app-body .ps-page-extra-filters.ps-sale-workspace-header .ps-sale-extra-filters,
@@ -1284,7 +1297,11 @@ html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table td:
 
 @media (max-width: 991px) {
     html body.pushsale-app-body .ps-page-header.ps-sale-workspace-header .ps-sale-primary-filters,
-    html body.pushsale-app-body .ps-page-header[data-page-code="4.1"] .ps-sale-primary-filters,
+    html body.pushsale-app-body .ps-page-header[data-page-code="4.1"] .ps-sale-primary-filters {
+        flex-wrap: wrap !important;
+        justify-content: flex-end !important;
+    }
+
     html body.pushsale-app-body .ps-page-extra-filters.ps-sale-workspace-header .ps-sale-extra-row,
     html body.pushsale-app-body .ps-page-extra-filters[data-page-code="4.1"] .ps-sale-extra-row {
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -1298,7 +1315,21 @@ html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table td:
     }
 
     html body.pushsale-app-body .ps-page-header.ps-sale-workspace-header .ps-sale-primary-filters,
-    html body.pushsale-app-body .ps-page-header[data-page-code="4.1"] .ps-sale-primary-filters,
+    html body.pushsale-app-body .ps-page-header[data-page-code="4.1"] .ps-sale-primary-filters {
+        width: 100% !important;
+        justify-content: stretch !important;
+    }
+
+    html body.pushsale-app-body .ps-page-header.ps-sale-workspace-header .ps-sale-primary-filters > .form-control,
+    html body.pushsale-app-body .ps-page-header.ps-sale-workspace-header .ps-sale-primary-filters > select,
+    html body.pushsale-app-body .ps-page-header[data-page-code="4.1"] .ps-sale-primary-filters > .form-control,
+    html body.pushsale-app-body .ps-page-header[data-page-code="4.1"] .ps-sale-primary-filters > select {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        flex: 1 1 100% !important;
+    }
+
     html body.pushsale-app-body .ps-page-extra-filters.ps-sale-workspace-header .ps-sale-extra-row,
     html body.pushsale-app-body .ps-page-extra-filters[data-page-code="4.1"] .ps-sale-extra-row {
         grid-template-columns: minmax(0, 1fr) !important;
@@ -1307,7 +1338,14 @@ html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-operation-table td:
     html body.pushsale-app-body .ps-page-header.ps-sale-workspace-header .ps-sale-search-wrap,
     html body.pushsale-app-body .ps-page-header[data-page-code="4.1"] .ps-sale-search-wrap {
         grid-template-columns: minmax(0, 1fr) auto !important;
+        width: 100% !important;
         min-width: 0 !important;
+    }
+
+    html body.pushsale-app-body .ps-page-header.ps-sale-workspace-header .ps-sale-search-wrap > .form-control,
+    html body.pushsale-app-body .ps-page-header[data-page-code="4.1"] .ps-sale-search-wrap > .form-control {
+        width: 100% !important;
+        max-width: none !important;
     }
 
     html body.pushsale-app-body .ps-sale-workspace-page .ps-sale-table-wrap,
