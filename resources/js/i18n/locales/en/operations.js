@@ -706,7 +706,7 @@ export default {
         unclose_hint: 'Order is waiting for waybill. Click Unclose order to operate and edit again.',
         unclose_success: 'Order unclosed — you can operate and edit again.',
         closed_locked: 'Order is closed. Unclose before editing (only while waiting for waybill).',
-        close_via_button: 'Successful close result requires the Close order button to generate the code.',
+        close_via_button: 'Result is set to «Close order» — code is not generated yet. Click the blue Close order button (not Save). Select a warehouse first.',
         next_operation_required: 'Please select the next operation time.',
         lock_missing: 'Could not acquire order interaction lock.',
         save_failed: 'Could not save the order.',

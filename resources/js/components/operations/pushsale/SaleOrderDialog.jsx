@@ -163,6 +163,7 @@ export function SaleOrderDialog({
     const orderClosed = Boolean(order?.closedAt);
     const [form, setForm] = useState(EMPTY);
     const [formError, setFormError] = useState('');
+    const [formHint, setFormHint] = useState('');
     const [processing, setProcessing] = useState(false);
     const [manualDiscount, setManualDiscount] = useState(false);
     const [manualShippingFee, setManualShippingFee] = useState(false);
@@ -187,6 +188,11 @@ export function SaleOrderDialog({
             setForm(nextForm);
             setOperationResultSeed(nextForm.operation_result || '');
             setFormError('');
+            setFormHint(
+                nextForm.operation_result === 'closed_success' && !order?.closedAt
+                    ? t('operations.sale_order.close_via_button')
+                    : '',
+            );
             setManualDiscount(numberValue(nextForm.discount) > 0);
             setManualShippingFee(numberValue(nextForm.shipping_fee_collected) > 0);
             setRecipientPaysCarrier(false);
@@ -471,23 +477,29 @@ export function SaleOrderDialog({
         }
         const error = shouldClose ? validateClose() : validate();
         if (error) {
+            setFormHint('');
             setFormError(error);
             return;
         }
         // Ladi đổ sản phẩm về với SL 0 — sale phải nhập số lượng trước khi chốt.
         if (shouldClose && !form.items.some((item) => hasProductLine(item) && numberValue(item.quantity) > 0)) {
+            setFormHint('');
             setFormError(t('operations.sale_order.quantity_required'));
             return;
         }
         if (!shouldClose && form.operation_result === 'closed_success') {
-            setFormError(t('operations.sale_order.close_via_button'));
+            // Hướng dẫn thao tác — không phải lỗi hệ thống (tránh banner đỏ gây hiểu nhầm).
+            setFormError('');
+            setFormHint(t('operations.sale_order.close_via_button'));
             return;
         }
         if (!shouldClose && needsNextOperationAt && !form.next_operation_at) {
+            setFormHint('');
             setFormError(t('operations.sale_order.next_operation_required'));
             return;
         }
         setFormError('');
+        setFormHint('');
         const data = payload();
         if (order) {
             if (!lockToken) {
@@ -611,9 +623,10 @@ export function SaleOrderDialog({
             >
                 <DialogHeader className="ps-sale-dialog-header"><DialogTitle>{dialogTitle}</DialogTitle></DialogHeader>
                 <div className="ps-sale-order-body">
-                    {formError || (orderClosed && canUnclose) ? (
+                    {formError || formHint || (orderClosed && canUnclose) ? (
                         <div className="ps-sale-order-notices">
                             {formError ? <div className="ps-dialog-form-error" role="alert">{formError}</div> : null}
+                            {formHint ? <div className="ps-dialog-form-error ps-dialog-form-hint" role="status">{formHint}</div> : null}
                             {orderClosed && canUnclose ? (
                                 <div className="ps-dialog-form-error ps-dialog-form-hint" role="status">
                                     {t('operations.sale_order.unclose_hint')}
@@ -635,7 +648,15 @@ export function SaleOrderDialog({
                                 disabled={sourceLocked || formDisabled}
                             />
                         </div>
-                        {order && operationStatusOptions.length ? <div className="ps-order-field ps-full ps-order-result-field"><FieldLabel>{t('operations.sale_order.result')}</FieldLabel><Select value={form.operation_result} onChange={(value) => update('operation_result', value)} disabled={editDisabled}><option value="">--{t('operations.sale_order.choose_result')}--</option>{operationStatusOptions.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</Select></div> : null}
+                        {order && operationStatusOptions.length ? <div className="ps-order-field ps-full ps-order-result-field"><FieldLabel>{t('operations.sale_order.result')}</FieldLabel><Select value={form.operation_result} onChange={(value) => {
+                            update('operation_result', value);
+                            if (value === 'closed_success' && !orderClosed) {
+                                setFormError('');
+                                setFormHint(t('operations.sale_order.close_via_button'));
+                            } else {
+                                setFormHint('');
+                            }
+                        }} disabled={editDisabled}><option value="">--{t('operations.sale_order.choose_result')}--</option>{operationStatusOptions.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</Select></div> : null}
                         {order && needsNextOperationAt ? <div className="ps-order-field ps-full ps-order-next-operation-field"><FieldLabel required>{t('operations.sale_order.next_operation')}</FieldLabel><input className="form-control" type="datetime-local" value={form.next_operation_at} onChange={(event) => update('next_operation_at', event.target.value)} disabled={editDisabled} /></div> : null}
                         <div className="ps-order-field"><FieldLabel required>{t('operations.sale_order.customer_name')}</FieldLabel><input className="form-control" value={form.name} onChange={(event) => update('name', event.target.value)} disabled={editDisabled} /></div>
                         <div className="ps-order-field"><FieldLabel required>{t('operations.sale_order.customer_phone')}</FieldLabel><input className="form-control" value={form.phone} onChange={(event) => update('phone', event.target.value)} disabled={editDisabled} /></div>

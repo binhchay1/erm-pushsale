@@ -706,7 +706,7 @@ export default {
         unclose_hint: 'Đơn đang chờ vận đơn. Bấm Hủy chốt đơn để tác nghiệp và chỉnh sửa lại.',
         unclose_success: 'Đã hủy chốt đơn — có thể tác nghiệp và chỉnh sửa lại.',
         closed_locked: 'Đơn đã chốt. Hủy chốt trước khi chỉnh sửa (chỉ khi còn Chờ vận đơn).',
-        close_via_button: 'Kết quả chốt đơn thành công cần bấm nút Chốt đơn để sinh mã đơn.',
+        close_via_button: 'Đang chọn kết quả «Chốt đơn» — chưa sinh mã đơn. Bấm nút xanh «Chốt đơn» (không phải Lưu đơn). Phải chọn Kho trước khi chốt.',
         next_operation_required: 'Vui lòng chọn thời gian tác nghiệp tiếp.',
         lock_missing: 'Chưa lấy được quyền thao tác đơn.',
         save_failed: 'Không thể lưu đơn.',
