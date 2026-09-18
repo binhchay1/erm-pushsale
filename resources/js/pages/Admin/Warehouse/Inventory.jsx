@@ -183,7 +183,9 @@ export default function Inventory({ report, filterOptions = {}, intakeUrl, expor
                                     <td className="text-center">{row.batchCode}</td>
                                     <td className="text-center">{row.expiryDate}</td>
                                     <td className="text-center">{row.locationCode}</td>
-                                    <td className="text-center"><strong>{number.format(row.stockQuantity)}</strong></td>
+                                    <td className={`text-center${Number(row.stockQuantity) < 0 ? ' text-danger' : ''}`}>
+                                        <strong>{number.format(row.stockQuantity)}</strong>
+                                    </td>
                                     <td className="text-center">{number.format(row.pendingSalesQuantity)}</td>
                                     <td className="text-center" />
                                     <td className="text-center">

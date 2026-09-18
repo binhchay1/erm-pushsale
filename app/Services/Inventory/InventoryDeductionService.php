@@ -9,7 +9,6 @@ use App\Models\Warehouse;
 use App\Models\WarehouseInventory;
 use App\Models\WarehouseInventoryMovement;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
 
 class InventoryDeductionService
 {
@@ -107,20 +106,13 @@ class InventoryDeductionService
         });
     }
 
-    public function assertCanClose(Order $order, bool $confirmInsufficientStock): void
+    /**
+     * Chốt đơn / xuất kho được phép âm tồn — không chặn theo tồn hiện tại.
+     * $confirmInsufficientStock giữ signature cũ (UI/API vẫn gửi) nhưng không còn gate.
+     */
+    public function assertCanClose(Order $order, bool $confirmInsufficientStock = false): void
     {
-        if ($this->hasSufficientStock($order)) {
-            return;
-        }
-
-        if ($confirmInsufficientStock) {
-            return;
-        }
-
-        throw ValidationException::withMessages([
-            'stock' => 'Hàng trong kho không đủ.',
-            'insufficient_stock' => 'Hàng trong kho không đủ.',
-        ]);
+        // no-op: khách yêu cầu xuất âm; số liệu tồn được phép âm.
     }
 
     public function resolveWarehouseId(Order $order): ?int

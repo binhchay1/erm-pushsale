@@ -18,7 +18,7 @@ import { SearchableSelect } from '@/components/ui/searchable-select';
 import { formatCurrency, formatNumber } from '@/lib/format';
 import { useT } from '@/providers/I18nProvider';
 
-function StockWarningBlock({ warnings = [] }) {
+function StockInfoBlock({ warnings = [] }) {
     const t = useT();
     const insufficient = warnings.filter((w) => !w.sufficient);
 
@@ -27,8 +27,9 @@ function StockWarningBlock({ warnings = [] }) {
     }
 
     return (
-        <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
+        <div className="rounded-lg border border-amber-400/50 bg-amber-50 p-3 text-sm text-amber-900">
             <p className="font-semibold">{t('operations.insufficient_stock')}</p>
+            <p className="mt-1 text-xs opacity-90">Cho phép xuất âm — chốt đơn sẽ trừ tồn (có thể âm).</p>
             <ul className="mt-2 list-inside list-disc text-xs">
                 {insufficient.map((w) => (
                     <li key={w.productId}>
@@ -93,7 +94,6 @@ export function OperationStatusDialog({
     const [result, setResult] = useState('');
     const [nextAt, setNextAt] = useState('');
     const [note, setNote] = useState('');
-    const [confirmInsufficient, setConfirmInsufficient] = useState(false);
 
     // Order tab state
     const [items, setItems] = useState(() => mapInitialItems(order));
@@ -215,7 +215,6 @@ export function OperationStatusDialog({
         setResult('');
         setNextAt('');
         setNote('');
-        setConfirmInsufficient(false);
         setItems(mapInitialItems(order));
         setOrderDiscount(Number(order.discount ?? 0) || 0);
         setCarrier(order.shippingProvider ?? '');
@@ -246,10 +245,6 @@ export function OperationStatusDialog({
             toast.error(t('operations.status_dialog.select_schedule'));
             return;
         }
-        if (isClosing && order.hasInsufficientStock && !confirmInsufficient) {
-            setConfirmInsufficient(true);
-            return;
-        }
 
         setProcessing(true);
         router.post(
@@ -258,7 +253,7 @@ export function OperationStatusDialog({
                 operation_result: result,
                 next_operation_at: needsSchedule ? nextAt : null,
                 note: note || null,
-                confirm_insufficient_stock: confirmInsufficient,
+                confirm_insufficient_stock: true,
             },
             {
                 preserveScroll: true,
@@ -267,11 +262,6 @@ export function OperationStatusDialog({
                     toast.success(t('operations.status_dialog.update_success'));
                 },
                 onError: (errors) => {
-                    if (errors.insufficient_stock || errors.stock) {
-                        setConfirmInsufficient(true);
-                        toast.error(t('operations.close_insufficient_error'));
-                        return;
-                    }
                     toast.error(
                         errors.operation_result ??
                             errors.next_operation_at ??
@@ -420,7 +410,6 @@ export function OperationStatusDialog({
                                     value={result}
                                     onChange={(e) => {
                                         setResult(e.target.value);
-                                        setConfirmInsufficient(false);
                                     }}
                                 >
                                     <option value="">{t('operations.status_dialog.select_result_placeholder')}</option>
@@ -436,8 +425,8 @@ export function OperationStatusDialog({
                                 </select>
                             </div>
 
-                            {(showStockWarning || (confirmInsufficient && isClosing)) && (
-                                <StockWarningBlock warnings={order.stockWarnings} />
+                            {showStockWarning && (
+                                <StockInfoBlock warnings={order.stockWarnings} />
                             )}
 
                             {needsSchedule && (
@@ -468,16 +457,12 @@ export function OperationStatusDialog({
                                 </Button>
                                 <Button
                                     type="button"
-                                    variant={showStockWarning && confirmInsufficient ? 'destructive' : 'default'}
+                                    variant="default"
                                     onClick={submitStatus}
                                     disabled={processing || !result || (needsSchedule && !nextAt)}
                                 >
                                     {processing && <Loader2 className="mr-1 size-4 animate-spin" />}
-                                    {showStockWarning && !confirmInsufficient
-                                        ? t('operations.status_dialog.continue')
-                                        : showStockWarning && confirmInsufficient
-                                          ? t('operations.status_dialog.confirm_insufficient')
-                                          : t('operations.status_dialog.save')}
+                                    {t('operations.status_dialog.save')}
                                 </Button>
                             </DialogFooter>
                         </div>

@@ -7,7 +7,6 @@ use App\Http\Controllers\Concerns\AssertsOrderInteractionLock;
 use App\Http\Controllers\Concerns\InteractsWithReportFilters;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
-use App\Services\Inventory\InventoryDeductionService;
 use App\Services\Shipping\CreateShipmentService;
 use App\Services\Shipping\ShippingOrderService;
 use App\Services\Settings\FeatureSettingsService;
@@ -100,13 +99,6 @@ class ShippingOrderController extends Controller
 
         if ($blocked = $this->assertShipmentPermission($request, 'create')) {
             return $blocked;
-        }
-
-        if (! $order->inventory_deducted_at && ! app(InventoryDeductionService::class)->hasSufficientStock($order)) {
-            return response()->json([
-                'success' => false,
-                'message' => __('messages.shipping_actions.out_of_stock'),
-            ], 422);
         }
 
         try {

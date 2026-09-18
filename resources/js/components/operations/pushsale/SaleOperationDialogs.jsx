@@ -490,13 +490,11 @@ export function DuplicatePhoneOrdersDialog({ order, open, onOpenChange, initialC
 
 export function BulkCloseDialog({ orderIds = [], rows = [], actionBaseUrl, open, onOpenChange }) {
     const [processing, setProcessing] = useState(false);
-    const [confirmStock, setConfirmStock] = useState(false);
     const [formError, setFormError] = useState('');
     const selectedRows = useMemo(() => rows.filter((row) => orderIds.includes(String(row.id))), [rows, orderIds]);
 
     useEffect(() => {
         if (!open) {
-            setConfirmStock(false);
             setFormError('');
         }
     }, [open]);
@@ -510,7 +508,7 @@ export function BulkCloseDialog({ orderIds = [], rows = [], actionBaseUrl, open,
         setProcessing(true);
         router.post(`${actionBaseUrl}/orders/bulk-close`, {
             order_ids: orderIds,
-            confirm_insufficient_stock: confirmStock,
+            confirm_insufficient_stock: true,
         }, {
             preserveScroll: true,
             onSuccess: () => {
@@ -528,11 +526,10 @@ export function BulkCloseDialog({ orderIds = [], rows = [], actionBaseUrl, open,
                 <DialogHeader className="ps-sale-dialog-header"><DialogTitle>Chốt đơn nhiều</DialogTitle></DialogHeader>
                 <div className="ps-bulk-close-body">
                     {formError ? <div className="ps-dialog-form-error" role="alert">{formError}</div> : null}
-                    <div className="alert alert-info">Đã chọn <b>{orderIds.length}</b> đơn. Mã đơn sẽ chỉ được sinh cho các đơn chốt thành công.</div>
+                    <div className="alert alert-info">Đã chọn <b>{orderIds.length}</b> đơn. Mã đơn sẽ chỉ được sinh cho các đơn chốt thành công. Cho phép xuất âm nếu tồn không đủ.</div>
                     <div className="table-responsive"><table className="table table-bordered table-striped"><thead><tr><th>#</th><th>Khách hàng</th><th>Điện thoại</th><th>Sản phẩm</th><th>Tổng tiền</th><th>Trạng thái</th></tr></thead><tbody>
                         {selectedRows.map((order, index) => <tr key={order.id}><td>{index + 1}</td><td>{order.customerName || '—'}</td><td>{order.customerPhone || '—'}</td><td>{order.products?.map((item) => `${item.productName} x${item.quantity}`).join(' | ') || '—'}</td><td className="text-right">{money(order.total)}</td><td>{order.closedAt ? 'Đã chốt' : 'Chưa chốt'}</td></tr>)}
                     </tbody></table></div>
-                    <label className="ps-bulk-stock-confirm"><input type="checkbox" checked={confirmStock} onChange={(event) => setConfirmStock(event.target.checked)} /> Xác nhận tiếp tục nếu tồn kho không đủ</label>
                     <div className="ps-sale-dialog-footer"><button type="button" className="btn btn-default" onClick={() => onOpenChange(false)}>Đóng</button><button type="button" className="btn btn-primary" disabled={processing || !orderIds.length} onClick={submit}><i className="fa fa-check-square-o" /> Chốt đơn</button></div>
                 </div>
             </DialogContent>

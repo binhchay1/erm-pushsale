@@ -61,12 +61,7 @@ class InventoryIntakeService
         return DB::transaction(function () use ($warehouseId, $productId, $quantity, $user, $note, $approvedByUserId) {
             $inventory = $this->inventoryFor($warehouseId, $productId);
 
-            if ($inventory->stock_quantity < $quantity) {
-                throw ValidationException::withMessages([
-                    'quantity' => "Tồn kho hiện chỉ còn {$inventory->stock_quantity} — không đủ để xuất {$quantity}.",
-                ]);
-            }
-
+            // Cho phép xuất âm: không chặn khi tồn < số lượng xuất.
             $inventory->decrement('stock_quantity', $quantity);
             $inventory->refresh();
 

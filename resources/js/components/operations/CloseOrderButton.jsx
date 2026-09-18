@@ -15,7 +15,7 @@ import {
 import { formatNumber } from '@/lib/format';
 import { useT } from '@/providers/I18nProvider';
 
-function StockWarningBlock({ warnings = [] }) {
+function StockInfoBlock({ warnings = [] }) {
     const t = useT();
     const insufficient = warnings.filter((w) => !w.sufficient);
 
@@ -24,8 +24,9 @@ function StockWarningBlock({ warnings = [] }) {
     }
 
     return (
-        <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
+        <div className="rounded-lg border border-amber-400/50 bg-amber-50 p-3 text-sm text-amber-900">
             <p className="font-semibold">{t('operations.insufficient_stock')}</p>
+            <p className="mt-1 text-xs opacity-90">Cho phép xuất âm — chốt đơn sẽ trừ tồn (có thể âm).</p>
             <ul className="mt-2 list-inside list-disc text-xs">
                 {insufficient.map((w) => (
                     <li key={w.productId}>
@@ -45,11 +46,9 @@ export function CloseOrderButton({ order, disabled, actionBaseUrl = '/sales' }) 
     const t = useT();
     const [open, setOpen] = useState(false);
     const [processing, setProcessing] = useState(false);
-    const [confirmInsufficient, setConfirmInsufficient] = useState(false);
 
     // Đồng nhất backend SaleOperationPolicy::canClose; fallback theo closedAt nếu prop thiếu.
     const canClose = (order.canClose ?? !order.closedAt) && !disabled;
-    const hasInsufficientStock = order.hasInsufficientStock;
     const warnings = order.stockWarnings ?? [];
 
     const submit = () => {
@@ -57,28 +56,18 @@ export function CloseOrderButton({ order, disabled, actionBaseUrl = '/sales' }) 
             toast.error(t('operations.sale_order.warehouse_required'));
             return;
         }
-        if (hasInsufficientStock && !confirmInsufficient) {
-            setConfirmInsufficient(true);
-            return;
-        }
 
         setProcessing(true);
         router.post(
             `${actionBaseUrl}/orders/${order.id}/close`,
-            { confirm_insufficient_stock: confirmInsufficient, warehouse_id: order.warehouseId },
+            { confirm_insufficient_stock: true, warehouse_id: order.warehouseId },
             {
                 preserveScroll: true,
                 onSuccess: () => {
                     setOpen(false);
-                    setConfirmInsufficient(false);
                     toast.success(t('operations.close_success'));
                 },
                 onError: (errors) => {
-                    if (errors.insufficient_stock || errors.stock) {
-                        setConfirmInsufficient(true);
-                        toast.error(t('operations.close_insufficient_error'));
-                        return;
-                    }
                     if (errors.warehouse_id) {
                         toast.error(errors.warehouse_id);
                         return;
@@ -104,37 +93,22 @@ export function CloseOrderButton({ order, disabled, actionBaseUrl = '/sales' }) 
             <Button type="button" size="sm" variant="default" onClick={() => setOpen(true)}>
                 {t('operations.close_order')}
             </Button>
-            <Dialog
-                open={open}
-                onOpenChange={(value) => {
-                    setOpen(value);
-                    if (!value) {
-                        setConfirmInsufficient(false);
-                    }
-                }}
-            >
+            <Dialog open={open} onOpenChange={setOpen}>
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>{t('operations.confirm_close_title', { code: order.orderCode })}</DialogTitle>
                         <DialogDescription>{t('operations.confirm_close_desc')}</DialogDescription>
                     </DialogHeader>
 
-                    {(hasInsufficientStock || confirmInsufficient) && (
-                        <StockWarningBlock warnings={warnings} />
-                    )}
+                    <StockInfoBlock warnings={warnings} />
 
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={() => setOpen(false)}>
                             {t('confirm_dialog.cancel_label')}
                         </Button>
-                        <Button
-                            type="button"
-                            variant={confirmInsufficient ? 'destructive' : 'default'}
-                            onClick={submit}
-                            disabled={processing}
-                        >
+                        <Button type="button" variant="default" onClick={submit} disabled={processing}>
                             {processing && <Loader2 className="mr-1 size-4 animate-spin" />}
-                            {confirmInsufficient ? t('operations.confirm_insufficient') : t('operations.confirm_close')}
+                            {t('operations.confirm_close')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

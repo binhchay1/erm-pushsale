@@ -111,7 +111,7 @@ class WarehouseVoucherBusinessLinkTest extends TestCase
         ]);
     }
 
-    public function test_outbound_complete_is_transactional_when_stock_is_insufficient(): void
+    public function test_outbound_complete_allows_negative_stock(): void
     {
         $actor = $this->adminUser();
         $warehouse = Warehouse::query()->create(['name' => 'Kho thiếu tồn', 'code' => 'LOW']);
@@ -148,10 +148,11 @@ class WarehouseVoucherBusinessLinkTest extends TestCase
 
         $this->actingAs($actor)
             ->postJson("/admin/warehouse/vouchers/entry/records/{$voucherId}/complete")
-            ->assertUnprocessable();
+            ->assertOk()
+            ->assertJsonPath('voucher.status', 'confirmed');
 
-        $this->assertDatabaseHas('warehouse_vouchers', ['code' => 'PXK-LOW-001', 'status' => 'draft']);
-        $this->assertSame(2, (int) WarehouseInventory::query()->where('warehouse_id', $warehouse->id)->where('product_id', $product->id)->value('stock_quantity'));
+        $this->assertDatabaseHas('warehouse_vouchers', ['code' => 'PXK-LOW-001', 'status' => 'confirmed']);
+        $this->assertSame(-3, (int) WarehouseInventory::query()->where('warehouse_id', $warehouse->id)->where('product_id', $product->id)->value('stock_quantity'));
     }
 
     public function test_warehouse_53_pages_use_same_linked_business_data(): void

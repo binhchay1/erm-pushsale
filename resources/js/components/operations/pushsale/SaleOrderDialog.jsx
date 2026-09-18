@@ -545,7 +545,7 @@ export function SaleOrderDialog({
                     shipping_method: data.shipping_method,
                     shipping_address: data.shipping_address,
                     amount_to_collect: collect,
-                    confirm_insufficient_stock: false,
+                    confirm_insufficient_stock: true,
                     interaction_lock_token: lockToken,
                 }, {
                     preserveScroll: true,

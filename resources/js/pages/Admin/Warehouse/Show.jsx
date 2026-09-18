@@ -77,7 +77,7 @@ export default function WarehouseShow({ warehouse, filters, rows }) {
                                         </Td>
                                         <Td>{r.batch_code ?? '—'}</Td>
                                         <Td>{r.location_code ?? '—'}</Td>
-                                        <Td className="font-semibold">{formatNumber(r.stock_quantity)}</Td>
+                                        <Td className={`font-semibold${Number(r.stock_quantity) < 0 ? ' text-danger' : ''}`}>{formatNumber(r.stock_quantity)}</Td>
                                         <Td>{formatNumber(r.pending_sales_quantity)}</Td>
                                         <Td>{r.is_discontinued ? '✓' : ''}</Td>
                                         <Td>

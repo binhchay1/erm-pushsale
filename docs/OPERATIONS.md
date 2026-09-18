@@ -29,6 +29,7 @@ Mọi lead/đơn/kho/SP gắn `shop_id` (cửa hàng đang chọn hoặc shop c�
 - Tab trạng thái: Khách mới / Gọi lần 2–6 / Bỏ qua / Chưa TN / Tất cả (Chăm sóc lần 1–3 đã bỏ khỏi quy trình active; đơn cũ vẫn đọc được).
 - Kết quả tác nghiệp (dropdown): Chốt đơn, Không nghe máy, Máy bận, Gọi lại sau, Trùng số, Sai số/Nhầm số, Thuê bao, Suy nghĩ thêm, Không có nhu cầu.
 - Trạng thái chốt đơn (filter): Đã chốt đơn / Chưa chốt đơn.
+- **Xuất âm:** chốt đơn / xuất kho / tạo vận đơn **không** chặn theo tồn; `stock_quantity` được phép âm. Cảnh báo tồn thiếu chỉ mang tính thông tin. Cân bằng sau kiểm kê: hiện chưa có màn riêng — dùng phiếu nhập 5.3.1 (hoặc helper tester reset tồn âm).
 
 ## Kho tác nghiệp (5.1)
 

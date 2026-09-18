@@ -5,7 +5,6 @@ namespace App\Services\Shipping;
 use App\Contracts\Shipping\ShippingCarrierInterface;
 use App\Models\Order;
 use App\Models\Shipment;
-use App\Services\Inventory\InventoryDeductionService;
 use App\Services\Settings\FeatureSettingsService;
 use RuntimeException;
 
@@ -13,7 +12,6 @@ class CreateShipmentService
 {
     public function __construct(
         private readonly CarrierRegistry $registry,
-        private readonly InventoryDeductionService $inventory,
         private readonly ShippingFeePresenter $feePresenter,
         private readonly FeatureSettingsService $featureSettings,
     ) {}
@@ -21,10 +19,6 @@ class CreateShipmentService
     public function createForOrder(Order $order, ?string $provider = null): Shipment
     {
         $order->loadMissing(['items', 'warehouse', 'company']);
-
-        if (! $order->inventory_deducted_at && ! $this->inventory->hasSufficientStock($order)) {
-            throw new RuntimeException(__('messages.shipping_actions.out_of_stock_create'));
-        }
 
         $providerKey = $provider
             ?? $order->shipping_provider
