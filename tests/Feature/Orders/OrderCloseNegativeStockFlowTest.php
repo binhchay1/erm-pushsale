@@ -22,7 +22,6 @@ use App\Services\Shipping\CreateShipmentService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
-use RuntimeException;
 use Tests\TestCase;
 
 /**
@@ -175,9 +174,11 @@ class OrderCloseNegativeStockFlowTest extends TestCase
 
         try {
             app(CreateShipmentService::class)->createForOrder($order->fresh(['items', 'warehouse', 'company']));
-            $this->fail('Expected carrier/config RuntimeException, not stock block');
-        } catch (RuntimeException $e) {
-            $this->assertDoesNotMatchRegularExpression('/hết hàng|out of stock|tồn kho|không đủ/i', $e->getMessage());
+            $this->fail('Expected ValidationException for missing carrier, not stock block');
+        } catch (ValidationException $e) {
+            $message = collect($e->errors())->flatten()->implode(' ');
+            $this->assertDoesNotMatchRegularExpression('/hết hàng|out of stock|tồn kho|không đủ/i', $message);
+            $this->assertNotEmpty($message);
         }
     }
 

@@ -3,6 +3,7 @@ import { toast } from 'sonner';
 
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { apiPost } from '@/lib/api';
+import { useT } from '@/providers/I18nProvider';
 
 /**
  * Dialog Đăng đơn khi FAB không có tick — cho phép đăng các đơn đủ điều kiện trên trang
@@ -15,6 +16,7 @@ export function RegisterShipmentDialog({
     apiBase,
     onDone,
 }) {
+    const t = useT();
     const [codes, setCodes] = useState('');
     const [busy, setBusy] = useState(false);
     const [selected, setSelected] = useState(() => new Set());
@@ -52,7 +54,7 @@ export function RegisterShipmentDialog({
         const targets = [...fromTable, ...byCode];
 
         if (!targets.length) {
-            toast.error('Chọn ít nhất 1 đơn đủ điều kiện đăng, hoặc dán mã đơn đang hiện trên trang.');
+            toast.error(t('operations.warehouse_ops.register_select_required'));
             return;
         }
 
@@ -68,7 +70,7 @@ export function RegisterShipmentDialog({
                     errors.push(`${row.orderCode}: ${error.message}`);
                 }
             }
-            if (ok) toast.success(`Đã đăng vận đơn cho ${ok} đơn.`);
+            if (ok) toast.success(t('operations.warehouse_ops.registered_count', { count: ok }));
             if (errors.length) toast.error(errors.slice(0, 3).join(' | '));
             onDone?.();
             onOpenChange(false);

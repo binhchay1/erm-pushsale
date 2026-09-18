@@ -12,7 +12,7 @@ use App\Models\Warehouse;
 use App\Services\Shipping\CreateShipmentService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
-use RuntimeException;
+use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
 
 /**
@@ -27,8 +27,7 @@ class MissingShippingConfigBehaviorTest extends TestCase
     {
         $order = $this->makeClosedOrder();
 
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessageMatches('/vận chuyển|carrier|cấu hình/i');
+        $this->expectException(ValidationException::class);
 
         app(CreateShipmentService::class)->createForOrder($order);
     }

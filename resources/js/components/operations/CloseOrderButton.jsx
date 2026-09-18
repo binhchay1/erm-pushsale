@@ -26,7 +26,7 @@ function StockInfoBlock({ warnings = [] }) {
     return (
         <div className="rounded-lg border border-amber-400/50 bg-amber-50 p-3 text-sm text-amber-900">
             <p className="font-semibold">{t('operations.insufficient_stock')}</p>
-            <p className="mt-1 text-xs opacity-90">Cho phép xuất âm — chốt đơn sẽ trừ tồn (có thể âm).</p>
+            <p className="mt-1 text-xs opacity-90">{t('operations.negative_stock_hint')}</p>
             <ul className="mt-2 list-inside list-disc text-xs">
                 {insufficient.map((w) => (
                     <li key={w.productId}>

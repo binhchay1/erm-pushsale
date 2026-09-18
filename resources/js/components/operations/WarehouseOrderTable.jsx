@@ -12,7 +12,7 @@ import { UpdateDeliveryStatusExcelDialog } from '@/components/operations/UpdateD
 import { UpdateReconByCodeDialog } from '@/components/operations/UpdateReconByCodeDialog';
 import { UpdateReconExcelDialog } from '@/components/operations/UpdateReconExcelDialog';
 import { OrderMoneyCell, OrderProductsBreakdown, OrderStatusFlags } from '@/components/operations/OrderLineBreakdown';
-import { apiPost, apiRequest, getCsrfToken } from '@/lib/api';
+import { apiPost, apiRequest, getCsrfToken, toastApiError } from '@/lib/api';
 import { formatCurrency, formatDateTime } from '@/lib/format';
 import { openShippingLabel } from '@/lib/shipping';
 import { useConfirm } from '@/hooks/use-confirm';
@@ -136,7 +136,7 @@ function FloatingWarehouseActions({
     const [reconExcelOpen, setReconExcelOpen] = useState(false);
     const [exportBusy, setExportBusy] = useState(false);
     const selectedIds = selectedRows.map((row) => row.id);
-    const selectedValidForShipment = selectedRows.filter((row) => row.canCreateShipment && !row.hasInsufficientStock);
+    const selectedValidForShipment = selectedRows.filter((row) => row.canCreateShipment);
 
     const resolveActionRows = () => (selectedRows.length ? selectedRows : pageRows);
     const resolveActionIds = () => {
@@ -168,23 +168,24 @@ function FloatingWarehouseActions({
     const openPrintProfile = (profileKey) => {
         const ids = resolveActionIds();
         if (!ids.length) {
-            toast.error('Không có đơn để in. Chọn đơn hoặc đảm bảo trang hiện tại có dữ liệu theo bộ lọc.');
+            toast.error(t('operations.warehouse_ops.no_orders_print'));
             return;
         }
         router.visit(`${actionApiBase}/print/${profileKey}?ids=${encodeURIComponent(ids.join(','))}`);
     };
 
     const createShipments = async () => {
+        // Xuất âm: không chặn đăng vận đơn theo tồn thiếu.
         const targetRows = selectedRows.length
             ? selectedValidForShipment
-            : pageRows.filter((row) => row.canCreateShipment && !row.hasInsufficientStock);
+            : pageRows.filter((row) => row.canCreateShipment);
 
         if (!selectedRows.length && !targetRows.length) {
             setRegisterOpen(true);
             return;
         }
         if (!targetRows.length) {
-            toast.error('Không có đơn đủ điều kiện tạo vận đơn trên trang / lựa chọn hiện tại.');
+            toast.error(t('operations.warehouse_ops.no_orders_ship'));
             return;
         }
         const ok = await ask({
@@ -195,16 +196,16 @@ function FloatingWarehouseActions({
         if (!ok) return;
         try {
             for (const row of targetRows) await apiPost(`${apiBase}/${row.id}/create-shipment`);
-            toast.success(`Đã đăng vận đơn cho ${targetRows.length} đơn.`);
+            toast.success(t('operations.warehouse_ops.registered_count', { count: targetRows.length }));
             onClear();
             onReload();
-        } catch (error) { toast.error(error.message); }
+        } catch (error) { toastApiError(error); }
     };
 
     const cancelShipments = async () => {
         const rows = resolveActionRows();
         if (!rows.length) {
-            toast.error('Không có đơn để hủy. Chọn đơn hoặc đảm bảo trang hiện tại có dữ liệu.');
+            toast.error(t('operations.warehouse_ops.no_orders_cancel'));
             return;
         }
         const ok = await ask({
@@ -218,20 +219,20 @@ function FloatingWarehouseActions({
             for (const row of rows) {
                 await apiRequest(`${apiBase}/${row.id}/cancel-shipment`, { method: 'POST', body: {} });
             }
-            toast.success(`Đã gửi yêu cầu hủy vận đơn cho ${rows.length} đơn.`);
+            toast.success(t('operations.warehouse_ops.cancel_sent_count', { count: rows.length }));
             onClear();
             onReload();
-        } catch (error) { toast.error(error.message); }
+        } catch (error) { toastApiError(error); }
     };
 
     const exportExcel = async (kind, type = 'standard') => {
         if (exportBusy) {
-            toast.warning('Đang xuất Excel, vui lòng đợi xong trước khi bấm tiếp.');
+            toast.warning(t('operations.warehouse_ops.export_busy'));
             return;
         }
         const ids = resolveActionIds();
         if (!ids.length) {
-            toast.error('Không có đơn để xuất. Chọn đơn hoặc đảm bảo trang hiện tại có dữ liệu.');
+            toast.error(t('operations.warehouse_ops.no_orders_export'));
             return;
         }
         setExportBusy(true);
@@ -241,9 +242,9 @@ function FloatingWarehouseActions({
                 ids,
                 filters,
             }, `warehouse-${type}.xls`);
-            toast.success(`${kind}: đã xuất ${ids.length} đơn.`);
+            toast.success(t('operations.warehouse_ops.exported_count', { kind, count: ids.length }));
         } catch (error) {
-            toast.error(error.message);
+            toastApiError(error);
         } finally {
             setExportBusy(false);
         }
@@ -252,15 +253,15 @@ function FloatingWarehouseActions({
     const issueInvoices = () => {
         const ids = resolveActionIds();
         if (!ids.length) {
-            toast.error('Không có đơn để xuất HĐĐT. Chọn đơn hoặc lọc có dữ liệu trên trang.');
+            toast.error(t('operations.warehouse_ops.no_orders_invoice'));
             return;
         }
         (async () => {
             try {
                 const data = await postJson(`${actionApiBase}/bulk/invoices`, { ids, source: 'warehouse-actions' });
-                toast.success(data.message || `Đã tạo yêu cầu xuất HĐĐT cho ${ids.length} đơn.`);
+                toast.success(data.message || t('operations.warehouse_ops.invoice_requested', { count: ids.length }));
                 onReload();
-            } catch (error) { toast.error(error.message); }
+            } catch (error) { toastApiError(error); }
         })();
     };
 
@@ -275,7 +276,7 @@ function FloatingWarehouseActions({
     const openHandoverDialog = () => {
         const rows = resolveActionRows();
         if (!rows.length) {
-            toast.error('Không có đơn để thêm vào biên bản.');
+            toast.error(t('operations.warehouse_ops.no_orders_handover'));
             return;
         }
         setHandoverOpen(true);
@@ -453,6 +454,7 @@ function LegacyStatus({ row }) {
 }
 
 function CareNoteCell({ row, actionApiBase, onCare, onMessage }) {
+    const t = useT();
     const [value, setValue] = useState('');
     const [saving, setSaving] = useState(false);
     const [expanded, setExpanded] = useState(false);
@@ -460,7 +462,7 @@ function CareNoteCell({ row, actionApiBase, onCare, onMessage }) {
     const saveNote = async () => {
         const note = value.trim();
         if (!note) {
-            toast.error('Nhập nội dung tin nhắn nội bộ.');
+            toast.error(t('operations.warehouse_ops.internal_message_required'));
             return;
         }
         setSaving(true);
@@ -469,11 +471,11 @@ function CareNoteCell({ row, actionApiBase, onCare, onMessage }) {
                 method: 'POST',
                 body: { message: note },
             });
-            toast.success('Đã lưu tin nhắn nội bộ.');
+            toast.success(t('operations.warehouse_ops.internal_message_saved'));
             setValue('');
             router.reload({ only: ['report', 'filters', 'filterOptions'] });
         } catch (error) {
-            toast.error(error.message);
+            toastApiError(error);
         } finally {
             setSaving(false);
         }
@@ -533,6 +535,7 @@ export function WarehouseOrderTable({
     exportButtons = [],
     variant = 'warehouse',
 }) {
+    const t = useT();
     const isAccounting = variant === 'accounting';
     const [action, setAction] = useState(null);
     const [detailOrderId, setDetailOrderId] = useState(null);
@@ -544,7 +547,7 @@ export function WarehouseOrderTable({
     const locks = useOrderLockPresence({ actionApiBase, orderIds: rowIds });
     const selectedRows = useMemo(() => rows.filter((row) => selected.includes(String(row.id))), [rows, selected]);
     const eligibleShipmentRows = useMemo(
-        () => rows.filter((row) => row.canCreateShipment && !row.hasInsufficientStock),
+        () => rows.filter((row) => row.canCreateShipment),
         [rows],
     );
     const allSelected = rowIds.length > 0 && rowIds.every((id) => selected.includes(id));
@@ -553,7 +556,10 @@ export function WarehouseOrderTable({
         const holder = locks[String(next.row?.id)];
         if (holder && Number(holder.user_id) !== Number(authUserId)) {
             const role = holder.role_label || holder.role || '';
-            toast.error(`Đơn đang được thao tác bởi ${holder.user_name}${role ? ` (${role})` : ''}. Vui lòng đợi.`);
+            toast.error(t('operations.warehouse_ops.order_locked_by', {
+                name: holder.user_name,
+                role: role ? ` (${role})` : '',
+            }));
             return;
         }
         setAction(next);
@@ -579,15 +585,15 @@ export function WarehouseOrderTable({
             if (row.canPrintLabel) openShippingLabel(`${apiBase}/${row.id}/label`);
             else window.print();
             if (reloadAfter) reload();
-        } catch (error) { toast.error(error.message); }
+        } catch (error) { toastApiError(error); }
     };
 
     const createShipment = async (row) => {
         try {
             await apiPost(`${apiBase}/${row.id}/create-shipment`);
-            toast.success(`Đã tạo vận đơn cho ${row.orderCode}.`);
+            toast.success(t('operations.warehouse_ops.shipment_created', { code: row.orderCode }));
             reload();
-        } catch (error) { toast.error(error.message); }
+        } catch (error) { toastApiError(error); }
     };
 
     const deleteOrder = async (row) => {
@@ -599,10 +605,10 @@ export function WarehouseOrderTable({
         if (!ok) return;
         try {
             await apiRequest(`${actionApiBase}/${row.id}`, { method: 'DELETE' });
-            toast.success('Đã xóa data.');
+            toast.success(t('operations.warehouse_ops.deleted_data'));
             reload();
         } catch (error) {
-            toast.error(error.message);
+            toastApiError(error);
         }
     };
 

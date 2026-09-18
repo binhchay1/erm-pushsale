@@ -13,8 +13,11 @@ use App\Services\Settings\FeatureSettingsService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response as InertiaResponse;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Throwable;
 
 class ShippingOrderController extends Controller
 {
@@ -89,7 +92,15 @@ class ShippingOrderController extends Controller
 
     public function createShipment(Request $request, Order $order, CreateShipmentService $service): JsonResponse
     {
-        $this->ensureOrderInteractionLock($request, $order, 'create_shipment');
+        try {
+            $this->ensureOrderInteractionLock($request, $order, 'create_shipment');
+        } catch (HttpException $exception) {
+            return response()->json([
+                'success' => false,
+                'message' => $exception->getMessage() ?: __('messages.sale_ops.order_locked'),
+            ], $exception->getStatusCode() ?: 423);
+        }
+
         if (! $order->closed_at) {
             return response()->json([
                 'success' => false,
@@ -104,12 +115,20 @@ class ShippingOrderController extends Controller
         try {
             $provider = $request->string('provider')->toString() ?: null;
             $service->createForOrder($order->fresh(['items', 'warehouse']), $provider);
-        } catch (\Throwable $exception) {
+        } catch (ValidationException $exception) {
+            return response()->json([
+                'success' => false,
+                'message' => collect($exception->errors())->flatten()->first() ?: __('messages.shipping_actions.waybill_failed'),
+                'errors' => $exception->errors(),
+            ], 422);
+        } catch (Throwable $exception) {
             report($exception);
 
             return response()->json([
                 'success' => false,
-                'message' => $exception->getMessage() ?: 'Không tạo được vận đơn.',
+                'message' => filled($exception->getMessage()) && ! str_contains($exception->getMessage(), 'SQLSTATE')
+                    ? $exception->getMessage()
+                    : __('messages.shipping_actions.waybill_failed'),
             ], 422);
         }
 
@@ -124,12 +143,20 @@ class ShippingOrderController extends Controller
         try {
             $provider = $request->string('provider')->toString() ?: null;
             $service->sync($order, $provider);
-        } catch (\Throwable $exception) {
+        } catch (ValidationException $exception) {
+            return response()->json([
+                'success' => false,
+                'message' => collect($exception->errors())->flatten()->first() ?: __('messages.shipping_actions.status_sync_failed'),
+                'errors' => $exception->errors(),
+            ], 422);
+        } catch (Throwable $exception) {
             report($exception);
 
             return response()->json([
                 'success' => false,
-                'message' => $exception->getMessage() ?: __('messages.shipping_actions.status_sync_failed'),
+                'message' => filled($exception->getMessage()) && ! str_contains($exception->getMessage(), 'SQLSTATE')
+                    ? $exception->getMessage()
+                    : __('messages.shipping_actions.status_sync_failed'),
             ], 422);
         }
 
@@ -145,12 +172,20 @@ class ShippingOrderController extends Controller
             $provider = $request->string('provider')->toString() ?: null;
 
             return response()->json($service->calculateFee($order->fresh(['items', 'warehouse']), $provider));
-        } catch (\Throwable $exception) {
+        } catch (ValidationException $exception) {
+            return response()->json([
+                'success' => false,
+                'message' => collect($exception->errors())->flatten()->first() ?: __('messages.shipping_actions.fee_failed'),
+                'errors' => $exception->errors(),
+            ], 422);
+        } catch (Throwable $exception) {
             report($exception);
 
             return response()->json([
                 'success' => false,
-                'message' => $exception->getMessage() ?: __('messages.shipping_actions.fee_failed'),
+                'message' => filled($exception->getMessage()) && ! str_contains($exception->getMessage(), 'SQLSTATE')
+                    ? $exception->getMessage()
+                    : __('messages.shipping_actions.fee_failed'),
             ], 422);
         }
     }
@@ -165,12 +200,20 @@ class ShippingOrderController extends Controller
         try {
             $provider = $request->string('provider')->toString() ?: null;
             $service->cancel($order, $provider);
-        } catch (\Throwable $exception) {
+        } catch (ValidationException $exception) {
+            return response()->json([
+                'success' => false,
+                'message' => collect($exception->errors())->flatten()->first() ?: 'Không hủy được vận đơn.',
+                'errors' => $exception->errors(),
+            ], 422);
+        } catch (Throwable $exception) {
             report($exception);
 
             return response()->json([
                 'success' => false,
-                'message' => $exception->getMessage() ?: 'Không hủy được vận đơn.',
+                'message' => filled($exception->getMessage()) && ! str_contains($exception->getMessage(), 'SQLSTATE')
+                    ? $exception->getMessage()
+                    : 'Không hủy được vận đơn.',
             ], 422);
         }
 
@@ -185,12 +228,20 @@ class ShippingOrderController extends Controller
         try {
             $provider = $request->string('provider')->toString() ?: null;
             $result = $service->printLabel($order, $provider);
-        } catch (\Throwable $exception) {
+        } catch (ValidationException $exception) {
+            return response()->json([
+                'success' => false,
+                'message' => collect($exception->errors())->flatten()->first() ?: __('messages.shipping_actions.label_failed'),
+                'errors' => $exception->errors(),
+            ], 422);
+        } catch (Throwable $exception) {
             report($exception);
 
             return response()->json([
                 'success' => false,
-                'message' => $exception->getMessage() ?: __('messages.shipping_actions.label_failed'),
+                'message' => filled($exception->getMessage()) && ! str_contains($exception->getMessage(), 'SQLSTATE')
+                    ? $exception->getMessage()
+                    : __('messages.shipping_actions.label_failed'),
             ], 422);
         }
 

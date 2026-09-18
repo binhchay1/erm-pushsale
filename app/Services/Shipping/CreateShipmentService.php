@@ -6,7 +6,7 @@ use App\Contracts\Shipping\ShippingCarrierInterface;
 use App\Models\Order;
 use App\Models\Shipment;
 use App\Services\Settings\FeatureSettingsService;
-use RuntimeException;
+use Illuminate\Validation\ValidationException;
 
 class CreateShipmentService
 {
@@ -25,7 +25,7 @@ class CreateShipmentService
             ?? $order->company?->default_shipping_provider;
 
         if (! $providerKey || ! $this->registry->has($providerKey)) {
-            throw new RuntimeException(__('messages.shipping_actions.no_carrier_configured'));
+            $this->failBusiness(__('messages.shipping_actions.no_carrier_configured'));
         }
 
         $latestShipment = $order->shipments()
@@ -35,7 +35,7 @@ class CreateShipmentService
 
         $carrier = $this->registry->get($providerKey, $latestShipment);
         if (! $carrier->isReady()) {
-            throw new RuntimeException(__('messages.shipping_actions.no_carrier_configured'));
+            $this->failBusiness(__('messages.shipping_actions.no_carrier_configured'));
         }
 
         if ($order->shipping_provider !== $providerKey) {
@@ -124,7 +124,7 @@ class CreateShipmentService
             ?? $order->company?->default_shipping_provider;
 
         if (! $key || ! $this->registry->has($key)) {
-            throw new RuntimeException(__('messages.shipping_actions.carrier_undetermined'));
+            $this->failBusiness(__('messages.shipping_actions.carrier_undetermined'));
         }
 
         $shipment = $order->shipments()
@@ -133,5 +133,12 @@ class CreateShipmentService
             ->first();
 
         return $this->registry->get($key, $shipment);
+    }
+
+    private function failBusiness(string $message): never
+    {
+        throw ValidationException::withMessages([
+            'shipping' => [$message],
+        ]);
     }
 }
