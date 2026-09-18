@@ -158,6 +158,12 @@ final class OrderOperationPresenter
 
         $statusSends = [];
         $packets = collect();
+        if (! $order->relationLoaded('leadPackets') || ! $order->relationLoaded('relatedLeadPackets')) {
+            $order->loadMissing([
+                'leadPackets:id,order_id,payload',
+                'relatedLeadPackets:id,related_order_id,payload',
+            ]);
+        }
         if ($order->relationLoaded('leadPackets')) {
             $packets = $packets->merge($order->leadPackets);
         }
@@ -185,6 +191,19 @@ final class OrderOperationPresenter
 
         $statusSends = array_values(array_unique(array_filter($statusSends, static fn (string $value): bool => $value !== '')));
         $note = trim((string) ($order->customer_note ?? ''));
+
+        // Đơn cũ: mapper từng bỏ form_item khi đã có SP catalog → customer_note trống.
+        // Bù combo/upsell từ payload gói tin để cột Tin nhắn khớp PM cũ (địa chỉ + combo).
+        if ($note === '' || (! str_contains($note, 'Combo khách mua') && ! str_contains($note, 'Sản phẩm mua thêm')
+            && ! str_contains($note, 'Customer package') && ! str_contains($note, 'Add-on products'))) {
+            $packetNotes = self::comboNotesFromLeadPackets($packets);
+            if ($packetNotes !== []) {
+                $merged = trim(implode("\n", array_values(array_unique(array_filter([$note, ...$packetNotes])))));
+                if ($merged !== '') {
+                    $note = $merged;
+                }
+            }
+        }
 
         $keptStatuses = [];
         foreach ($statusSends as $status) {
@@ -215,6 +234,31 @@ final class OrderOperationPresenter
             'status_send' => $statusLine,
             'fallback' => '',
         ];
+    }
+
+    /**
+     * @param  Collection<int, mixed>  $packets
+     * @return list<string>
+     */
+    private static function comboNotesFromLeadPackets(Collection $packets): array
+    {
+        if ($packets->isEmpty()) {
+            return [];
+        }
+
+        $factory = app(\App\Services\Leads\LeadOrderFactory::class);
+        $notes = [];
+        foreach ($packets as $packet) {
+            $payload = is_array($packet->payload ?? null) ? $packet->payload : [];
+            if ($payload === []) {
+                continue;
+            }
+            foreach ($factory->landingLabelNotes($factory->formItemRowsFromRawPayload($payload)) as $line) {
+                $notes[] = $line;
+            }
+        }
+
+        return array_values(array_unique(array_filter($notes)));
     }
 
     /**

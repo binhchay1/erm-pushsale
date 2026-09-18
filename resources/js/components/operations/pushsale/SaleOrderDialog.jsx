@@ -78,7 +78,9 @@ function mapOrder(order, operationResult = null, productOptions = []) {
         warehouse_id: order.warehouseId ?? '',
         name: order.customerName ?? '',
         phone: order.customerPhone ?? '',
-        message: order.customerNote ?? '',
+        message: order.customerNote
+            || order.messageParts?.note_line
+            || '',
         address_mode: order.addressMode ?? geo.mode ?? 'old',
         address_detail: geo.address_detail ?? geo.address ?? order.shippingAddress ?? '',
         province_code: geo.province_code ?? '',

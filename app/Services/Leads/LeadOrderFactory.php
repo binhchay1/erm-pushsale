@@ -85,10 +85,14 @@ class LeadOrderFactory
 
         // Tin nhắn theo form khách yêu cầu: địa chỉ khách để lại (dựng ở presenter)
         // + combo khách mua + sản phẩm mua thêm.
-        $noteParts = array_values(array_filter([
+        $noteParts = array_values(array_unique(array_filter([
             filled($normalized['message'] ?? null) ? (string) $normalized['message'] : null,
             ...$this->landingLabelNotes($payloadItems),
-        ]));
+            // Fallback: form_item* còn trên payload gốc (khi mapper cũ chỉ giữ SP catalog).
+            ...$this->landingLabelNotes($this->formItemRowsFromRawPayload(
+                is_array($lead->payload) ? $lead->payload : []
+            )),
+        ])));
 
         $order = Order::query()->create([
             // Mã đơn chỉ được cấp khi sale chốt đơn thành công.
@@ -271,6 +275,47 @@ class LeadOrderFactory
                 ? __('messages.landing.upsell_note', ['value' => implode(' + ', $labels['upsell'])])
                 : null,
         ]));
+    }
+
+    /**
+     * Tách form_item* từ payload webhook thô thành dòng nhãn combo/upsell (không catalog).
+     *
+     * @param  array<string, mixed>  $payload
+     * @return list<array<string, mixed>>
+     */
+    public function formItemRowsFromRawPayload(array $payload): array
+    {
+        $rows = [];
+        $seen = [];
+
+        foreach ($payload as $key => $value) {
+            if (! is_string($key) || preg_match('/^form_item/i', $key) !== 1) {
+                continue;
+            }
+            $entries = is_array($value) ? $value : [$value];
+            foreach ($entries as $entry) {
+                if (! is_scalar($entry) || trim((string) $entry) === '') {
+                    continue;
+                }
+                $label = LandingProductLabel::sanitizeName((string) $entry);
+                if ($label === null) {
+                    continue;
+                }
+                $norm = mb_strtolower($label);
+                if (isset($seen[$norm])) {
+                    continue;
+                }
+                $seen[$norm] = true;
+                $rows[] = [
+                    'product_id' => null,
+                    'product_name' => $label,
+                    'item_type' => 'combo',
+                    'meta' => ['raw_label' => (string) $entry, 'external_field' => $key],
+                ];
+            }
+        }
+
+        return $rows;
     }
 
     /**

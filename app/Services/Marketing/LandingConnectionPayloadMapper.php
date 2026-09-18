@@ -52,10 +52,11 @@ class LandingConnectionPayloadMapper
         $payload['external_submission_id'] = substr($rawSubmission, 0, 255);
         $payload['submission_id'] = 'lc_'.substr(hash('sha256', $connection->id.'|'.$source->id.'|'.$rawSubmission), 0, 40);
 
-        $items = $this->configuredItems($connection, $source, $input);
-        if ($items === []) {
-            $items = $this->softFormItemLines($input, $source);
-        }
+        $configuredItems = $this->configuredItems($connection, $source, $input);
+        $formItemLines = $this->softFormItemLines($input, $source);
+        // Catalog SKU (cột SP) + nhãn form_item* (Tin nhắn "Combo khách mua") phải đi cùng nhau.
+        // Trước đây nếu đã map SP thì bỏ form_item → Tin nhắn chỉ còn địa chỉ.
+        $items = $this->mergeCatalogAndFormItemLines($configuredItems, $formItemLines);
         if ($items !== []) {
             $payload['items'] = $items;
             $payload['products'] = collect($items)->pluck('product_name')->implode(', ');
@@ -407,6 +408,57 @@ class LandingConnectionPayloadMapper
         }
 
         return $lines;
+    }
+
+    /**
+     * Gộp SP catalog đã map với nhãn form_item* (combo/upsell text).
+     * Không đè catalog; bỏ form_item trùng nhãn với SP đã map.
+     *
+     * @param  list<array<string, mixed>>  $catalogItems
+     * @param  list<array<string, mixed>>  $formItemLines
+     * @return list<array<string, mixed>>
+     */
+    private function mergeCatalogAndFormItemLines(array $catalogItems, array $formItemLines): array
+    {
+        if ($catalogItems === []) {
+            return $formItemLines;
+        }
+        if ($formItemLines === []) {
+            return $catalogItems;
+        }
+
+        $seen = [];
+        foreach ($catalogItems as $row) {
+            $key = mb_strtolower(trim((string) ($row['product_name'] ?? $row['name'] ?? '')));
+            if ($key !== '') {
+                $seen[$key] = true;
+            }
+            $raw = mb_strtolower(trim((string) (($row['meta']['raw_label'] ?? null) ?: '')));
+            if ($raw !== '') {
+                $seen[$raw] = true;
+            }
+        }
+
+        $extra = [];
+        foreach ($formItemLines as $row) {
+            $key = mb_strtolower(trim((string) ($row['product_name'] ?? $row['name'] ?? '')));
+            $raw = mb_strtolower(trim((string) (($row['meta']['raw_label'] ?? null) ?: $key)));
+            if ($key !== '' && isset($seen[$key])) {
+                continue;
+            }
+            if ($raw !== '' && isset($seen[$raw])) {
+                continue;
+            }
+            if ($key !== '') {
+                $seen[$key] = true;
+            }
+            if ($raw !== '') {
+                $seen[$raw] = true;
+            }
+            $extra[] = $row;
+        }
+
+        return array_values(array_merge($catalogItems, $extra));
     }
 
     /** @param array<string, mixed> $input */

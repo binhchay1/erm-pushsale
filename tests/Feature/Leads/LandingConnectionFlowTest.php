@@ -233,6 +233,69 @@ class LandingConnectionFlowTest extends TestCase
         $this->assertSame($upsell->id, $packets[1]->fresh()->landingConnectionSource?->id);
     }
 
+    public function test_mapped_catalog_product_still_keeps_form_item_combo_in_customer_note(): void
+    {
+        $admin = User::factory()->create(['role' => UserRole::Admin]);
+        $marketer = User::factory()->create(['role' => UserRole::Marketing]);
+        $sale = User::factory()->create(['role' => UserRole::Sales]);
+
+        $product = Product::query()->create([
+            'name' => 'Kem Nám Catalog',
+            'sku' => 'LC-COMBO-NOTE',
+            'unit_price' => 189_000,
+            'is_active' => true,
+            'available_marketing' => true,
+        ]);
+
+        $connection = app(LandingConnectionManager::class)->create([
+            'name' => 'Landing giữ combo trong tin nhắn',
+            'marketer_user_id' => $marketer->id,
+            'connection_type' => 'landing',
+            'allocation_method' => 'round_robin',
+            'is_approved' => true,
+            'is_active' => true,
+            'sources' => [
+                ['client_key' => 'main', 'name' => 'Landing chính', 'source_type' => 'main', 'source_url' => 'https://landing.example/combo-note', 'is_active' => true],
+            ],
+            'products' => [
+                [
+                    'product_id' => $product->id,
+                    'source_key' => 'main',
+                    'item_type' => 'product',
+                    'external_field' => 'package',
+                    'external_value' => 'package-base',
+                    'quantity' => 1,
+                    'is_default' => true,
+                ],
+            ],
+            'sale_user_ids' => [$sale->id],
+        ], $admin);
+
+        $main = $connection->sources->firstWhere('source_type', 'main');
+
+        $this->postJson($this->submitPath($connection, $main->public_token), [
+            'submission_id' => 'combo-note-main-001',
+            'name' => 'Khách combo note',
+            'phone' => '0909000888',
+            'address' => 'Khóm 5 Long Hồ Vĩnh Long',
+            'form_item12' => ['MUA 1 HỘP: 189k + 30k Phí Ship'],
+            'fields' => [
+                ['name' => 'package', 'value' => 'package-base'],
+            ],
+        ])->assertCreated()->assertJsonPath('ok', true);
+
+        $order = Order::query()->where('customer_phone', '0909000888')->with(['items', 'leadPackets'])->firstOrFail();
+        $this->assertCount(1, $order->items);
+        $this->assertSame($product->id, (int) $order->items->first()->product_id);
+        $this->assertNotNull($order->customer_note);
+        $this->assertStringContainsString('Combo khách mua:', (string) $order->customer_note);
+        $this->assertStringContainsString('MUA 1 HỘP: 189k + 30k Phí Ship', (string) $order->customer_note);
+
+        $display = \App\Services\Operations\OrderOperationPresenter::landingMessageDisplay($order);
+        $this->assertStringContainsString('Địa chỉ=', $display);
+        $this->assertStringContainsString('Combo khách mua:', $display);
+        $this->assertStringContainsString('MUA 1 HỘP', $display);
+    }
 
     public function test_upsell_without_flow_token_can_fallback_to_recent_phone_session_and_merge(): void
     {
