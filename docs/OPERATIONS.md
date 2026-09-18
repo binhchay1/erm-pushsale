@@ -60,3 +60,24 @@ Export: `ReportExcelExporter` + `SalesLeaderReportExcelLayout` (header nhiều h
 - Allocator chia contact; chống trùng SĐT theo policy hiện tại.
 - Sale chỉ thấy data trong scope team/user.
 - Upsell hold window: `config/saleops.php` (hold seconds).
+
+## Marketing — gói tin nhận được vs contact Sale
+
+- **Gói tin nhận được** (đối soát landing/sheet): `inbound_events` với `source = landing_webhook`, theo `created_at` lúc server nhận. Không trừ trùng SĐT; không phụ thuộc đã chia Sale / đã merge upsale.
+- **Contact hợp lệ** (vận hành Sale): sau `lead_ingestions` (duplicate / review / failed / orphan xử lý riêng).
+- Công thức hiển thị reconciliation: `Gói tin nhận được = Đã xử lý hợp lệ + Gửi trùng + Cần rà soát`.
+
+## Landing / upsale packet types
+
+Canonical: `lead_ingestions.packet_type` + `counts_as_lead`.
+
+| Packet | When | `counts_as_lead` |
+| --- | --- | --- |
+| Primary `lead` | source `main` / campaign `/receive` | `true` |
+| Upsale `upsell` / `late_upsell` / `orphan_upsell` | source `upsell`, `/upsell`, or payload upsell flags | `false` |
+
+Marketing contact count = primary + **valid** upsale (`status=processed`, linked to an order, not review/orphan-pending). Audit: `php artisan landing:upsale-audit --from=… --to=… --json` (`partition_ok`).
+
+## Reporting facts
+
+Historical dashboards: hybrid facts — see [REPORTING.md](./REPORTING.md).

@@ -1,6 +1,6 @@
 # Integrations
 
-Landing webhooks, Pancake chat, queues. Ops flows: [OPERATIONS.md](./OPERATIONS.md).
+Landing webhooks, Pancake chat, queues. Ops: [OPERATIONS.md](./OPERATIONS.md). Packet rules cũng nằm trong OPERATIONS.
 
 ## Landing form / webhook
 

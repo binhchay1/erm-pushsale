@@ -1,6 +1,6 @@
 # Architecture — ERM SaleOps
 
-Stack, layers, roles. UI/CSS rules: [PROJECT_CONTRACT.md](./PROJECT_CONTRACT.md). Business flow: [OPERATIONS.md](./OPERATIONS.md).
+Stack, layers, roles. UI/CSS rules: [PROJECT_CONTRACT.md](./PROJECT_CONTRACT.md). Business flow: [OPERATIONS.md](./OPERATIONS.md). Facts: [REPORTING.md](./REPORTING.md).
 
 ## Stack
 

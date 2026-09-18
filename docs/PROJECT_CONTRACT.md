@@ -1,6 +1,6 @@
 # ERM Pushsale Project Contract
 
-Living contract. Agent conventions: root `AGENTS.md`. Docs index: `docs/README.md`.
+Living contract. Agent conventions: `docs/AGENTS.md`. Docs index: `docs/README.md`.
 
 ## 0. Sources of truth
 
@@ -20,7 +20,7 @@ Living contract. Agent conventions: root `AGENTS.md`. Docs index: `docs/README.m
 | Orphan CSS | `resources/css/_archive/` (not loaded) |
 | Multi-shop | `shops` + `BelongsToShop` / `ShopScope` + `SetCurrentShop` + `ShopSwitcher` |
 
-Do **not** create `CONTEXT_HANDOFF_V*` / versioned UI docs / HTML templates under `docs/`. Update this file, `AGENTS.md`, or the slim set in `docs/README.md`.
+Do **not** create `CONTEXT_HANDOFF_V*` / versioned UI docs / HTML templates under `docs/`. Update this file, `docs/AGENTS.md`, or the slim set in `docs/README.md`.
 
 ## 0a. Multi-shop (Company → Shop)
 

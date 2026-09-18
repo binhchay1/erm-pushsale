@@ -1,6 +1,6 @@
 # AGENTS.md — ERM Pushsale conventions
 
-Đọc file này trước khi sửa UI, CSS, route, hoặc thêm docs. Nguồn sự thật sống: `docs/PROJECT_CONTRACT.md` + file này. Không tạo `CONTEXT_HANDOFF_V*` / `UI_*_V*` mới.
+Đọc file này trước khi sửa UI, CSS, route, hoặc thêm docs. Nguồn sự thật sống: `docs/PROJECT_CONTRACT.md` + file này (canonical path: `docs/AGENTS.md`). Không tạo `CONTEXT_HANDOFF_V*` / `UI_*_V*` mới.
 
 ## 1. Nguồn sự thật (đừng nhân bản)
 
@@ -20,13 +20,15 @@
 | Filter shadcn (secondary) | `ReportFilterBar` — chỉ trang Marketing/Sales/Shipping/Allocator đã dùng Tailwind; **không** thêm trang admin Pushsale mới vào stack này |
 | Extra-report toolbars | `components/reports/extra/ExtraReportToolbars.jsx` |
 | Sidebar / L3 flyout | `AppSidebar.jsx` + `usePushsaleSidebarMenu.js` + `pushsale-sidebar-canonical-contract.css` (load **cuối**) |
-| Contract nghiệp vụ dài | `docs/PROJECT_CONTRACT.md` |
-| Kiến trúc / API overview | `docs/ARCHITECTURE.md` |
-| Luồng nghiệp vụ | `docs/OPERATIONS.md` |
-| Tích hợp (landing, Pancake, queue) | `docs/INTEGRATIONS.md` |
-| Deploy | `docs/DEPLOY.md` |
-| Index docs | `docs/README.md` |
-| CSS orphan | `resources/css/_archive/` (không import lại) |
+| Contract nghiệp vụ dài | `PROJECT_CONTRACT.md` (cùng thư mục) |
+| Kiến trúc / API overview | `ARCHITECTURE.md` |
+| Luồng nghiệp vụ + packet | `OPERATIONS.md` |
+| Tích hợp (landing, Pancake, queue) | `INTEGRATIONS.md` |
+| Reporting facts | `REPORTING.md` |
+| Deploy | `DEPLOY.md` |
+| Index docs | `README.md` |
+| Agent audit script | `scripts/audit-pushsale-contract.mjs` (`pnpm audit:pushsale`) |
+| CSS orphan (không import) | `resources/css/_archive/` |
 | Multi-shop | `app/Models/Shop.php`, `BelongsToShop`, `SetCurrentShop`, `ShopSwitcher`, `/admin/shops` |
 
 ## 2. Đặt tên theo menu
@@ -98,9 +100,9 @@ Thiếu use case → mở rộng `PageHeader`/shell, không copy header từng t
 
 ## 7. Docs — đừng spam
 
-- Cập nhật `PROJECT_CONTRACT.md` / `AGENTS.md` / `docs/README.md` khi thay đổi contract sống.
-- Không tạo `CONTEXT_HANDOFF_V{n}.md`, `RELEASE_VALIDATION_V{n}.md`, HTML mẫu trong `docs/reference*`.
-- Changelog ngắn → `docs/CHANGELOG.md` nếu cần.
+- Living set trong `docs/`: `AGENTS.md`, `README.md`, `PROJECT_CONTRACT.md`, `ARCHITECTURE.md`, `OPERATIONS.md`, `INTEGRATIONS.md`, `REPORTING.md`, `DEPLOY.md`, `CHANGELOG.md`.
+- Cập nhật living docs khi đổi contract; không tạo `CONTEXT_HANDOFF_V*`, `RELEASE_VALIDATION_V*`, HTML mẫu trong `docs/reference*`.
+- Changelog ngắn → `CHANGELOG.md`.
 
 ## 8. Checklist trước khi xong task UI
 

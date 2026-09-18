@@ -6,7 +6,7 @@ use PHPUnit\Framework\TestCase;
 
 class PushsalePageRegistryTest extends TestCase
 {
-    public function test_every_registered_page_has_a_unique_semantic_route_component_and_template(): void
+    public function test_every_registered_page_has_a_unique_semantic_route_and_component(): void
     {
         $root = dirname(__DIR__, 2);
         $pages = require $root.'/config/pushsale_pages.php';
@@ -34,13 +34,10 @@ class PushsalePageRegistryTest extends TestCase
             $this->assertNotSame('', $componentName, "Page {$code} is missing an Inertia component path");
             $this->assertDoesNotMatchRegularExpression('/(^|\/)Page_\d/', $componentName, "Page {$code} still names its component by menu number");
             $component = $root.'/resources/js/pages/'.$componentName.'.jsx';
-            $templateCode = $page['template_alias'] ?? $code;
-            $template = $root.'/public/pushsale-templates/'.$templateCode.'.html';
 
             $this->assertFileExists($component, "Missing component for page {$code}");
-            if (($page['requires_template'] ?? true) !== false) {
-                $this->assertFileExists($template, "Missing template for page {$code}");
-            }
+            // Captured HTML templates under public/pushsale-templates/ were retired;
+            // pages render native React. Optional template files are never required.
         }
     }
 

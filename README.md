@@ -6,10 +6,10 @@ Laravel + Inertia/React ERM. Deploy target: `salesloop.vn`.
 
 Đọc trước khi sửa UI / route / nghiệp vụ:
 
-- [`AGENTS.md`](./AGENTS.md) — conventions agent
+- [`docs/AGENTS.md`](./docs/AGENTS.md) — conventions agent
 - [`docs/README.md`](./docs/README.md) — index
 - [`docs/PROJECT_CONTRACT.md`](./docs/PROJECT_CONTRACT.md) — UI/CSS/shell/menu
-- [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) · [`docs/OPERATIONS.md`](./docs/OPERATIONS.md) · [`docs/INTEGRATIONS.md`](./docs/INTEGRATIONS.md) · [`docs/DEPLOY.md`](./docs/DEPLOY.md)
+- [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) · [`docs/OPERATIONS.md`](./docs/OPERATIONS.md) · [`docs/INTEGRATIONS.md`](./docs/INTEGRATIONS.md) · [`docs/REPORTING.md`](./docs/REPORTING.md) · [`docs/DEPLOY.md`](./docs/DEPLOY.md)
 
 Không tạo `CONTEXT_HANDOFF_V*` / HTML template trong `docs/`.
 

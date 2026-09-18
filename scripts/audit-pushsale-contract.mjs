@@ -7,7 +7,7 @@ const rel = (file) => path.relative(root, file).replaceAll(path.sep, '/');
 const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
 const exists = (file) => fs.existsSync(path.join(root, file));
 
-// `_archive/` giữ file cũ có chủ đích (AGENTS.md §3.5) nên không tính là nợ contract.
+// `_archive/` giữ file cũ có chủ đích (docs/AGENTS.md §3.5) nên không tính là nợ contract.
 const IGNORED_DIRS = new Set(['_archive', 'node_modules', 'vendor']);
 
 function walk(dir, predicate = () => true) {

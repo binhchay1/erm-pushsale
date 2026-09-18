@@ -36,12 +36,63 @@ sudo chmod -R ug+rwX public/build storage bootstrap/cache
 - Do **not** commit `public/build`
 - Do **not** `pnpm build` as root if hook runs as `deploy`
 
-## After deploy smoke
+## Smoke sau cleanup dead-asset (A+B)
 
-1. Hard refresh admin shell (sidebar + header).
-2. Sale 4.1 / Kho 5.1 / KT 6.1 tables load.
-3. One landing submit (if testing ingest).
-4. One Excel export on a 4.6 report.
+Commit gộp xóa asset chết + docs slim. **Không** đổi schema/route live. Checklist trên `salesloop.vn` sau `git push ssd` + hook build:
+
+### 0. Preflight (SSH app VM)
+
+```bash
+cd /var/www/erm-pushsale
+git log -1 --oneline
+test ! -f AGENTS.md && test -f docs/AGENTS.md && echo OK_agents
+test ! -f config/pushsale_page_merges.php && echo OK_no_merges
+test -f scripts/audit-pushsale-contract.mjs && test -f scripts/enforce-pnpm.cjs && echo OK_scripts
+test ! -f deploy/security-audit-remote.sh && test -f deploy/ops-harden-root.sh && echo OK_deploy
+ls resources/css/_archive/   # chỉ README.md
+php artisan route:list --name=admin.marketing.landing-approvals --columns=method,uri,name
+php artisan route:list --name=activity-logs --columns=method,uri,name
+php artisan about | head
+```
+
+### 1. Shell / CSS (hard refresh Ctrl+Shift+R)
+
+- Login admin → sidebar L1/L2 + L3 flyout hover OK (canonical CSS còn).
+- Một trang admin bất kỳ: đúng 1 `PageHeader`, không double header.
+- Sale 4.1 / Kho 5.1 / KT 6.1 table load + icon legacy FA còn.
+
+### 2. Trang từng đụng file xóa (A)
+
+| Check | URL / hành động | Kỳ vọng |
+| --- | --- | --- |
+| Landing duyệt | `/admin/marketing/landing-approvals` | `LandingApprovalPage` (không 404/500) |
+| Campaigns live | `/admin/marketing/campaigns` (hoặc menu 2.x) | `Marketing/Campaigns/*` |
+| Activity logs | menu nhật ký | Index OK; show redirect index |
+| Phiếu nhập | menu kho phiếu | Form mở, toast lỗi thân thiện nếu thiếu SP |
+
+### 3. Báo cáo / CEO (không liên quan xóa nhưng regression)
+
+- CEO 7.x yearly/monthly mở được, không 500.
+- Một report 4.6 Excel export thử 1 file.
+
+### 4. Playwright local (trước hoặc sau deploy, cần `.env` + APP_KEY)
+
+```bash
+pnpm check:frontend
+php vendor/bin/phpunit --filter PushsalePageRegistryTest
+pnpm e2e:flows -- e2e/flows/01-login.spec.ts e2e/flows/16-warehouse-voucher-inbound.spec.ts e2e/flows/17-ceo-menu7.spec.ts
+```
+
+E2E **không** reference file A/B đã xóa. Fail do thiếu seed/kho/SP ≠ fail do cleanup.
+
+### 5. Rollback nếu shell/CSS vỡ
+
+```bash
+cd /var/www/erm-pushsale && git revert HEAD --no-edit && git push origin HEAD && git push ssd HEAD
+```
+
+Hoặc `git reset --hard <sha-trước>` trên bare + re-push (chỉ khi team đồng ý). CSS archive đã xóa có thể lấy lại từ git history nếu cần debug parity — **không** cần cho runtime.
+
 
 ## Security & backup (ops)
 
