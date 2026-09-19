@@ -185,6 +185,7 @@ return [
         'out_of_stock' => 'Hết hàng trong kho.',
         'out_of_stock_create' => 'Hết hàng trong kho — không thể tạo vận đơn.',
         'no_carrier_configured' => 'Chưa cấu hình đơn vị vận chuyển (hoặc đang để Thủ công). Chọn Viettel/GHTK/GHN… (qua NetShip nếu dùng) rồi Đăng đơn lại.',
+        'carrier_or_netship_not_ready' => ':carrier chưa cấu hình trực tiếp và NetShip cũng chưa sẵn sàng (thiếu token/bật cổng). Vào Đối tác vận chuyển cấu hình NetShip hoặc :carrier rồi Đăng đơn lại.',
         'carrier_undetermined' => 'Không xác định được đơn vị vận chuyển của đơn.',
         'waybill_created' => 'Đã tạo vận đơn.',
         'waybill_created_status' => 'Đã tạo vận đơn',

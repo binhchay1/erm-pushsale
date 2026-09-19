@@ -16,9 +16,9 @@ class VietnamDivisions
 
     public const MODE_NEW = 'new'; // Đơn vị hành chính 2 cấp từ 01/07/2025 (bỏ quận/huyện).
 
-    private const CACHE_KEY = 'vn_divisions_v1';
+    private const CACHE_KEY = 'vn_divisions_v2';
 
-    private const CACHE_KEY_NEW = 'vn_divisions_2025_v1';
+    private const CACHE_KEY_NEW = 'vn_divisions_2025_v2';
 
     /** @return array{provinces: list<array{code:int,name:string}>, districts: array<string, list<array{code:int,name:string}>>, wards: array<string, list<array{code:int,name:string}>>} */
     private static function data(): array

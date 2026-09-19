@@ -31,6 +31,7 @@ export default {
         register_select_required: 'Chọn ít nhất 1 đơn đủ điều kiện đăng, hoặc dán mã đơn đang hiện trên trang.',
         bulk_close_ok: 'Đã xử lý chốt các đơn được chọn.',
         bulk_close_allow_negative: 'Cho phép xuất âm nếu tồn không đủ.',
+        footer_total: 'Tổng:',
     },
     log_call: 'Ghi nhận cuộc gọi',
     update_status: 'Cập nhật trạng thái',

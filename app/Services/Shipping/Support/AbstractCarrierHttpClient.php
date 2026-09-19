@@ -44,12 +44,20 @@ abstract class AbstractCarrierHttpClient
         };
 
         $body = $response->json();
-        $success = $response->successful() && ($body['success'] ?? true) !== false;
+        $body = is_array($body) ? $body : [];
+        $message = $this->extractMessage($body);
+        // NetShip (và một số gateway) trả HTTP 200 kèm {error: "..."} không có success=false.
+        $hasExplicitError = filled($body['error'] ?? null)
+            || (is_string($body['errors'] ?? null) && filled($body['errors']))
+            || (is_array($body['errors'] ?? null) && $body['errors'] !== []);
+        $success = $response->successful()
+            && ($body['success'] ?? true) !== false
+            && ! $hasExplicitError;
 
         $result = [
             'success' => $success,
             'data' => $body['data'] ?? null,
-            'message' => $body['message'] ?? null,
+            'message' => $message,
             'log_id' => $body['log_id'] ?? null,
             'http_status' => $response->status(),
             'raw' => $body,
@@ -71,6 +79,35 @@ abstract class AbstractCarrierHttpClient
     protected function baseUrl(): string
     {
         return app(PartnerCredentialResolver::class)->baseUrl($this->provider());
+    }
+
+    /** @param  array<string, mixed>  $body */
+    protected function extractMessage(array $body): ?string
+    {
+        foreach (['message', 'error', 'msg', 'detail'] as $key) {
+            $value = $body[$key] ?? null;
+            if (is_string($value) && trim($value) !== '') {
+                return trim($value);
+            }
+        }
+
+        $errors = $body['errors'] ?? null;
+        if (is_string($errors) && trim($errors) !== '') {
+            return trim($errors);
+        }
+        if (is_array($errors) && $errors !== []) {
+            $flat = [];
+            array_walk_recursive($errors, function ($item) use (&$flat): void {
+                if (is_string($item) && trim($item) !== '') {
+                    $flat[] = trim($item);
+                }
+            });
+            if ($flat !== []) {
+                return implode(' ', array_slice($flat, 0, 3));
+            }
+        }
+
+        return null;
     }
 
     /**

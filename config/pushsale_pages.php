@@ -5265,45 +5265,57 @@ return array (
       ),
       4 => 
       array (
+        'key' => 'products',
+        'label' => 'Sản phẩm - Số lượng',
+        'format' => 'text',
+      ),
+      5 => 
+      array (
         'key' => 'performed_at',
         'label' => 'Ngày thực hiện',
         'format' => 'datetime',
       ),
-      5 => 
+      6 => 
       array (
         'key' => 'total_quantity',
         'label' => 'Tổng số lượng',
         'format' => 'number',
       ),
-      6 => 
+      7 => 
       array (
         'key' => 'total_value',
         'label' => 'Tổng giá trị',
         'format' => 'currency',
       ),
-      7 => 
+      8 => 
       array (
         'key' => 'status',
         'label' => 'Trạng thái',
         'format' => 'status',
       ),
-      8 => 
+      9 => 
       array (
         'key' => 'note',
         'label' => 'Ghi chú',
         'format' => 'text',
       ),
-      9 => 
+      10 => 
       array (
         'key' => 'internal_voucher',
         'label' => 'Phiếu XNNB',
         'format' => 'text',
       ),
-      10 => 
+      11 => 
       array (
         'key' => 'updated_at',
         'label' => 'Cập nhật',
         'format' => 'datetime',
+      ),
+      12 => 
+      array (
+        'key' => 'actions',
+        'label' => 'Thao tác',
+        'format' => 'text',
       ),
     ),
     'source' => 'warehouse_vouchers',
@@ -5336,42 +5348,53 @@ return array (
       ),
       4 => 
       array (
+        'key' => 'products',
+        'format' => 'text',
+      ),
+      5 => 
+      array (
         'key' => 'performed_at',
         'format' => 'date',
         'align' => 'center',
       ),
-      5 => 
+      6 => 
       array (
         'key' => 'total_quantity',
         'format' => 'number',
         'align' => 'right',
       ),
-      6 => 
+      7 => 
       array (
         'key' => 'total_value',
         'format' => 'currency',
         'align' => 'right',
       ),
-      7 => 
+      8 => 
       array (
         'key' => 'status',
         'format' => 'status',
         'align' => 'center',
       ),
-      8 => 
+      9 => 
       array (
         'key' => 'note',
         'format' => 'text',
       ),
-      9 => 
+      10 => 
       array (
         'key' => 'internal_voucher',
         'format' => 'text',
       ),
-      10 => 
+      11 => 
       array (
         'key' => 'updated_at',
         'format' => 'datetime',
+        'align' => 'center',
+      ),
+      12 => 
+      array (
+        'key' => 'actions',
+        'format' => 'text',
         'align' => 'center',
       ),
     ),

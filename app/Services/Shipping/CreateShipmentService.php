@@ -6,6 +6,7 @@ use App\Contracts\Shipping\ShippingCarrierInterface;
 use App\Models\Order;
 use App\Models\Shipment;
 use App\Services\Settings\FeatureSettingsService;
+use App\Services\Shipping\Gateways\NetShip\NetShipGateway;
 use Illuminate\Validation\ValidationException;
 
 class CreateShipmentService
@@ -35,6 +36,13 @@ class CreateShipmentService
 
         $carrier = $this->registry->get($providerKey, $latestShipment);
         if (! $carrier->isReady()) {
+            $label = (string) config("shipping_partners.providers.{$providerKey}.label", $providerKey);
+            $netship = app(NetShipGateway::class);
+            if ($netship->canProxy($providerKey) === false && array_key_exists($providerKey, $netship->routedProviders())) {
+                $this->failBusiness(__('messages.shipping_actions.carrier_or_netship_not_ready', [
+                    'carrier' => $label,
+                ]));
+            }
             $this->failBusiness(__('messages.shipping_actions.no_carrier_configured'));
         }
 
@@ -109,7 +117,11 @@ class CreateShipmentService
             $routed = config('shipping_partners.providers.netship.routed_providers', []);
             $business = array_key_first($routed) ?: 'viettel_post';
 
-            return $this->registry->netShipGateway()->proxyFor($business)->runTest($action);
+            return $this->registry->netShipGateway()->proxyFor($business)->runTest(
+                in_array($action, ['connection', 'provinces', 'test_connection'], true)
+                    ? ($action === 'test_connection' ? 'connection' : $action)
+                    : 'connection'
+            );
         }
 
         return $this->registry->get($provider)->runTest($action);

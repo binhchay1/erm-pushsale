@@ -13,7 +13,7 @@ import { UpdateReconByCodeDialog } from '@/components/operations/UpdateReconByCo
 import { UpdateReconExcelDialog } from '@/components/operations/UpdateReconExcelDialog';
 import { OrderMoneyCell, OrderProductsBreakdown, OrderStatusFlags } from '@/components/operations/OrderLineBreakdown';
 import { apiPost, apiRequest, getCsrfToken, toastApiError } from '@/lib/api';
-import { formatCurrency, formatDateTime } from '@/lib/format';
+import { formatCurrency, formatDateTime, formatNumber } from '@/lib/format';
 import { openShippingLabel } from '@/lib/shipping';
 import { useConfirm } from '@/hooks/use-confirm';
 import { useAppName } from '@/hooks/use-app-name';
@@ -96,6 +96,170 @@ function InlineIconButton({ title, icon, onClick, disabled = false, className = 
         <button type="button" className={`btn-icon aoh ps-wh-inline-icon ${className}`} title={title} onClick={onClick} disabled={disabled}>
             <i className={`fa fa-${icon}`} />
         </button>
+    );
+}
+
+function rowProductItems(row = {}) {
+    if (Array.isArray(row.products) && row.products.length) return row.products;
+    return [...(row.mainProducts || []), ...(row.upsellProducts || [])];
+}
+
+function productLineName(item = {}) {
+    const raw = String(item.productName ?? item.product_name ?? item.name ?? '').trim();
+    if (!raw) return '—';
+    try {
+        const decoded = decodeURIComponent(raw.replace(/\+/g, ' '));
+        if (decoded && decoded !== raw) return decoded.trim() || raw;
+    } catch {
+        // keep raw
+    }
+    return raw;
+}
+
+function productLineQty(item = {}) {
+    if (item.quantity === 0 || item.qty === 0) return 0;
+    const raw = Number(item.quantity ?? item.qty ?? 1);
+    return Number.isFinite(raw) && raw >= 0 ? raw : 1;
+}
+
+/** Aggregate products + money for sticky table footer (Pushsale 5.1 parity). */
+function buildWarehouseTableFooter(sourceRows = []) {
+    const productMap = new Map();
+    let qtyTotal = 0;
+    let subtotal = 0;
+    let discount = 0;
+    let vat = 0;
+    let shipping = 0;
+    let total = 0;
+
+    for (const row of sourceRows) {
+        for (const item of rowProductItems(row)) {
+            const name = productLineName(item);
+            const qty = productLineQty(item);
+            const key = String(item.productId ?? item.product_id ?? name);
+            const prev = productMap.get(key);
+            if (prev) {
+                prev.qty += qty;
+            } else {
+                productMap.set(key, { name, qty });
+            }
+            qtyTotal += qty;
+        }
+
+        const storedSubtotal = Number(row.subtotal ?? row.sub_total ?? 0);
+        const lineSubtotal = storedSubtotal > 0
+            ? storedSubtotal
+            : rowProductItems(row).reduce((sum, item) => {
+                const unit = Math.max(0, Number(item.unitPrice ?? item.unit_price ?? item.price ?? 0));
+                return sum + (productLineQty(item) * unit);
+            }, 0);
+        const lineDiscount = Math.max(0, Number(row.discount ?? row.discountAmount ?? 0));
+        const lineVat = Math.max(0, Number(row.vat ?? row.tax ?? 0));
+        const lineShip = Math.max(0, Number(row.shippingFeeCollected ?? row.shipping_fee_collected ?? row.shippingFee ?? 0));
+        const storedTotal = Number(row.total ?? 0);
+        const lineTotal = storedTotal > 0
+            ? storedTotal
+            : Math.max(0, lineSubtotal - lineDiscount + lineShip);
+
+        subtotal += lineSubtotal;
+        discount += lineDiscount;
+        vat += lineVat;
+        shipping += lineShip;
+        total += lineTotal;
+    }
+
+    return {
+        products: Array.from(productMap.values()).filter((p) => p.qty > 0),
+        qtyTotal,
+        subtotal,
+        discount,
+        vat,
+        shipping,
+        total,
+        orderCount: sourceRows.length,
+    };
+}
+
+function formatFooterMoney(value, { signed = false } = {}) {
+    const n = Number(value) || 0;
+    const text = formatNumber(Math.abs(n));
+    if (signed && n !== 0) return `-${text}`;
+    return text;
+}
+
+function WarehouseTableFooter({
+    isAccounting,
+    summary,
+    detailOpen,
+    onToggleDetail,
+    viewDetailLabel,
+    totalLabel,
+}) {
+    if (!summary.orderCount) return null;
+
+    const productsCell = (
+        <td className="text-left c-products-body ps-wh-tfoot-products">
+            <button
+                type="button"
+                className="ps-wh-tfoot-detail-link"
+                onClick={onToggleDetail}
+                aria-expanded={detailOpen}
+            >
+                {summary.qtyTotal} ({viewDetailLabel})
+            </button>
+            {detailOpen ? (
+                <div className="ps-wh-tfoot-product-box">
+                    <div className="ps-wh-tfoot-product-title"><b>{totalLabel}</b></div>
+                    {summary.products.length ? summary.products.map((line) => (
+                        <div key={`${line.name}-${line.qty}`} className="ps-wh-tfoot-product-line">
+                            {line.name} x{line.qty}
+                        </div>
+                    )) : (
+                        <div className="ps-wh-tfoot-product-line">—</div>
+                    )}
+                </div>
+            ) : null}
+        </td>
+    );
+
+    const moneyStack = (
+        <div className="ps-wh-tfoot-money">
+            <div>{formatFooterMoney(summary.subtotal)}</div>
+            <div>{summary.discount ? formatFooterMoney(summary.discount, { signed: true }) : '0'}</div>
+            <div>{formatFooterMoney(summary.vat)}</div>
+            <div>{formatFooterMoney(summary.shipping)}</div>
+            <div className="is-total"><b>{formatFooterMoney(summary.total)}</b></div>
+        </div>
+    );
+
+    if (isAccounting) {
+        return (
+            <tfoot className="ps-wh-tfoot">
+                <tr>
+                    <td colSpan={7} className="ps-wh-tfoot-spacer" />
+                    {productsCell}
+                    <td className="text-right no-wrap c-money-sub">{formatFooterMoney(summary.subtotal)}</td>
+                    <td className="text-right no-wrap c-money-ck">{summary.discount ? formatFooterMoney(summary.discount, { signed: true }) : ''}</td>
+                    <td className="text-right no-wrap c-money-vat">{formatFooterMoney(summary.vat)}</td>
+                    <td className="text-right no-wrap c-money-ship">{formatFooterMoney(summary.shipping)}</td>
+                    <td className="text-right no-wrap c-money-total"><b>{formatFooterMoney(summary.total)}</b></td>
+                    <td colSpan={6} className="ps-wh-tfoot-spacer" />
+                </tr>
+            </tfoot>
+        );
+    }
+
+    return (
+        <tfoot className="ps-wh-tfoot">
+            <tr>
+                <td colSpan={8} className="ps-wh-tfoot-spacer" />
+                {productsCell}
+                <td className="text-right no-wrap area3 c-money-body ps-wh-tfoot-money-cell">
+                    {moneyStack}
+                </td>
+                <td colSpan={5} className="ps-wh-tfoot-spacer" />
+            </tr>
+        </tfoot>
     );
 }
 
@@ -540,6 +704,7 @@ export function WarehouseOrderTable({
     const [action, setAction] = useState(null);
     const [detailOrderId, setDetailOrderId] = useState(null);
     const [selected, setSelected] = useState([]);
+    const [footerDetailOpen, setFooterDetailOpen] = useState(true);
     const checkAllRef = useRef(null);
     const { ask } = useConfirm();
     const authUserId = usePage().props?.auth?.user?.id;
@@ -549,6 +714,11 @@ export function WarehouseOrderTable({
     const eligibleShipmentRows = useMemo(
         () => rows.filter((row) => row.canCreateShipment),
         [rows],
+    );
+    const footerSourceRows = selectedRows.length ? selectedRows : rows;
+    const footerSummary = useMemo(
+        () => buildWarehouseTableFooter(footerSourceRows),
+        [footerSourceRows],
     );
     const allSelected = rowIds.length > 0 && rowIds.every((id) => selected.includes(id));
 
@@ -843,6 +1013,14 @@ export function WarehouseOrderTable({
                             </tr>
                         )) : <tr><td colSpan={isAccounting ? 19 : 15} className="ps-wh-empty">Không có đơn phù hợp bộ lọc.</td></tr>}
                     </tbody>
+                    <WarehouseTableFooter
+                        isAccounting={isAccounting}
+                        summary={footerSummary}
+                        detailOpen={footerDetailOpen}
+                        onToggleDetail={() => setFooterDetailOpen((open) => !open)}
+                        viewDetailLabel={t('operations.view_detail')}
+                        totalLabel={t('operations.warehouse_ops.footer_total')}
+                    />
                 </table>
             </div>
 

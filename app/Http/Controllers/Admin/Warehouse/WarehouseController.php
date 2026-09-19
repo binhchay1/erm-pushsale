@@ -283,7 +283,7 @@ class WarehouseController extends Controller
     /** @return array<string,mixed> */
     protected function locationOptions(): array
     {
-        return Cache::remember('warehouse.location-options.v2', now()->addDay(), function (): array {
+        return Cache::remember('warehouse.location-options.v3', now()->addDay(), function (): array {
             return $this->buildLocationOptions();
         });
     }

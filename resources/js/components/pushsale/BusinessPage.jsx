@@ -90,8 +90,12 @@ function CellValue({ column, row, onEdit, onDelete, selectedRecordIds, onToggleS
             <div className="pushsale-row-actions">
                 {row.is_upsell && <span className="pushsale-upsale-badge">UPSALE</span>}
                 {row._edit_url && (
-                    <Link href={row._edit_url} className="pushsale-icon-action" title="Cập nhật">
-                        <i className="fa fa-pencil" aria-hidden="true" />
+                    <Link
+                        href={row._edit_url}
+                        className="pushsale-icon-action"
+                        title={row._edit_title || 'Xem / Sửa'}
+                    >
+                        <i className={`fa fa-${row._edit_icon || 'pencil'}`} aria-hidden="true" />
                     </Link>
                 )}
                 {row._order_id && (() => {
@@ -114,7 +118,7 @@ function CellValue({ column, row, onEdit, onDelete, selectedRecordIds, onToggleS
                         </>
                     );
                 })()}
-                {row._record_id && (
+                {row._record_id && !row._edit_url && (
                     <>
                         <button type="button" className="pushsale-icon-action" title="Cập nhật" onClick={() => onEdit(row)}>
                             <i className="fa fa-pencil" aria-hidden="true" />
@@ -125,6 +129,25 @@ function CellValue({ column, row, onEdit, onDelete, selectedRecordIds, onToggleS
                     </>
                 )}
                 {!row._edit_url && !row._order_id && !row._record_id && value && <span>{String(value)}</span>}
+            </div>
+        );
+    }
+
+    if (column.key === 'voucher_code' && row._edit_url) {
+        return (
+            <Link href={row._edit_url} className="ps-voucher-code-link" title={row._edit_title || 'Mở phiếu'}>
+                {String(value || '—')}
+            </Link>
+        );
+    }
+
+    if (column.key === 'products' && value) {
+        const lines = String(value).split('\n').filter(Boolean);
+        return (
+            <div className="ps-voucher-products-cell" title={lines.join(' · ')}>
+                {lines.map((line) => (
+                    <div key={line} className="ps-voucher-products-line">{line}</div>
+                ))}
             </div>
         );
     }
@@ -1707,6 +1730,10 @@ export default function PushsaleBusinessPage({ schema, rows = [], pagination, su
     }, [resolveDialog, schema.create_url, schema.editable]);
 
     const openEdit = useCallback((row) => {
+        if (row?._edit_url) {
+            router.visit(row._edit_url);
+            return;
+        }
         setEditor({ open: true, row, dialogCode: schema.dialogs?.[0] ?? null, dialogSchema: null });
     }, [schema.dialogs]);
 

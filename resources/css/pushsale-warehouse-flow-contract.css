@@ -1171,3 +1171,22 @@ html body.pushsale-app-body .pushsale-page[data-page-code="5.3.1"] .box-body {
 }
 
 
+
+/* 5.3.2 list: reopen voucher + multi-product summary */
+.pushsale-page[data-page-code="5.3.2"] .ps-voucher-code-link {
+    color: #0577d6;
+    font-weight: 700;
+    text-decoration: none;
+}
+.pushsale-page[data-page-code="5.3.2"] .ps-voucher-code-link:hover {
+    text-decoration: underline;
+}
+.pushsale-page[data-page-code="5.3.2"] .ps-voucher-products-cell {
+    max-width: 280px;
+    text-align: left;
+    white-space: normal;
+    line-height: 18px;
+}
+.pushsale-page[data-page-code="5.3.2"] .ps-voucher-products-line {
+    display: block;
+}

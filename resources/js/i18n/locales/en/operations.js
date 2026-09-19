@@ -31,6 +31,7 @@ export default {
         register_select_required: 'Select at least one eligible order, or paste codes shown on this page.',
         bulk_close_ok: 'Selected orders were closed.',
         bulk_close_allow_negative: 'Negative stock export is allowed when inventory is short.',
+        footer_total: 'Total:',
     },
     log_call: 'Log call',
     update_status: 'Update status',

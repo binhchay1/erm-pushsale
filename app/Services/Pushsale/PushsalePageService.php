@@ -1441,6 +1441,17 @@ class PushsalePageService
             ->map(function (WarehouseVoucher $voucher, int $index): array {
                 $quantity = (int) $voucher->lines->sum('quantity');
                 $value = (int) $voucher->lines->sum(fn (WarehouseVoucherLine $line): int => (int) $line->quantity * (int) $line->unit_cost);
+                $productParts = $voucher->lines
+                    ->map(function (WarehouseVoucherLine $line): string {
+                        $name = trim((string) ($line->product?->name ?: '—'));
+                        $qty = (int) $line->quantity;
+
+                        return $name.' x'.$qty;
+                    })
+                    ->filter()
+                    ->values();
+                $productsSummary = $productParts->implode("\n");
+                $isDraft = $voucher->status === 'draft';
 
                 return [
                     'id' => $index + 1,
@@ -1453,6 +1464,8 @@ class PushsalePageService
                         default => 'Nhập kho',
                     },
                     'voucher_code' => $voucher->code,
+                    'products' => $productsSummary !== '' ? $productsSummary : '—',
+                    'line_count' => $voucher->lines->count(),
                     'performed_at' => $voucher->document_date?->toDateString(),
                     'total_quantity' => $quantity,
                     'total_value' => $value,
@@ -1463,6 +1476,8 @@ class PushsalePageService
                     'actions' => '',
                     '_record_id' => $voucher->id,
                     '_edit_url' => '/admin/warehouse/vouchers/entry?id='.$voucher->id,
+                    '_edit_title' => $isDraft ? 'Sửa phiếu' : 'Xem phiếu',
+                    '_edit_icon' => $isDraft ? 'pencil' : 'eye',
                     '_warehouse_id' => $voucher->warehouse_id,
                     '_product_ids' => $voucher->lines->pluck('product_id')->filter()->map(fn ($id) => (string) $id)->unique()->values()->all(),
                     '_data_arrived_at' => $voucher->document_date?->toDateString(),

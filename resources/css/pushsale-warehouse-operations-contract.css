@@ -1829,3 +1829,81 @@ html body.pushsale-app-body .ps-recon-tb-sp textarea.form-control {
         text-align: left !important;
     }
 }
+
+/* 5.1 / KT ops — sticky Pushsale-style product+money footer */
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table > tfoot.ps-wh-tfoot > tr > td,
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table > tfoot.ps-wh-tfoot > tr > td {
+    position: sticky !important;
+    bottom: 0 !important;
+    z-index: 5 !important;
+    background: #fff !important;
+    border-top: 2px solid #2f72c4 !important;
+    vertical-align: top !important;
+    box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.06);
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table > tfoot.ps-wh-tfoot > tr > td.ps-wh-tfoot-spacer,
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table > tfoot.ps-wh-tfoot > tr > td.ps-wh-tfoot-spacer {
+    background: #f7f9fc !important;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-wh-tfoot-detail-link,
+html body.pushsale-app-body .ps-acc-page .ps-wh-tfoot-detail-link {
+    display: inline-block;
+    margin-bottom: 4px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #0577d6 !important;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 16px;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-wh-tfoot-detail-link:hover,
+html body.pushsale-app-body .ps-acc-page .ps-wh-tfoot-detail-link:hover {
+    text-decoration: underline;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-wh-tfoot-product-box,
+html body.pushsale-app-body .ps-acc-page .ps-wh-tfoot-product-box {
+    display: block;
+    max-width: 100%;
+    padding: 6px 8px;
+    border: 1px solid #c8d0db;
+    background: #fff;
+    color: #222;
+    font-size: 12px;
+    line-height: 18px;
+    text-align: left;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-wh-tfoot-product-title,
+html body.pushsale-app-body .ps-acc-page .ps-wh-tfoot-product-title {
+    margin-bottom: 2px;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-wh-tfoot-product-line,
+html body.pushsale-app-body .ps-acc-page .ps-wh-tfoot-product-line {
+    white-space: normal;
+    word-break: break-word;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-wh-tfoot-money,
+html body.pushsale-app-body .ps-acc-page .ps-wh-tfoot-money {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 1px;
+    font-size: 12px;
+    line-height: 18px;
+    color: #111;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-wh-tfoot-money .is-total,
+html body.pushsale-app-body .ps-acc-page .ps-wh-tfoot-money .is-total {
+    margin-top: 1px;
+}
+

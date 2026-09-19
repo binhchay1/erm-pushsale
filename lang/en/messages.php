@@ -185,6 +185,7 @@ return [
         'out_of_stock' => 'Out of stock.',
         'out_of_stock_create' => 'Out of stock — cannot create waybill.',
         'no_carrier_configured' => 'No shipping carrier configured (or method is Manual). Pick Viettel/GHTK/GHN… (via NetShip if used) then register again.',
+        'carrier_or_netship_not_ready' => ':carrier is not configured directly and NetShip is not ready (missing token/gateway). Configure NetShip or :carrier under Shipping partners, then register again.',
         'carrier_undetermined' => 'Could not determine the order\'s shipping carrier.',
         'waybill_created' => 'Waybill created.',
         'waybill_created_status' => 'Waybill created',
