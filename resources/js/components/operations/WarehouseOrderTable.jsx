@@ -213,54 +213,82 @@ function formatFooterMoney(value, { signed = false } = {}) {
 function WarehouseFooterDetailDialog({ open, onOpenChange, summary, labels }) {
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="ps-wh-tfoot-detail-dialog max-w-5xl gap-3 p-4 sm:p-5" showClose>
-                <DialogHeader className="gap-1 pr-8">
-                    <DialogTitle className="text-base">
+            <DialogContent
+                className="ps-wh-tfoot-detail-dialog ps-dialog-content gap-0 p-0"
+                showClose
+                style={{ width: 'min(96vw, 1280px)', maxWidth: 'min(96vw, 1280px)' }}
+            >
+                <DialogHeader className="ps-wh-tfoot-detail-dialog__header">
+                    <DialogTitle className="ps-wh-tfoot-detail-dialog__title">
                         {labels.title}
                     </DialogTitle>
-                    <DialogDescription className="text-sm text-muted-foreground">
+                    <DialogDescription className="ps-wh-tfoot-detail-dialog__scope">
                         {labels.scope}
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="ps-wh-tfoot-detail-summary">
-                    <div><span>{labels.orders}</span><b>{formatNumber(summary.orderCount)}</b></div>
-                    <div><span>{labels.qty}</span><b>{formatNumber(summary.qtyTotal)}</b></div>
-                    <div><span>{labels.subtotal}</span><b>{formatFooterMoney(summary.subtotal)}</b></div>
-                    <div><span>{labels.discount}</span><b>{summary.discount ? formatFooterMoney(summary.discount, { signed: true }) : '0'}</b></div>
-                    <div><span>{labels.shipping}</span><b>{formatFooterMoney(summary.shipping)}</b></div>
-                    <div className="is-total"><span>{labels.total}</span><b>{formatFooterMoney(summary.total)}</b></div>
-                </div>
+                <div className="ps-wh-tfoot-detail-dialog__body">
+                    <div className="ps-wh-tfoot-detail-summary">
+                        <div className="ps-wh-tfoot-detail-summary__item">
+                            <span>{labels.orders}</span>
+                            <b>{formatNumber(summary.orderCount)}</b>
+                        </div>
+                        <div className="ps-wh-tfoot-detail-summary__item">
+                            <span>{labels.qty}</span>
+                            <b>{formatNumber(summary.qtyTotal)}</b>
+                        </div>
+                        <div className="ps-wh-tfoot-detail-summary__item">
+                            <span>{labels.subtotal}</span>
+                            <b>{formatFooterMoney(summary.subtotal)}</b>
+                        </div>
+                        <div className="ps-wh-tfoot-detail-summary__item">
+                            <span>{labels.discount}</span>
+                            <b>{summary.discount ? formatFooterMoney(summary.discount, { signed: true }) : '0'}</b>
+                        </div>
+                        <div className="ps-wh-tfoot-detail-summary__item">
+                            <span>{labels.vat}</span>
+                            <b>{formatFooterMoney(summary.vat)}</b>
+                        </div>
+                        <div className="ps-wh-tfoot-detail-summary__item">
+                            <span>{labels.shipping}</span>
+                            <b>{formatFooterMoney(summary.shipping)}</b>
+                        </div>
+                        <div className="ps-wh-tfoot-detail-summary__item is-total">
+                            <span>{labels.total}</span>
+                            <b>{formatFooterMoney(summary.total)}</b>
+                        </div>
+                    </div>
 
-                <div className="ps-wh-tfoot-detail-table-wrap">
-                    <table className="ps-wh-tfoot-detail-table">
-                        <thead>
-                            <tr>
-                                <th className="is-idx">#</th>
-                                <th>{labels.product}</th>
-                                <th>{labels.sku}</th>
-                                <th className="is-num">{labels.qtyCol}</th>
-                                <th className="is-num">{labels.unitPrice}</th>
-                                <th className="is-num">{labels.amount}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {summary.products.length ? summary.products.map((line, index) => (
-                                <tr key={`${line.sku || line.name}-${line.qty}-${index}`}>
-                                    <td className="is-idx">{index + 1}</td>
-                                    <td>{line.name}</td>
-                                    <td className="is-muted">{line.sku || '—'}</td>
-                                    <td className="is-num">x{formatNumber(line.qty)}</td>
-                                    <td className="is-num">{line.unitPrice > 0 ? formatFooterMoney(line.unitPrice) : '—'}</td>
-                                    <td className="is-num">{line.amount > 0 ? formatFooterMoney(line.amount) : '—'}</td>
-                                </tr>
-                            )) : (
+                    <div className="ps-wh-tfoot-detail-table-wrap">
+                        <table className="ps-wh-tfoot-detail-table">
+                            <thead>
                                 <tr>
-                                    <td colSpan={6} className="is-empty">—</td>
+                                    <th className="is-idx">#</th>
+                                    <th>{labels.product}</th>
+                                    <th>{labels.sku}</th>
+                                    <th className="is-num">{labels.qtyCol}</th>
+                                    <th className="is-num">{labels.unitPrice}</th>
+                                    <th className="is-num">{labels.amount}</th>
                                 </tr>
-                            )}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {summary.products.length ? summary.products.map((line, index) => (
+                                    <tr key={`${line.sku || line.name}-${line.qty}-${index}`}>
+                                        <td className="is-idx">{index + 1}</td>
+                                        <td>{line.name}</td>
+                                        <td className="is-muted">{line.sku || '—'}</td>
+                                        <td className="is-num">x{formatNumber(line.qty)}</td>
+                                        <td className="is-num">{line.unitPrice > 0 ? formatFooterMoney(line.unitPrice) : '—'}</td>
+                                        <td className="is-num">{line.amount > 0 ? formatFooterMoney(line.amount) : '—'}</td>
+                                    </tr>
+                                )) : (
+                                    <tr>
+                                        <td colSpan={6} className="is-empty">—</td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </DialogContent>
         </Dialog>
@@ -272,6 +300,7 @@ function WarehouseTableFooter({
     summary,
     onOpenDetail,
     viewDetailLabel,
+    moneyLabels,
 }) {
     if (!summary.orderCount) return null;
 
@@ -289,11 +318,26 @@ function WarehouseTableFooter({
 
     const moneyStack = (
         <div className="ps-wh-tfoot-money">
-            <div>{formatFooterMoney(summary.subtotal)}</div>
-            <div>{summary.discount ? formatFooterMoney(summary.discount, { signed: true }) : '0'}</div>
-            <div>{formatFooterMoney(summary.vat)}</div>
-            <div>{formatFooterMoney(summary.shipping)}</div>
-            <div className="is-total"><b>{formatFooterMoney(summary.total)}</b></div>
+            <div className="ps-wh-tfoot-money__row">
+                <span>{moneyLabels.subtotal}</span>
+                <b>{formatFooterMoney(summary.subtotal)}</b>
+            </div>
+            <div className="ps-wh-tfoot-money__row">
+                <span>{moneyLabels.discount}</span>
+                <b>{summary.discount ? formatFooterMoney(summary.discount, { signed: true }) : '0'}</b>
+            </div>
+            <div className="ps-wh-tfoot-money__row">
+                <span>{moneyLabels.vat}</span>
+                <b>{formatFooterMoney(summary.vat)}</b>
+            </div>
+            <div className="ps-wh-tfoot-money__row">
+                <span>{moneyLabels.shipping}</span>
+                <b>{formatFooterMoney(summary.shipping)}</b>
+            </div>
+            <div className="ps-wh-tfoot-money__row is-total">
+                <span>{moneyLabels.total}</span>
+                <b>{formatFooterMoney(summary.total)}</b>
+            </div>
         </div>
     );
 
@@ -797,6 +841,7 @@ export function WarehouseOrderTable({
         qty: t('operations.warehouse_ops.footer_detail_qty'),
         subtotal: t('operations.warehouse_ops.footer_detail_subtotal'),
         discount: t('operations.warehouse_ops.footer_detail_discount'),
+        vat: t('operations.warehouse_ops.footer_detail_vat'),
         shipping: t('operations.warehouse_ops.footer_detail_shipping'),
         total: t('operations.warehouse_ops.footer_detail_total'),
         product: t('operations.warehouse_ops.footer_detail_product'),
@@ -805,6 +850,13 @@ export function WarehouseOrderTable({
         unitPrice: t('operations.warehouse_ops.footer_detail_unit_price'),
         amount: t('operations.warehouse_ops.footer_detail_amount'),
     }), [t, footerSummary.scopedToSelection, footerSummary.orderCount]);
+    const footerMoneyLabels = useMemo(() => ({
+        subtotal: t('operations.warehouse_ops.footer_money_subtotal'),
+        discount: t('operations.warehouse_ops.footer_money_discount'),
+        vat: t('operations.warehouse_ops.footer_money_vat'),
+        shipping: t('operations.warehouse_ops.footer_money_shipping'),
+        total: t('operations.warehouse_ops.footer_money_total'),
+    }), [t]);
     const allSelected = rowIds.length > 0 && rowIds.every((id) => selected.includes(id));
 
     const openAction = (next) => {
@@ -1103,6 +1155,7 @@ export function WarehouseOrderTable({
                         summary={footerSummary}
                         onOpenDetail={() => setFooterDetailOpen(true)}
                         viewDetailLabel={t('operations.view_detail')}
+                        moneyLabels={footerMoneyLabels}
                     />
                 </table>
             </div>

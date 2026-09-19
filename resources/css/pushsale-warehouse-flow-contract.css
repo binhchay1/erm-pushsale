@@ -277,7 +277,8 @@
    this contract keeps that structure instead of stretching the form across the
    full 1920px viewport. */
 .pushsale-page[data-page-code="5.3.1"] {
-    --ps-voucher-width: 960px;
+    /* Pushsale box-body uses max-width:1200px; bump slightly so line table fits without x-scroll. */
+    --ps-voucher-width: 1320px;
     --ps-voucher-label-width: 155px;
     --ps-voucher-gap: 12px;
 }
@@ -956,7 +957,7 @@ html body.pushsale-app-body .pushsale-page[data-page-code="5.3.1"] .box-body {
 
 .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-table {
     width: 100%;
-    min-width: 920px;
+    min-width: 1180px;
     background: #fff;
     margin-bottom: 0;
 }
@@ -973,55 +974,100 @@ html body.pushsale-app-body .pushsale-page[data-page-code="5.3.1"] .box-body {
     padding: 6px 7px !important;
 }
 
-/* Apply ticks sit under column titles inside the same header cell (Pushsale parity) */
 .pushsale-page.ps-voucher-entry-page .ps-voucher-head-labels th {
-    padding: 6px 7px 8px !important;
-    vertical-align: bottom;
+    padding: 7px 7px !important;
+    vertical-align: middle;
+}
+
+/* Apply icons on their own row under header (Pushsale CapNhatPhieu HTML). */
+.pushsale-page.ps-voucher-entry-page .ps-voucher-apply-row > td {
+    padding: 4px 6px !important;
+    background: #fff !important;
+    vertical-align: middle !important;
 }
 
 .pushsale-page.ps-voucher-entry-page .ps-voucher-col-apply {
-    display: inline-flex;
+    display: inline-flex !important;
     align-items: center;
     justify-content: center;
-    margin: 0;
+    min-width: 22px;
+    min-height: 22px;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: #3c8dbc !important;
+    box-shadow: none !important;
     cursor: pointer;
-    user-select: none;
-    color: inherit;
     line-height: 1;
 }
 
-.pushsale-page.ps-voucher-entry-page .ps-voucher-col-apply__tick {
-    appearance: none;
-    -webkit-appearance: none;
-    width: 14px;
-    height: 14px;
-    margin: 0;
-    border: 2px solid #fff;
-    border-radius: 50%;
-    background: transparent;
-    cursor: pointer;
-    flex: 0 0 auto;
+.pushsale-page.ps-voucher-entry-page .ps-voucher-col-apply .fa {
+    font-size: 16px !important;
+    color: inherit !important;
+    background: transparent !important;
+    border: 0 !important;
 }
 
-.pushsale-page.ps-voucher-entry-page .ps-voucher-col-apply__tick:checked {
-    background: #fff;
-    box-shadow: inset 0 0 0 3px #2675bf;
+.pushsale-page.ps-voucher-entry-page .ps-voucher-col-apply.is-on {
+    color: #2675bf !important;
 }
 
-.pushsale-page.ps-voucher-entry-page .ps-voucher-col-apply__tick:disabled {
-    opacity: 0.55;
+.pushsale-page.ps-voucher-entry-page .ps-voucher-col-apply:disabled {
+    opacity: 0.45;
     cursor: not-allowed;
 }
 
+.pushsale-page.ps-voucher-entry-page .ps-voucher-trash-all {
+    color: darkorange !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+.pushsale-page.ps-voucher-entry-page .ps-voucher-trash-row {
+    color: #3c8dbc !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+.pushsale-page.ps-voucher-entry-page .ps-voucher-trash-all .fa,
+.pushsale-page.ps-voucher-entry-page .ps-voucher-trash-row .fa {
+    font-size: 14px !important;
+    background: transparent !important;
+    border: 0 !important;
+}
+
+/* Active product line — green glow like Pushsale `.high-light` */
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-table tr.row-item.high-light {
+    outline: 2px solid #7dce82;
+    outline-offset: -2px;
+}
+
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-table tr.row-item.high-light > td {
+    background: #f4fff6 !important;
+}
+
 .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-table td {
-    vertical-align: middle;
+    padding: 4px 5px !important;
+    vertical-align: middle !important;
     font-size: 12px;
 }
 
 .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-table .form-control {
-    min-width: 70px;
-    height: 30px !important;
-    padding: 2px 6px;
+    min-width: 64px;
+    height: 28px !important;
+    min-height: 28px !important;
+    padding: 2px 6px !important;
+    font-size: 12px !important;
+}
+
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-table .form-control.thanh-tien,
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-table .form-control.txt-label,
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-table .form-control:disabled {
+    background: #f3f5f7 !important;
+    color: #222 !important;
 }
 
 .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-empty {
@@ -1032,8 +1078,8 @@ html body.pushsale-app-body .pushsale-page[data-page-code="5.3.1"] .box-body {
 }
 
 .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-total-row td {
-    font-weight: 600;
-    background: #fafbfc;
+    font-weight: 700;
+    background: #fff !important;
 }
 
 .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-row--footer {
@@ -1163,11 +1209,21 @@ html body.pushsale-app-body .pushsale-page[data-page-code="5.3.1"] .box-body {
     display: none !important;
 }
 
-/* Row trash icons must stay orange — override .btn-icon blue fill on 5.3 */
-.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-table .btn-icon.text-orange {
+/* Trash icons: orange for clear-all (apply row), blue for per-line delete — Pushsale parity */
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-table .ps-voucher-trash-all,
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-table .btn-icon.ps-voucher-trash-all {
     background: transparent !important;
     border: 0 !important;
     color: darkorange !important;
+    min-height: auto !important;
+    padding: 0 4px !important;
+}
+
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-table .ps-voucher-trash-row,
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-table .btn-icon.ps-voucher-trash-row {
+    background: transparent !important;
+    border: 0 !important;
+    color: #3c8dbc !important;
     min-height: auto !important;
     padding: 0 4px !important;
 }

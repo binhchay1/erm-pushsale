@@ -232,15 +232,16 @@ export default function VoucherEntry({
     };
 
     const renderApplyTick = (field) => (
-        <label className="ps-voucher-col-apply" title={t('operations.voucher_entry.apply_column_hint')}>
-            <input
-                type="checkbox"
-                className="ps-voucher-col-apply__tick"
-                checked={Boolean(applyFlags[field])}
-                disabled={isConfirmed || busy}
-                onChange={() => toggleApplyFlag(field)}
-            />
-        </label>
+        <button
+            type="button"
+            className={`btn-icon ps-voucher-col-apply${applyFlags[field] ? ' is-on' : ''}`}
+            title={t('operations.voucher_entry.apply_column_hint')}
+            disabled={isConfirmed || busy}
+            onClick={() => toggleApplyFlag(field)}
+            aria-pressed={Boolean(applyFlags[field])}
+        >
+            <i className={`fa ${applyFlags[field] ? 'fa-check-circle-o' : 'fa-circle-o'}`} aria-hidden="true" />
+        </button>
     );
 
     const removeLine = (key) => setLines((prev) => prev.filter((line) => line.key !== key));
@@ -808,31 +809,42 @@ export default function VoucherEntry({
                                                 <th className="no-wrap text-center" style={{ width: 100 }}>{t('operations.voucher_entry.col_sku')}</th>
                                                 <th className="no-wrap text-center" style={{ width: 60 }}>{t('operations.voucher_entry.col_uom')}</th>
                                                 <th className="no-wrap text-center" style={{ width: 70 }}>{t('operations.voucher_entry.col_qty')}</th>
-                                                <th className="no-wrap text-center" style={{ width: 90 }}>
-                                                    <div className="ps-voucher-th-stack">
-                                                        <span>{t('operations.voucher_entry.col_unit_cost')}</span>
-                                                        {renderApplyTick('unit_cost')}
-                                                    </div>
-                                                </th>
+                                                <th className="no-wrap text-center" style={{ width: 90 }}>{t('operations.voucher_entry.col_unit_cost')}</th>
                                                 <th className="no-wrap text-center" style={{ width: 100 }}>{t('operations.voucher_entry.col_total')}</th>
-                                                <th className="no-wrap text-center" style={{ width: 80 }}>
-                                                    <div className="ps-voucher-th-stack">
-                                                        <span>{t('operations.voucher_entry.col_batch')}</span>
-                                                        {renderApplyTick('batch_code')}
-                                                    </div>
-                                                </th>
-                                                <th className="no-wrap text-center" style={{ width: 100 }}>
-                                                    <div className="ps-voucher-th-stack">
-                                                        <span>{t('operations.voucher_entry.col_expiry')}</span>
-                                                        {renderApplyTick('expiry_date')}
-                                                    </div>
-                                                </th>
+                                                <th className="no-wrap text-center" style={{ width: 80 }}>{t('operations.voucher_entry.col_batch')}</th>
+                                                <th className="no-wrap text-center" style={{ width: 110 }}>{t('operations.voucher_entry.col_expiry')}</th>
                                                 <th className="no-wrap text-center">{t('operations.voucher_entry.col_location')}</th>
                                                 <th className="no-wrap text-center">{t('operations.voucher_entry.col_note')}</th>
                                                 <th className="no-wrap text-center hidden-print" style={{ width: 40 }} />
                                             </tr>
                                         </thead>
                                         <tbody>
+                                            {/* Pushsale apply-icons row — separate from header labels */}
+                                            <tr className="ps-voucher-apply-row">
+                                                <td className="text-center" />
+                                                <td />
+                                                <td />
+                                                <td />
+                                                <td className="text-center">{renderApplyTick('quantity')}</td>
+                                                <td className="text-center">{renderApplyTick('unit_cost')}</td>
+                                                <td />
+                                                <td className="text-center">{renderApplyTick('batch_code')}</td>
+                                                <td className="text-center">{renderApplyTick('expiry_date')}</td>
+                                                <td className="text-center">{renderApplyTick('location_code')}</td>
+                                                <td />
+                                                <td className="text-center hidden-print">
+                                                    <button
+                                                        type="button"
+                                                        className="btn-icon ps-voucher-trash-all"
+                                                        disabled={isConfirmed || busy || !lines.length}
+                                                        onClick={clearLines}
+                                                        title={t('operations.voucher_entry.clear_lines')}
+                                                        aria-label={t('operations.voucher_entry.clear_lines')}
+                                                    >
+                                                        <i className="fa fa-trash" aria-hidden="true" />
+                                                    </button>
+                                                </td>
+                                            </tr>
                                             {lines.length === 0 ? (
                                                 <tr>
                                                     <td colSpan={12} className="ps-voucher-entry-empty">
@@ -843,8 +855,16 @@ export default function VoucherEntry({
                                                 const product = productById.get(String(line.product_id));
                                                 const total = (Number(line.quantity) || 0) * (Number(line.unit_cost) || 0);
                                                 return (
-                                                    <tr key={line.key}>
-                                                        <td className="text-center">{index + 1}</td>
+                                                    <tr key={line.key} className="row-item high-light ps-voucher-line">
+                                                        <td>
+                                                            <input
+                                                                type="text"
+                                                                className="form-control text-center"
+                                                                value={index + 1}
+                                                                readOnly
+                                                                tabIndex={-1}
+                                                            />
+                                                        </td>
                                                         <td>{product?.name || line.product || '—'}</td>
                                                         <td className="text-center">{product?.sku || line.sku || ''}</td>
                                                         <td className="text-center">{product?.unit || line.uom || ''}</td>
@@ -852,7 +872,7 @@ export default function VoucherEntry({
                                                             <input
                                                                 type="number"
                                                                 min="0"
-                                                                className="form-control text-right"
+                                                                className="form-control text-right so-luong"
                                                                 value={line.quantity}
                                                                 disabled={isConfirmed || busy}
                                                                 onChange={(event) => {
@@ -878,13 +898,21 @@ export default function VoucherEntry({
                                                             <input
                                                                 type="number"
                                                                 min="0"
-                                                                className="form-control text-right"
+                                                                className="form-control text-right don-gia"
                                                                 value={line.unit_cost}
                                                                 disabled={isConfirmed || busy}
                                                                 onChange={(event) => patchLine(line.key, 'unit_cost', event.target.value)}
                                                             />
                                                         </td>
-                                                        <td className="text-right">{numberFmt.format(total)}</td>
+                                                        <td>
+                                                            <input
+                                                                type="text"
+                                                                className="form-control text-right thanh-tien"
+                                                                value={numberFmt.format(total)}
+                                                                disabled
+                                                                readOnly
+                                                            />
+                                                        </td>
                                                         <td>
                                                             <input
                                                                 className="form-control"
@@ -921,7 +949,7 @@ export default function VoucherEntry({
                                                         <td className="text-center hidden-print">
                                                             <button
                                                                 type="button"
-                                                                className="btn-icon text-orange"
+                                                                className="btn-icon ps-voucher-trash-row"
                                                                 disabled={isConfirmed || busy}
                                                                 onClick={() => removeLine(line.key)}
                                                                 aria-label={t('operations.voucher_entry.remove_line')}
@@ -932,23 +960,28 @@ export default function VoucherEntry({
                                                     </tr>
                                                 );
                                             })}
-                                            <tr className="ps-voucher-entry-total-row">
+                                            <tr className="fb ps-voucher-entry-total-row">
                                                 <td colSpan={4} className="text-right">{t('operations.voucher_entry.total')}</td>
-                                                <td className="text-right">{numberFmt.format(totals.quantity)}</td>
-                                                <td />
-                                                <td className="text-right">{numberFmt.format(totals.total)}</td>
-                                                <td colSpan={4} />
-                                                <td className="text-center hidden-print">
-                                                    <button
-                                                        type="button"
-                                                        className="btn-icon text-orange"
-                                                        disabled={isConfirmed || busy || !lines.length}
-                                                        onClick={clearLines}
-                                                        title={t('operations.voucher_entry.clear_lines')}
-                                                    >
-                                                        <i className="fa fa-trash" aria-hidden="true" />
-                                                    </button>
+                                                <td className="text-right">
+                                                    <input
+                                                        type="text"
+                                                        className="form-control text-right txt-label"
+                                                        value={numberFmt.format(totals.quantity)}
+                                                        disabled
+                                                        readOnly
+                                                    />
                                                 </td>
+                                                <td />
+                                                <td className="text-right">
+                                                    <input
+                                                        type="text"
+                                                        className="form-control text-right txt-label"
+                                                        value={numberFmt.format(totals.total)}
+                                                        disabled
+                                                        readOnly
+                                                    />
+                                                </td>
+                                                <td colSpan={5} />
                                             </tr>
                                         </tbody>
                                     </table>
