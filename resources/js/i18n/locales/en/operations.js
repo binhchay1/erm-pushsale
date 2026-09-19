@@ -49,7 +49,7 @@ export default {
         footer_detail_amount: 'Line amount',
         footer_money_subtotal: 'Subtotal',
         footer_money_discount: 'Discount',
-        footer_money_vat: 'VAT',
+        footer_money_vat: 'Product VAT',
         footer_money_shipping: 'Shipping',
         footer_money_total: 'Total',
     },

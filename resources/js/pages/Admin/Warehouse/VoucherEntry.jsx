@@ -783,7 +783,7 @@ export default function VoucherEntry({
                             <div className="col-xs-2 form-group">
                                 <span className="h-label">{t('operations.voucher_entry.stock_product')}</span>
                             </div>
-                            <div className="col-xs-4 form-group ps-voucher-stock-product-cell">
+                            <div className="col-xs-4 form-group">
                                 <ProductSearchSelect
                                     products={products}
                                     value={pendingStockProductId}

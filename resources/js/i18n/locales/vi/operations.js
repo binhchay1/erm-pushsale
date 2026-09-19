@@ -49,7 +49,7 @@ export default {
         footer_detail_amount: 'Thành tiền SP',
         footer_money_subtotal: 'Tạm tính',
         footer_money_discount: 'Chiết khấu',
-        footer_money_vat: 'VAT',
+        footer_money_vat: 'Tiền VAT SP',
         footer_money_shipping: 'Phí VC',
         footer_money_total: 'Thành tiền',
     },

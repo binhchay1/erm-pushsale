@@ -363,10 +363,12 @@ function WarehouseTableFooter({
             <tr>
                 <td colSpan={8} className="ps-wh-tfoot-spacer" />
                 {productsCell}
-                <td className="text-right no-wrap area3 c-money-body ps-wh-tfoot-money-cell">
+                <td
+                    colSpan={6}
+                    className="text-right no-wrap area3 c-money-body ps-wh-tfoot-money-cell"
+                >
                     {moneyStack}
                 </td>
-                <td colSpan={5} className="ps-wh-tfoot-spacer" />
             </tr>
         </tfoot>
     );

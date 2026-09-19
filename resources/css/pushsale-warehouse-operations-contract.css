@@ -1847,6 +1847,85 @@ html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table > tfoot.ps-wh-tfoot
     background: #f7f9fc !important;
 }
 
+/*
+ * Footer money sits in a colspan over money + trailing spacer columns so the
+ * labeled amounts fit fully. Body/header .c-money width stays unchanged.
+ */
+html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table > tfoot.ps-wh-tfoot > tr > td.ps-wh-tfoot-money-cell,
+html body.pushsale-app-body .ps-acc-page .ps-wh-legacy-table > tfoot.ps-wh-tfoot > tr > td.ps-wh-tfoot-money-cell {
+    position: sticky !important;
+    overflow: visible !important;
+    z-index: 8 !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    width: auto !important;
+    padding: 8px 10px !important;
+    text-align: right !important;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-wh-tfoot-money,
+html body.pushsale-app-body .ps-acc-page .ps-wh-tfoot-money {
+    position: relative !important;
+    display: inline-flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 3px !important;
+    width: max-content !important;
+    min-width: 230px !important;
+    max-width: none !important;
+    margin: 0 0 0 auto !important;
+    padding: 8px 12px !important;
+    border: 1px solid #d7dee8 !important;
+    border-radius: 6px !important;
+    background: #fff !important;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06) !important;
+    font-size: 12px !important;
+    line-height: 18px !important;
+    color: #111 !important;
+    box-sizing: border-box !important;
+    vertical-align: top !important;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-wh-tfoot-money__row,
+html body.pushsale-app-body .ps-acc-page .ps-wh-tfoot-money__row {
+    display: grid !important;
+    grid-template-columns: minmax(96px, max-content) minmax(96px, max-content) !important;
+    align-items: baseline !important;
+    justify-content: space-between !important;
+    column-gap: 16px !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-wh-tfoot-money__row span,
+html body.pushsale-app-body .ps-acc-page .ps-wh-tfoot-money__row span {
+    color: #64748b !important;
+    font-weight: 500 !important;
+    text-align: left !important;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-wh-tfoot-money__row b,
+html body.pushsale-app-body .ps-acc-page .ps-wh-tfoot-money__row b {
+    color: #111 !important;
+    font-weight: 600 !important;
+    font-variant-numeric: tabular-nums !important;
+    text-align: right !important;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-wh-tfoot-money__row.is-total,
+html body.pushsale-app-body .ps-acc-page .ps-wh-tfoot-money__row.is-total {
+    margin-top: 2px !important;
+    padding-top: 4px !important;
+    border-top: 1px dashed #c8d0db !important;
+}
+
+html body.pushsale-app-body .ps-wh-page .ps-wh-tfoot-money__row.is-total span,
+html body.pushsale-app-body .ps-acc-page .ps-wh-tfoot-money__row.is-total span,
+html body.pushsale-app-body .ps-wh-page .ps-wh-tfoot-money__row.is-total b,
+html body.pushsale-app-body .ps-acc-page .ps-wh-tfoot-money__row.is-total b {
+    color: #0f172a !important;
+    font-weight: 700 !important;
+}
+
 html body.pushsale-app-body .ps-wh-page .ps-wh-tfoot-detail-link,
 html body.pushsale-app-body .ps-acc-page .ps-wh-tfoot-detail-link {
     display: inline-block;
@@ -1865,56 +1944,6 @@ html body.pushsale-app-body .ps-acc-page .ps-wh-tfoot-detail-link {
 html body.pushsale-app-body .ps-wh-page .ps-wh-tfoot-detail-link:hover,
 html body.pushsale-app-body .ps-acc-page .ps-wh-tfoot-detail-link:hover {
     text-decoration: underline;
-}
-
-html body.pushsale-app-body .ps-wh-page .ps-wh-tfoot-money,
-html body.pushsale-app-body .ps-acc-page .ps-wh-tfoot-money {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 2px;
-    min-width: 168px;
-    margin-left: auto;
-    font-size: 12px;
-    line-height: 18px;
-    color: #111;
-}
-
-html body.pushsale-app-body .ps-wh-page .ps-wh-tfoot-money__row,
-html body.pushsale-app-body .ps-acc-page .ps-wh-tfoot-money__row {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 10px;
-    white-space: nowrap;
-}
-
-html body.pushsale-app-body .ps-wh-page .ps-wh-tfoot-money__row span,
-html body.pushsale-app-body .ps-acc-page .ps-wh-tfoot-money__row span {
-    color: #64748b;
-    font-weight: 500;
-}
-
-html body.pushsale-app-body .ps-wh-page .ps-wh-tfoot-money__row b,
-html body.pushsale-app-body .ps-acc-page .ps-wh-tfoot-money__row b {
-    color: #111;
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
-}
-
-html body.pushsale-app-body .ps-wh-page .ps-wh-tfoot-money__row.is-total,
-html body.pushsale-app-body .ps-acc-page .ps-wh-tfoot-money__row.is-total {
-    margin-top: 2px;
-    padding-top: 3px;
-    border-top: 1px dashed #c8d0db;
-}
-
-html body.pushsale-app-body .ps-wh-page .ps-wh-tfoot-money__row.is-total span,
-html body.pushsale-app-body .ps-acc-page .ps-wh-tfoot-money__row.is-total span,
-html body.pushsale-app-body .ps-wh-page .ps-wh-tfoot-money__row.is-total b,
-html body.pushsale-app-body .ps-acc-page .ps-wh-tfoot-money__row.is-total b {
-    color: #0f172a;
-    font-weight: 700;
 }
 
 /* Footer product detail dialog (replaces inline Pushsale expand box) */
