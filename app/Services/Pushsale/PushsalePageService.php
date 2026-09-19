@@ -55,6 +55,7 @@ use App\Services\Reports\SalesLeader\SalesDataReportService;
 use App\Services\Reports\SalesLeader\SalesOptimizationReportService;
 use App\Services\Reports\SalesLeader\SalesTeamReportService;
 use App\Services\Reports\SalesLeader\SalesWorkReportService;
+use App\Services\Warehouse\WarehouseVoucherVisibilityScope;
 use App\Support\ActivityLogger;
 use App\Support\ShippingProviders;
 use Carbon\CarbonImmutable;
@@ -1431,11 +1432,19 @@ class PushsalePageService
 
     private function warehouseVouchers(): Collection
     {
-        return WarehouseVoucher::query()
+        $viewer = auth()->user();
+        $query = WarehouseVoucher::query()
             ->with(['warehouse:id,name', 'lines.product:id,name,sku', 'approver:id,name', 'creator:id,name'])
             ->latest('document_date')
             ->latest('id')
-            ->limit(2000)
+            ->limit(2000);
+
+        if ($viewer instanceof User) {
+            $query = app(WarehouseVoucherVisibilityScope::class)
+                ->applyToVouchers($query, $viewer);
+        }
+
+        return $query
             ->get()
             ->values()
             ->map(function (WarehouseVoucher $voucher, int $index): array {
@@ -2686,7 +2695,20 @@ class PushsalePageService
 
     private function warehouseVoucherLines(): Collection
     {
-        return WarehouseVoucherLine::query()->with(['voucher.warehouse:id,name', 'product:id,name,sku,unit'])->latest()->limit(2000)->get()->values()->map(fn (WarehouseVoucherLine $line, int $index) => [
+        $viewer = auth()->user();
+        $query = WarehouseVoucherLine::query()
+            ->with(['voucher.warehouse:id,name', 'product:id,name,sku,unit'])
+            ->latest()
+            ->limit(2000);
+
+        if ($viewer instanceof User) {
+            $allowed = app(WarehouseVoucherVisibilityScope::class)->allowedCreatorIds($viewer);
+            if ($allowed !== null) {
+                $query->whereHas('voucher', fn ($q) => $q->whereIn('created_by_user_id', $allowed));
+            }
+        }
+
+        return $query->get()->values()->map(fn (WarehouseVoucherLine $line, int $index) => [
             'index' => $index + 1,
             'product' => $line->product?->name,
             'sku' => $line->product?->sku,

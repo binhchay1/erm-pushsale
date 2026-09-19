@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin\Pushsale\Warehouse;
 use App\Http\Controllers\Admin\Pushsale\BasePushsalePageController;
 use App\Models\Pushsale\WarehouseVoucher;
 use App\Models\User;
+use App\Services\Warehouse\WarehouseVoucherVisibilityScope;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -12,11 +13,21 @@ use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Throwable;
 
 final class WarehouseVoucherEntryController extends BasePushsalePageController
 {
     protected string $pageCode = '5.3.1';
+
+    public function __construct(
+        \App\Services\Pushsale\PushsalePageService $pages,
+        \App\Services\Pushsale\PageResourceManager $resources,
+        \App\Services\NavigationService $navigation,
+        private readonly WarehouseVoucherVisibilityScope $voucherVisibility,
+    ) {
+        parent::__construct($pages, $resources, $navigation);
+    }
 
     public function index(Request $request): Response|StreamedResponse|\Symfony\Component\HttpFoundation\Response
     {
@@ -53,6 +64,9 @@ final class WarehouseVoucherEntryController extends BasePushsalePageController
             try {
                 /** @var WarehouseVoucher $model */
                 $model = $this->resources->find('5.3.1', $voucherId);
+                if ($request->user() instanceof User) {
+                    $this->voucherVisibility->assertCanView($request->user(), $model);
+                }
                 $voucher = $this->resources->serializeWarehouseVoucher($model);
             } catch (Throwable $exception) {
                 report($exception);
@@ -116,14 +130,34 @@ final class WarehouseVoucherEntryController extends BasePushsalePageController
             abort_unless($resourceKey, 405);
             $model = $this->resources->find($resourceKey, $record);
             /** @var WarehouseVoucher $model */
+            if ($request->user() instanceof User) {
+                $this->voucherVisibility->assertCanView($request->user(), $model);
+            }
             $model = $this->resources->update($resourceKey, $model, $this->payload($request), $request->user());
 
             return $this->voucherSavedResponse($request, $model, 200, 'Đã cập nhật phiếu tạm.');
-        } catch (ValidationException $exception) {
+        } catch (ValidationException|HttpException $exception) {
             throw $exception;
         } catch (Throwable $exception) {
             return $this->voucherFailureResponse($request, $exception, 'Không cập nhật được phiếu kho. Phiếu có thể đã hoàn thành hoặc dữ liệu không hợp lệ.');
         }
+    }
+
+    public function destroy(Request $request, int $record): RedirectResponse|JsonResponse
+    {
+        $this->authorizePage($request);
+        $resourceKey = $this->mainResourceKey();
+        abort_unless($resourceKey, 405);
+        $model = $this->resources->find($resourceKey, $record);
+        /** @var WarehouseVoucher $model */
+        if ($request->user() instanceof User) {
+            $this->voucherVisibility->assertCanView($request->user(), $model);
+        }
+        $this->resources->delete($resourceKey, $model);
+
+        return $request->expectsJson()
+            ? response()->json(['ok' => true])
+            : back()->with('success', 'Đã xóa phiếu kho.');
     }
 
     public function complete(Request $request, int $record): RedirectResponse|JsonResponse
@@ -134,10 +168,11 @@ final class WarehouseVoucherEntryController extends BasePushsalePageController
             $voucher = $this->resources->find('5.3.1', $record);
             /** @var User $actor */
             $actor = $request->user();
+            $this->voucherVisibility->assertCanView($actor, $voucher);
             $voucher = $this->resources->completeWarehouseVoucher($voucher, $actor);
 
             return $this->voucherSavedResponse($request, $voucher, 200, 'Đã hoàn thành phiếu kho.');
-        } catch (ValidationException $exception) {
+        } catch (ValidationException|HttpException $exception) {
             throw $exception;
         } catch (Throwable $exception) {
             return $this->voucherFailureResponse($request, $exception, 'Không hoàn thành được phiếu. Kiểm tra tồn kho / trạng thái phiếu rồi thử lại.');
@@ -160,6 +195,9 @@ final class WarehouseVoucherEntryController extends BasePushsalePageController
             if ($voucherId > 0) {
                 /** @var WarehouseVoucher $voucher */
                 $voucher = $this->resources->find('5.3.1', $voucherId);
+                if ($request->user() instanceof User) {
+                    $this->voucherVisibility->assertCanView($request->user(), $voucher);
+                }
                 if ($voucher->status === 'confirmed') {
                     throw ValidationException::withMessages([
                         'voucher_id' => 'Phiếu đã hoàn thành không thể import. Hãy tạo phiếu mới hoặc mở phiếu tạm.',
@@ -185,7 +223,7 @@ final class WarehouseVoucherEntryController extends BasePushsalePageController
                 'lines' => $lines,
                 'voucher' => $voucherPayload,
             ]);
-        } catch (ValidationException $exception) {
+        } catch (ValidationException|HttpException $exception) {
             throw $exception;
         } catch (Throwable $exception) {
             report($exception);
