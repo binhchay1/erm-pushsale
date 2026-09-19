@@ -277,7 +277,7 @@
    this contract keeps that structure instead of stretching the form across the
    full 1920px viewport. */
 .pushsale-page[data-page-code="5.3.1"] {
-    --ps-voucher-width: 1200px;
+    --ps-voucher-width: 960px;
     --ps-voucher-label-width: 155px;
     --ps-voucher-gap: 12px;
 }
@@ -784,13 +784,14 @@ html body.pushsale-app-body .pushsale-page[data-page-code="5.3.1"] .box-body {
     padding-right: 0 !important;
 }
 
-/* Same left gutter as PageHeader title (--ps-header-x). No extra body margin. */
+/* Same left gutter as PageHeader title (--ps-header-x). Form stays on left half like Pushsale. */
 .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-body {
     display: block !important;
     width: 100% !important;
-    max-width: none !important;
+    max-width: var(--ps-voucher-width, 960px) !important;
     margin: 0 !important;
-    padding: 0 var(--ps-header-x, 14px) 24px !important;
+    margin-right: auto !important;
+    padding: 0 0 24px !important;
     box-sizing: border-box;
 }
 
@@ -901,6 +902,16 @@ html body.pushsale-app-body .pushsale-page[data-page-code="5.3.1"] .box-body {
     height: 31px !important;
     min-height: 31px !important;
     font-size: 12px !important;
+}
+
+/* Stock-product picker sits alone on its row — keep it from reading wider than sibling fields. */
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-body > .row > .col-xs-4.ps-voucher-stock-product-cell {
+    width: 28% !important;
+    max-width: 280px !important;
+}
+
+.pushsale-page.ps-voucher-entry-page .ps-voucher-entry-body .ps-voucher-stock-product-cell .ps-product-search-select {
+    max-width: 280px !important;
 }
 
 .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-code {
@@ -1165,8 +1176,8 @@ html body.pushsale-app-body .pushsale-page[data-page-code="5.3.1"] .box-body {
     .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-body {
         margin-left: 0 !important;
         margin-right: 0 !important;
-        padding-left: var(--ps-header-x, 14px) !important;
-        padding-right: var(--ps-header-x, 14px) !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
         max-width: none !important;
     }
 

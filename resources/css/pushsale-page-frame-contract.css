@@ -928,7 +928,8 @@ html body.pushsale-app-body .ps-wh-menu-report-table-wrap,
 html body.pushsale-app-body [data-pushsale-table='true'],
 html body.pushsale-app-body .dragscroll1,
 html body.pushsale-app-body .tableFixHead {
-    scrollbar-gutter: stable both-edges !important;
+    /* `both-edges` reserved a blank strip on the left — tables looked inset vs title/filters. */
+    scrollbar-gutter: stable !important;
     scrollbar-width: auto !important;
     scrollbar-color: #9aa6b2 #edf1f5 !important;
 }

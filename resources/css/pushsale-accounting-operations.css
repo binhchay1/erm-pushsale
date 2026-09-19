@@ -383,7 +383,7 @@ html body.pushsale-app-body .ps-acc-page .ps-acc-table-wrap {
     overflow: auto !important;
     -webkit-overflow-scrolling: touch !important;
     overscroll-behavior: contain !important;
-    scrollbar-gutter: stable both-edges !important;
+    scrollbar-gutter: stable !important;
 }
 
 html body.pushsale-app-body .ps-acc-page .ps-acc-operation-table {

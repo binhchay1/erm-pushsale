@@ -213,7 +213,7 @@ function formatFooterMoney(value, { signed = false } = {}) {
 function WarehouseFooterDetailDialog({ open, onOpenChange, summary, labels }) {
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="ps-wh-tfoot-detail-dialog max-w-2xl gap-3 p-4 sm:p-5" showClose>
+            <DialogContent className="ps-wh-tfoot-detail-dialog max-w-5xl gap-3 p-4 sm:p-5" showClose>
                 <DialogHeader className="gap-1 pr-8">
                     <DialogTitle className="text-base">
                         {labels.title}

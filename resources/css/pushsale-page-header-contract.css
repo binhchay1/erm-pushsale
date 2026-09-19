@@ -1369,7 +1369,7 @@ html body.pushsale-app-body .ps-page-shell > .ps-page-shell__toolbar {
 }
 
 html body.pushsale-app-body .ps-page-shell > .ps-page-shell__body {
-    /* Tables flush with shell edges; toolbar/header keep --ps-header-x gutters. */
+    /* Body itself stays flush; table wrappers take --ps-header-x to match title. */
     padding-top: 0 !important;
     padding-left: 0 !important;
     padding-right: 0 !important;
@@ -1386,11 +1386,13 @@ html body.pushsale-app-body .ps-page-shell > .ps-page-shell__body > .ps-table-sc
 html body.pushsale-app-body .ps-page-shell > .ps-page-shell__body > .table-responsive,
 html body.pushsale-app-body .ps-page-shell > .ps-page-shell__body > .ps-users-table-wrap,
 html body.pushsale-app-body .ps-page-shell > .ps-page-shell__body > .ps-hr-config-table-wrap,
+html body.pushsale-app-body .ps-page-shell > .ps-page-shell__body > .pushsale-template-table-scroll,
 html body.pushsale-app-body .ps-page-shell > .ps-page-shell__body > table {
     margin-left: 0 !important;
     margin-right: 0 !important;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
+    padding-left: var(--ps-header-x, 14px) !important;
+    padding-right: var(--ps-header-x, 14px) !important;
+    box-sizing: border-box !important;
 }
 
 html body.pushsale-app-body .ps-page-shell > .ps-page-shell__body > .pushsale-pagination,

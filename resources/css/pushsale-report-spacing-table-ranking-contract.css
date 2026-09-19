@@ -65,7 +65,7 @@ html body.pushsale-app-body .pushsale-template-fragment [style*='overflow-x:auto
     overflow-x: auto !important;
     overflow-y: visible !important;
     -webkit-overflow-scrolling: touch !important;
-    scrollbar-gutter: stable both-edges !important;
+    scrollbar-gutter: stable !important;
 }
 
 html body.pushsale-app-body .ps-table-scroll::-webkit-scrollbar,
@@ -232,7 +232,7 @@ html body.pushsale-app-body .psr-table-scroll {
     overflow: auto !important;
     -webkit-overflow-scrolling: touch !important;
     overscroll-behavior: contain !important;
-    scrollbar-gutter: stable both-edges !important;
+    scrollbar-gutter: stable !important;
 }
 
 html body.pushsale-app-body .psr-podium {
@@ -280,7 +280,7 @@ html body.pushsale-app-body [data-page-code='4.3'] .pushsale-template-table-scro
     overflow: auto !important;
     max-width: 100% !important;
     -webkit-overflow-scrolling: touch !important;
-    scrollbar-gutter: stable both-edges !important;
+    scrollbar-gutter: stable !important;
 }
 
 @media (max-width: 991px) {

@@ -89,14 +89,16 @@ html body.pushsale-app-body .ps-sales-leader-report .pushsale-pagination,
 html body.pushsale-app-body .ps-operation-conversion-report .pushsale-pagination,
 html body.pushsale-app-body .ps-operation-conversion-bottom-pager,
 html body.pushsale-app-body .ps-operation-conversion-pager-row {
-    margin-left: var(--ps-header-x, 14px) !important;
-    margin-right: var(--ps-header-x, 14px) !important;
-    width: calc(100% - (2 * var(--ps-header-x, 14px))) !important;
-    max-width: calc(100% - (2 * var(--ps-header-x, 14px))) !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: var(--ps-header-x, 14px) !important;
+    padding-right: var(--ps-header-x, 14px) !important;
+    width: 100% !important;
+    max-width: 100% !important;
     box-sizing: border-box !important;
 }
 
-/* both-edges tạo khoảng trống trái nhìn như bảng bị lùi — chỉ chừa gutter phải */
+/* both-edges tạo khoảng trống trái nhìn như bảng bị lùi — chỉ chừa gutter phải (scrollbar) */
 html body.pushsale-app-body .ps-sales-leader-table-wrap,
 html body.pushsale-app-body .ps-operation-conversion-table-wrap,
 html body.pushsale-app-body .pushsale-page.ps-sales-optimization-report .dragscroll1,

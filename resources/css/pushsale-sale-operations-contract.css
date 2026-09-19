@@ -1245,7 +1245,7 @@ html body.pushsale-app-body .ps-sale-workspace-shell .ps-sale-table-wrap {
     overflow-y: auto !important;
     overscroll-behavior: contain !important;
     -webkit-overflow-scrolling: touch !important;
-    scrollbar-gutter: stable both-edges !important;
+    scrollbar-gutter: stable !important;
     padding-left: var(--ps-header-x, 14px) !important;
     padding-right: var(--ps-header-x, 14px) !important;
     max-height: calc(var(--ps-data-table-head, 42px) + (var(--ps-data-table-visible-rows, 5) * var(--ps-data-table-row, 110px))) !important;

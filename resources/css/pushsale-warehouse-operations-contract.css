@@ -1175,7 +1175,7 @@ html body.pushsale-app-body .ps-acc-page .tableFixHead {
     overflow: auto !important;
     overscroll-behavior: contain !important;
     -webkit-overflow-scrolling: touch !important;
-    scrollbar-gutter: stable both-edges !important;
+    scrollbar-gutter: stable !important;
 }
 
 html body.pushsale-app-body .ps-wh-page .ps-wh-legacy-table,
@@ -1884,6 +1884,11 @@ html body.pushsale-app-body .ps-acc-page .ps-wh-tfoot-money .is-total {
 }
 
 /* Footer product detail dialog (replaces inline Pushsale expand box) */
+.ps-wh-tfoot-detail-dialog {
+    width: min(96vw, 1100px) !important;
+    max-width: min(96vw, 1100px) !important;
+}
+
 .ps-wh-tfoot-detail-dialog .ps-wh-tfoot-detail-summary {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));

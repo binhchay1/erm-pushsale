@@ -130,9 +130,12 @@ html body.pushsale-app-body .ps-operation-conversion-table-wrap {
     overflow: auto;
     border-top: 1px solid #1f72bd;
     background: #fff;
-    margin-left: var(--ps-header-x, 14px) !important;
-    margin-right: var(--ps-header-x, 14px) !important;
-    width: calc(100% - (2 * var(--ps-header-x, 14px))) !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: var(--ps-header-x, 14px) !important;
+    padding-right: var(--ps-header-x, 14px) !important;
+    width: 100% !important;
+    max-width: 100% !important;
     box-sizing: border-box !important;
 }
 

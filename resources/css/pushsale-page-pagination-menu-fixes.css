@@ -35,12 +35,13 @@ html body.pushsale-app-body .ps-inventory-page .ps-table-scroll {
 
 html body.pushsale-app-body .ps-inventory-page .ps-inventory-table-wrap,
 html body.pushsale-app-body .ps-inventory-page .ps-table-scroll.ps-inventory-table-wrap {
-    margin-left: var(--ps-header-x, 14px) !important;
-    margin-right: var(--ps-header-x, 14px) !important;
-    width: calc(100% - (2 * var(--ps-header-x, 14px))) !important;
-    max-width: calc(100% - (2 * var(--ps-header-x, 14px))) !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
     box-sizing: border-box !important;
-    padding: 0 !important;
+    padding-left: var(--ps-header-x, 14px) !important;
+    padding-right: var(--ps-header-x, 14px) !important;
     border: 0 !important;
     box-shadow: none !important;
     background: transparent !important;

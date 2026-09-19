@@ -413,7 +413,7 @@ html body.pushsale-app-body .ps-product-conversion-report .ps-table-scroll.ps-pr
     padding: 0 !important;
     border-top: 0 !important;
     border-bottom: 1px solid #d7dce0 !important;
-    scrollbar-gutter: stable both-edges !important;
+    scrollbar-gutter: stable !important;
     background: #fff !important;
 }
 
