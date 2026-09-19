@@ -5,7 +5,7 @@ export default {
     reminder: { label: 'Nhắc gọi lại', description: 'Lịch hẹn telesale đến giờ' },
     delivery_issue: { label: 'Đơn giao lỗi', description: 'Hoàn / delay từ hãng vận chuyển' },
     kpi_alert: { label: 'Cảnh báo KPI', description: 'Chạm ngưỡng doanh số hoặc tỷ lệ chuyển đổi' },
-    sound: { label: 'Âm thanh', description: 'Phát tiếng khi có thông báo desktop' },
+    sound: { label: 'Âm thanh thông báo', description: 'Phát tiếng (coin lead/đơn, ding duyệt, beep cảnh báo) khi có toast realtime' },
     desktop: { label: 'Toast trên màn hình', description: 'Hiện popup khi số liệu real-time cập nhật' },
     email_digest: { label: 'Email tổng hợp ngày', description: 'Gửi báo cáo cuối ngày (sắp có)' },
     title: 'Thông báo',

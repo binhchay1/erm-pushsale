@@ -157,81 +157,108 @@ html body.pushsale-app-body .m-header-wrap.ps-handover-header {
     text-align: center !important;
 }
 
-.ps-handover-modal-backdrop {
+html body.pushsale-app-body .ps-handover-modal-backdrop {
     position: fixed !important;
     z-index: 1050 !important;
     inset: 0 !important;
-    background: rgba(0, 0, 0, 0.6) !important;
+    background: rgba(0, 0, 0, 0.55) !important;
     display: flex !important;
-    align-items: flex-start !important;
+    align-items: center !important;
     justify-content: center !important;
-    padding-top: 5px !important;
+    padding: 16px !important;
 }
 
-.ps-handover-modal {
-    width: 600px !important;
-    max-width: calc(100vw - 22px) !important;
-    height: auto !important;
-    max-height: calc(100vh - 24px) !important;
+html body.pushsale-app-body .ps-handover-modal {
+    width: 640px !important;
+    max-width: calc(100vw - 32px) !important;
+    max-height: calc(100vh - 32px) !important;
     background: #fff !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.32) !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
+    border-radius: 4px !important;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28) !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
 }
 
-.ps-handover-modal-title {
-    height: 54px !important;
+html body.pushsale-app-body .ps-handover-modal-title {
+    flex: 0 0 auto !important;
+    min-height: 48px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
-    padding: 0 16px !important;
-    border-bottom: 1px solid #d3d3d3 !important;
+    padding: 10px 16px !important;
+    border-bottom: 1px solid #d9dee7 !important;
     background: #fff !important;
 }
 
-.ps-handover-modal-title strong {
-    font-size: 18px !important;
-    color: #000 !important;
+html body.pushsale-app-body .ps-handover-modal-title strong {
+    font-size: 16px !important;
+    color: #111 !important;
     font-weight: 700 !important;
 }
 
-.ps-handover-modal-title button {
+html body.pushsale-app-body .ps-handover-modal-title button {
     border: 0 !important;
     background: transparent !important;
-    font-size: 20px !important;
-    line-height: 20px !important;
-    color: #333 !important;
+    font-size: 22px !important;
+    line-height: 1 !important;
+    color: #555 !important;
+    cursor: pointer !important;
 }
 
-.ps-handover-form {
-    padding: 16px 16px 24px !important;
+html body.pushsale-app-body .ps-handover-form {
+    flex: 1 1 auto !important;
+    overflow-y: auto !important;
+    padding: 18px 20px 22px !important;
 }
 
-.ps-handover-form label {
+html body.pushsale-app-body .ps-handover-form > label {
     display: grid !important;
-    grid-template-columns: 185px minmax(0, 1fr) !important;
+    grid-template-columns: 168px minmax(0, 1fr) !important;
     gap: 12px !important;
     align-items: center !important;
+    width: 100% !important;
     margin: 0 0 12px !important;
     font-size: 13px !important;
     font-weight: 600 !important;
-    color: #000 !important;
+    color: #111 !important;
 }
 
-.ps-handover-form label > span {
+html body.pushsale-app-body .ps-handover-form > label > span {
+    display: block !important;
     font-size: 13px !important;
     line-height: 18px !important;
     font-weight: 600 !important;
+    color: #111 !important;
+    white-space: normal !important;
 }
 
-.ps-handover-form input,
-.ps-handover-form select {
+html body.pushsale-app-body .ps-handover-form > label > input,
+html body.pushsale-app-body .ps-handover-form > label > select {
     width: 100% !important;
+    max-width: 100% !important;
+    height: 34px !important;
+    margin: 0 !important;
+    border: 1px solid #c8d0db !important;
+    border-radius: 2px !important;
+    padding: 4px 8px !important;
+    background: #fff !important;
+    box-sizing: border-box !important;
 }
 
-.ps-handover-modal-actions {
-    margin-left: 197px !important;
-    margin-top: 6px !important;
+html body.pushsale-app-body .ps-handover-modal-actions {
+    margin: 8px 0 0 180px !important;
+}
+
+@media (max-width: 640px) {
+    html body.pushsale-app-body .ps-handover-form > label {
+        grid-template-columns: 1fr !important;
+        gap: 6px !important;
+    }
+
+    html body.pushsale-app-body .ps-handover-modal-actions {
+        margin-left: 0 !important;
+    }
 }
 
 @media (max-width: 900px) {

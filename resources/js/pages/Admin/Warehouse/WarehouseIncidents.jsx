@@ -1,5 +1,6 @@
 import { Head, router } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 import { PushsalePageShell } from '@/components/layout/PushsalePageShell';
 import { PushsalePagination } from '@/components/pagination/PushsalePagination';
@@ -76,15 +77,15 @@ function emptyForm(defaultSender = '') {
 }
 
 function HandoverModal({ open, mode, form, providers, onChange, onClose, onSubmit, processing }) {
-    if (!open) return null;
+    if (!open || typeof document === 'undefined') return null;
 
     const title = mode === 'edit' ? 'Cập nhật biên bản' : 'Biên bản bàn giao vận đơn';
 
-    return (
-        <div className="ps-handover-modal-backdrop" role="dialog" aria-modal="true">
+    return createPortal(
+        <div className="ps-handover-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="ps-handover-modal-title">
             <div className="ps-handover-modal">
                 <div className="ps-handover-modal-title">
-                    <strong>{title}</strong>
+                    <strong id="ps-handover-modal-title">{title}</strong>
                     <button type="button" aria-label="Đóng" onClick={onClose}>×</button>
                 </div>
 
@@ -139,7 +140,8 @@ function HandoverModal({ open, mode, form, providers, onChange, onClose, onSubmi
                     </div>
                 </form>
             </div>
-        </div>
+        </div>,
+        document.body,
     );
 }
 

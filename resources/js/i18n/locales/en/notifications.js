@@ -5,7 +5,7 @@ export default {
     reminder: { label: 'Callback reminder', description: 'Scheduled telesales callbacks' },
     delivery_issue: { label: 'Delivery issues', description: 'Returns / delays from carrier' },
     kpi_alert: { label: 'KPI alerts', description: 'Revenue or conversion thresholds' },
-    sound: { label: 'Sound', description: 'Play sound for desktop notifications' },
+    sound: { label: 'Notification sound', description: 'Play sounds (coin for leads/orders, ding for approvals, alert beeps) with realtime toasts' },
     desktop: { label: 'On-screen toast', description: 'Popup when realtime data updates' },
     email_digest: { label: 'Daily email digest', description: 'End-of-day report (coming soon)' },
     title: 'Notifications',

@@ -21,4 +21,8 @@ export default {
     confirm_password: 'Xác nhận mật khẩu',
     password_saved: 'Đã đổi mật khẩu',
     save_password: 'Lưu mật khẩu',
+    notifications_title: 'Thông báo & âm thanh',
+    notifications_desc: 'Bật/tắt toast desktop và âm thanh khi có lead, đơn hoặc duyệt landing',
+    notifications_saved: 'Đã lưu tùy chọn thông báo',
+    save_notifications: 'Lưu thông báo',
 };

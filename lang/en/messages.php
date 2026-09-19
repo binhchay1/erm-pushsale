@@ -38,6 +38,7 @@ return [
     'landing_approved' => 'Landing source approved — new leads will be routed to sales.',
     'landing_rejected' => 'Landing connection rejected.',
     'password_changed' => 'Password changed.',
+    'preferences_saved' => 'Notification preferences saved.',
     'avatar_updated' => 'Avatar updated.',
     'avatar_removed' => 'Avatar removed.',
     'inventory_intake' => 'Stock intake recorded.',

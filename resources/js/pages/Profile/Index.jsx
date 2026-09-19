@@ -1,8 +1,9 @@
-import { Head, router, useForm } from '@inertiajs/react';
-import { useRef, useState } from 'react';
+import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import { PushsalePageShell } from '@/components/layout/PushsalePageShell';
+import { NotificationSettings } from '@/components/settings/NotificationSettings';
 import { useConfirm } from '@/hooks/use-confirm';
 import { useRoleLabel } from '@/hooks/use-labels';
 import AppLayout from '@/layouts/AppLayout';
@@ -17,19 +18,44 @@ function InfoItem({ label, value }) {
     );
 }
 
-export default function ProfileIndex({ profile }) {
+export default function ProfileIndex({ profile, notificationPreferences = {} }) {
     const t = useT();
     const roleLabel = useRoleLabel(profile.role);
     const fileRef = useRef(null);
     const [preview, setPreview] = useState(null);
     const { ask, ConfirmDialogPortal } = useConfirm();
+    const pagePreferences = usePage().props?.preferences?.notifications ?? {};
 
     const { data, setData, put, processing, errors, recentlySuccessful, reset, setError, clearErrors } = useForm({
         password: '',
         password_confirmation: '',
     });
 
+    const [notifications, setNotifications] = useState(() => ({
+        ...pagePreferences,
+        ...notificationPreferences,
+    }));
+    const [savingNotifications, setSavingNotifications] = useState(false);
+
+    useEffect(() => {
+        setNotifications((current) => ({
+            ...current,
+            ...pagePreferences,
+            ...notificationPreferences,
+        }));
+    }, [notificationPreferences, pagePreferences]);
+
     const avatarSrc = preview ?? profile.avatar_url;
+
+    const saveNotifications = () => {
+        setSavingNotifications(true);
+        router.put('/profile/notifications', { notifications }, {
+            preserveScroll: true,
+            onSuccess: () => toast.success(t('profile.notifications_saved')),
+            onError: () => toast.error(t('common.request_failed')),
+            onFinish: () => setSavingNotifications(false),
+        });
+    };
 
     const onPickAvatar = (event) => {
         const file = event.target.files?.[0];
@@ -146,6 +172,24 @@ export default function ProfileIndex({ profile }) {
                             ) : null}
                         </dl>
                         <p className="ps-profile-hint">{t('profile.admin_contact')}</p>
+                    </section>
+
+                    <section className="ps-profile-card">
+                        <h3 className="ps-profile-card__title">{t('profile.notifications_title')}</h3>
+                        <p className="ps-profile-hint" style={{ marginTop: 0 }}>{t('profile.notifications_desc')}</p>
+                        <NotificationSettings value={notifications} onChange={setNotifications} />
+                        <div className="ps-profile-actions" style={{ marginTop: 14 }}>
+                            <button
+                                type="button"
+                                className="btn btn-sm btn-primary"
+                                disabled={savingNotifications}
+                                onClick={saveNotifications}
+                            >
+                                <i className={`fa ${savingNotifications ? 'fa-spinner fa-spin' : 'fa-bell'}`} />
+                                {' '}
+                                {savingNotifications ? t('common.saving') : t('profile.save_notifications')}
+                            </button>
+                        </div>
                     </section>
 
                     <section className="ps-profile-card">

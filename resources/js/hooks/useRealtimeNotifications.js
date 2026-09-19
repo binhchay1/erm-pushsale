@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 
 import { getEcho } from '@/lib/echo';
 import { getNotificationText } from '@/lib/notification-text';
+import { playNotificationSound } from '@/lib/notification-sound';
 import { useI18n } from '@/providers/I18nProvider';
 
 function shouldShowToast(type, prefs) {
@@ -67,13 +68,19 @@ export function useRealtimeNotifications() {
                 if (shouldShowToast(payload.type, prefs)) {
                     const { title, message } = getNotificationText(payload, t, locale);
 
-                    pendingRealtimeToast.current = { title, message, url: payload.url };
+                    pendingRealtimeToast.current = {
+                        title,
+                        message,
+                        url: payload.url,
+                        type: payload.type,
+                    };
                     if (!realtimeToastTimer.current) {
                         realtimeToastTimer.current = setTimeout(() => {
                             const latest = pendingRealtimeToast.current;
                             pendingRealtimeToast.current = null;
                             realtimeToastTimer.current = null;
                             if (!latest) return;
+                            playNotificationSound(latest.type, prefs);
                             toast.info(latest.title, {
                                 id: 'pushsale-realtime-notification',
                                 description: latest.message || undefined,
@@ -105,5 +112,5 @@ export function useRealtimeNotifications() {
             channel.stopListening('.notification.created');
             echo.leave(channelName);
         };
-    }, [auth?.user?.id, reverb?.key, prefs.desktop, prefs.new_lead, prefs.landing_approval, t, locale]);
+    }, [auth?.user?.id, reverb?.key, prefs.desktop, prefs.new_lead, prefs.landing_approval, prefs.sound, t, locale]);
 }

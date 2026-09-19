@@ -12,6 +12,7 @@ import { UpdateDeliveryStatusExcelDialog } from '@/components/operations/UpdateD
 import { UpdateReconByCodeDialog } from '@/components/operations/UpdateReconByCodeDialog';
 import { UpdateReconExcelDialog } from '@/components/operations/UpdateReconExcelDialog';
 import { OrderMoneyCell, OrderProductsBreakdown, OrderStatusFlags } from '@/components/operations/OrderLineBreakdown';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { apiPost, apiRequest, getCsrfToken, toastApiError } from '@/lib/api';
 import { formatCurrency, formatDateTime, formatNumber } from '@/lib/format';
 import { openShippingLabel } from '@/lib/shipping';
@@ -122,6 +123,14 @@ function productLineQty(item = {}) {
     return Number.isFinite(raw) && raw >= 0 ? raw : 1;
 }
 
+function productLineSku(item = {}) {
+    return String(item.sku ?? item.productSku ?? item.product_sku ?? '').trim();
+}
+
+function productLineUnitPrice(item = {}) {
+    return Math.max(0, Number(item.unitPrice ?? item.unit_price ?? item.price ?? 0));
+}
+
 /** Aggregate products + money for sticky table footer (Pushsale 5.1 parity). */
 function buildWarehouseTableFooter(sourceRows = []) {
     const productMap = new Map();
@@ -136,12 +145,23 @@ function buildWarehouseTableFooter(sourceRows = []) {
         for (const item of rowProductItems(row)) {
             const name = productLineName(item);
             const qty = productLineQty(item);
-            const key = String(item.productId ?? item.product_id ?? name);
+            const sku = productLineSku(item);
+            const unitPrice = productLineUnitPrice(item);
+            const key = String(item.productId ?? item.product_id ?? `${sku}|${name}`);
             const prev = productMap.get(key);
             if (prev) {
                 prev.qty += qty;
+                if (!prev.sku && sku) prev.sku = sku;
+                if (prev.unitPrice <= 0 && unitPrice > 0) prev.unitPrice = unitPrice;
+                prev.amount += qty * unitPrice;
             } else {
-                productMap.set(key, { name, qty });
+                productMap.set(key, {
+                    name,
+                    sku,
+                    qty,
+                    unitPrice,
+                    amount: qty * unitPrice,
+                });
             }
             qtyTotal += qty;
         }
@@ -150,7 +170,7 @@ function buildWarehouseTableFooter(sourceRows = []) {
         const lineSubtotal = storedSubtotal > 0
             ? storedSubtotal
             : rowProductItems(row).reduce((sum, item) => {
-                const unit = Math.max(0, Number(item.unitPrice ?? item.unit_price ?? item.price ?? 0));
+                const unit = productLineUnitPrice(item);
                 return sum + (productLineQty(item) * unit);
             }, 0);
         const lineDiscount = Math.max(0, Number(row.discount ?? row.discountAmount ?? 0));
@@ -169,7 +189,9 @@ function buildWarehouseTableFooter(sourceRows = []) {
     }
 
     return {
-        products: Array.from(productMap.values()).filter((p) => p.qty > 0),
+        products: Array.from(productMap.values())
+            .filter((p) => p.qty > 0)
+            .sort((a, b) => a.name.localeCompare(b.name, 'vi')),
         qtyTotal,
         subtotal,
         discount,
@@ -177,6 +199,7 @@ function buildWarehouseTableFooter(sourceRows = []) {
         shipping,
         total,
         orderCount: sourceRows.length,
+        scopedToSelection: false,
     };
 }
 
@@ -187,13 +210,68 @@ function formatFooterMoney(value, { signed = false } = {}) {
     return text;
 }
 
+function WarehouseFooterDetailDialog({ open, onOpenChange, summary, labels }) {
+    return (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogContent className="ps-wh-tfoot-detail-dialog max-w-2xl gap-3 p-4 sm:p-5" showClose>
+                <DialogHeader className="gap-1 pr-8">
+                    <DialogTitle className="text-base">
+                        {labels.title}
+                    </DialogTitle>
+                    <DialogDescription className="text-sm text-muted-foreground">
+                        {labels.scope}
+                    </DialogDescription>
+                </DialogHeader>
+
+                <div className="ps-wh-tfoot-detail-summary">
+                    <div><span>{labels.orders}</span><b>{formatNumber(summary.orderCount)}</b></div>
+                    <div><span>{labels.qty}</span><b>{formatNumber(summary.qtyTotal)}</b></div>
+                    <div><span>{labels.subtotal}</span><b>{formatFooterMoney(summary.subtotal)}</b></div>
+                    <div><span>{labels.discount}</span><b>{summary.discount ? formatFooterMoney(summary.discount, { signed: true }) : '0'}</b></div>
+                    <div><span>{labels.shipping}</span><b>{formatFooterMoney(summary.shipping)}</b></div>
+                    <div className="is-total"><span>{labels.total}</span><b>{formatFooterMoney(summary.total)}</b></div>
+                </div>
+
+                <div className="ps-wh-tfoot-detail-table-wrap">
+                    <table className="ps-wh-tfoot-detail-table">
+                        <thead>
+                            <tr>
+                                <th className="is-idx">#</th>
+                                <th>{labels.product}</th>
+                                <th>{labels.sku}</th>
+                                <th className="is-num">{labels.qtyCol}</th>
+                                <th className="is-num">{labels.unitPrice}</th>
+                                <th className="is-num">{labels.amount}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {summary.products.length ? summary.products.map((line, index) => (
+                                <tr key={`${line.sku || line.name}-${line.qty}-${index}`}>
+                                    <td className="is-idx">{index + 1}</td>
+                                    <td>{line.name}</td>
+                                    <td className="is-muted">{line.sku || '—'}</td>
+                                    <td className="is-num">x{formatNumber(line.qty)}</td>
+                                    <td className="is-num">{line.unitPrice > 0 ? formatFooterMoney(line.unitPrice) : '—'}</td>
+                                    <td className="is-num">{line.amount > 0 ? formatFooterMoney(line.amount) : '—'}</td>
+                                </tr>
+                            )) : (
+                                <tr>
+                                    <td colSpan={6} className="is-empty">—</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
 function WarehouseTableFooter({
     isAccounting,
     summary,
-    detailOpen,
-    onToggleDetail,
+    onOpenDetail,
     viewDetailLabel,
-    totalLabel,
 }) {
     if (!summary.orderCount) return null;
 
@@ -202,23 +280,10 @@ function WarehouseTableFooter({
             <button
                 type="button"
                 className="ps-wh-tfoot-detail-link"
-                onClick={onToggleDetail}
-                aria-expanded={detailOpen}
+                onClick={onOpenDetail}
             >
                 {summary.qtyTotal} ({viewDetailLabel})
             </button>
-            {detailOpen ? (
-                <div className="ps-wh-tfoot-product-box">
-                    <div className="ps-wh-tfoot-product-title"><b>{totalLabel}</b></div>
-                    {summary.products.length ? summary.products.map((line) => (
-                        <div key={`${line.name}-${line.qty}`} className="ps-wh-tfoot-product-line">
-                            {line.name} x{line.qty}
-                        </div>
-                    )) : (
-                        <div className="ps-wh-tfoot-product-line">—</div>
-                    )}
-                </div>
-            ) : null}
         </td>
     );
 
@@ -704,7 +769,7 @@ export function WarehouseOrderTable({
     const [action, setAction] = useState(null);
     const [detailOrderId, setDetailOrderId] = useState(null);
     const [selected, setSelected] = useState([]);
-    const [footerDetailOpen, setFooterDetailOpen] = useState(true);
+    const [footerDetailOpen, setFooterDetailOpen] = useState(false);
     const checkAllRef = useRef(null);
     const { ask } = useConfirm();
     const authUserId = usePage().props?.auth?.user?.id;
@@ -717,9 +782,29 @@ export function WarehouseOrderTable({
     );
     const footerSourceRows = selectedRows.length ? selectedRows : rows;
     const footerSummary = useMemo(
-        () => buildWarehouseTableFooter(footerSourceRows),
-        [footerSourceRows],
+        () => ({
+            ...buildWarehouseTableFooter(footerSourceRows),
+            scopedToSelection: selectedRows.length > 0,
+        }),
+        [footerSourceRows, selectedRows.length],
     );
+    const footerDetailLabels = useMemo(() => ({
+        title: t('operations.warehouse_ops.footer_detail_title'),
+        scope: footerSummary.scopedToSelection
+            ? t('operations.warehouse_ops.footer_detail_scope_selected', { count: footerSummary.orderCount })
+            : t('operations.warehouse_ops.footer_detail_scope_page', { count: footerSummary.orderCount }),
+        orders: t('operations.warehouse_ops.footer_detail_orders'),
+        qty: t('operations.warehouse_ops.footer_detail_qty'),
+        subtotal: t('operations.warehouse_ops.footer_detail_subtotal'),
+        discount: t('operations.warehouse_ops.footer_detail_discount'),
+        shipping: t('operations.warehouse_ops.footer_detail_shipping'),
+        total: t('operations.warehouse_ops.footer_detail_total'),
+        product: t('operations.warehouse_ops.footer_detail_product'),
+        sku: t('operations.warehouse_ops.footer_detail_sku'),
+        qtyCol: t('operations.warehouse_ops.footer_detail_qty_col'),
+        unitPrice: t('operations.warehouse_ops.footer_detail_unit_price'),
+        amount: t('operations.warehouse_ops.footer_detail_amount'),
+    }), [t, footerSummary.scopedToSelection, footerSummary.orderCount]);
     const allSelected = rowIds.length > 0 && rowIds.every((id) => selected.includes(id));
 
     const openAction = (next) => {
@@ -1016,13 +1101,18 @@ export function WarehouseOrderTable({
                     <WarehouseTableFooter
                         isAccounting={isAccounting}
                         summary={footerSummary}
-                        detailOpen={footerDetailOpen}
-                        onToggleDetail={() => setFooterDetailOpen((open) => !open)}
+                        onOpenDetail={() => setFooterDetailOpen(true)}
                         viewDetailLabel={t('operations.view_detail')}
-                        totalLabel={t('operations.warehouse_ops.footer_total')}
                     />
                 </table>
             </div>
+
+            <WarehouseFooterDetailDialog
+                open={footerDetailOpen}
+                onOpenChange={setFooterDetailOpen}
+                summary={footerSummary}
+                labels={footerDetailLabels}
+            />
 
             <FloatingWarehouseActions
                 selectedRows={selectedRows}

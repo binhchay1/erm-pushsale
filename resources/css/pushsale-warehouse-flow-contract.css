@@ -858,6 +858,42 @@ html body.pushsale-app-body .pushsale-page[data-page-code="5.3.1"] .box-body {
     font-weight: 700;
 }
 
+.pushsale-page.ps-voucher-entry-page .ps-voucher-temp-check {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 6px;
+    min-height: 30px;
+    margin: 0 !important;
+    font-size: 12px;
+    font-weight: 700;
+    color: #111;
+    line-height: 30px;
+    white-space: nowrap;
+    cursor: default;
+}
+
+.pushsale-page.ps-voucher-entry-page .ps-voucher-temp-check input {
+    margin: 0;
+    vertical-align: middle;
+}
+
+.pushsale-page.ps-voucher-entry-page .ps-voucher-excel-cell {
+    display: flex !important;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 18px;
+    min-height: 30px;
+}
+
+.pushsale-page.ps-voucher-entry-page .ps-voucher-th-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    line-height: 1.2;
+}
+
 .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-body .form-control,
 .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-body .ps-product-search-select {
     width: 100% !important;
@@ -909,7 +945,7 @@ html body.pushsale-app-body .pushsale-page[data-page-code="5.3.1"] .box-body {
 
 .pushsale-page.ps-voucher-entry-page .ps-voucher-entry-table {
     width: 100%;
-    min-width: 980px;
+    min-width: 920px;
     background: #fff;
     margin-bottom: 0;
 }
@@ -926,8 +962,10 @@ html body.pushsale-app-body .pushsale-page[data-page-code="5.3.1"] .box-body {
     padding: 6px 7px !important;
 }
 
+/* Apply ticks sit under column titles inside the same header cell (Pushsale parity) */
 .pushsale-page.ps-voucher-entry-page .ps-voucher-head-labels th {
-    padding-bottom: 2px !important;
+    padding: 6px 7px 8px !important;
+    vertical-align: bottom;
 }
 
 .pushsale-page.ps-voucher-entry-page .ps-voucher-col-apply {
@@ -939,17 +977,6 @@ html body.pushsale-app-body .pushsale-page[data-page-code="5.3.1"] .box-body {
     user-select: none;
     color: inherit;
     line-height: 1;
-}
-
-/* Apply ticks: second thead row under labels */
-.pushsale-page.ps-voucher-entry-page .ps-voucher-apply-row th {
-    background: #2675bf !important;
-    border-color: #1f63a3 !important;
-    color: #fff !important;
-    padding: 0 6px 6px !important;
-    height: 22px;
-    vertical-align: middle;
-    font-weight: 400;
 }
 
 .pushsale-page.ps-voucher-entry-page .ps-voucher-col-apply__tick {

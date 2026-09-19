@@ -93,6 +93,7 @@ Route::middleware(['auth', 'tenant', 'shop', 'permissions'])->group(function ():
 
     Route::get('profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::put('profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('profile/notifications', [ProfileController::class, 'updateNotifications'])->name('profile.notifications');
     Route::post('profile/avatar', [ProfileController::class, 'updateAvatar'])->name('profile.avatar');
     Route::delete('profile/avatar', [ProfileController::class, 'destroyAvatar'])->name('profile.avatar.destroy');
 

@@ -9,6 +9,7 @@ import { PageHeaderOutlet, PageHeaderProvider } from '@/components/layout/PageHe
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { useFlashToast } from '@/hooks/useFlashToast';
 import { useRealtimeNotifications } from '@/hooks/useRealtimeNotifications';
+import { unlockNotificationAudio } from '@/lib/notification-sound';
 import { ensurePushsaleStyles } from '@/lib/uiShellStyles';
 import { cn } from '@/lib/utils';
 
@@ -30,6 +31,10 @@ function dashboardRoleFromUrl(url) {
 export default function AppLayout({ children }) {
     useFlashToast();
     useRealtimeNotifications();
+
+    useEffect(() => {
+        unlockNotificationAudio();
+    }, []);
 
     const [pendingDashboardRole, setPendingDashboardRole] = useState(null);
     const [pageTransitioning, setPageTransitioning] = useState(false);

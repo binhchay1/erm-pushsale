@@ -17,10 +17,39 @@ class ProfileController extends Controller
     {
         $user = $request->user();
         $user->loadMissing(['team:id,name,type', 'manager:id,name']);
+        $preferences = $user->ensurePreferences();
 
         return Inertia::render('Profile/Index', [
             'profile' => $this->profilePayload($user),
+            'notificationPreferences' => $preferences->mergedNotifications(),
         ]);
+    }
+
+    public function updateNotifications(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'notifications' => ['required', 'array'],
+            'notifications.new_lead' => ['sometimes', 'boolean'],
+            'notifications.landing_approval' => ['sometimes', 'boolean'],
+            'notifications.order_update' => ['sometimes', 'boolean'],
+            'notifications.reminder' => ['sometimes', 'boolean'],
+            'notifications.delivery_issue' => ['sometimes', 'boolean'],
+            'notifications.kpi_alert' => ['sometimes', 'boolean'],
+            'notifications.sound' => ['sometimes', 'boolean'],
+            'notifications.desktop' => ['sometimes', 'boolean'],
+            'notifications.email_digest' => ['sometimes', 'boolean'],
+        ]);
+
+        $user = $request->user();
+        $preferences = $user->ensurePreferences();
+        $preferences->update([
+            'notifications' => array_merge(
+                $preferences->mergedNotifications(),
+                $validated['notifications'],
+            ),
+        ]);
+
+        return back()->with('success', __('messages.preferences_saved'));
     }
 
     public function update(ProfileUpdateRequest $request): RedirectResponse

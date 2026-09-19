@@ -38,6 +38,7 @@ return [
     'landing_approved' => 'Đã duyệt kết nối Landing — dữ liệu mới sẽ tự động tạo đơn chờ và chia cho Sale.',
     'landing_rejected' => 'Đã từ chối kết nối Landing.',
     'password_changed' => 'Đã đổi mật khẩu.',
+    'preferences_saved' => 'Đã lưu tùy chọn thông báo.',
     'avatar_updated' => 'Đã cập nhật ảnh đại diện.',
     'avatar_removed' => 'Đã xóa ảnh đại diện.',
     'inventory_intake' => 'Đã nhập kho thành công.',

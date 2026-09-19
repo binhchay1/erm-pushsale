@@ -21,4 +21,8 @@ export default {
     confirm_password: 'Confirm password',
     password_saved: 'Password changed',
     save_password: 'Save password',
+    notifications_title: 'Notifications & sound',
+    notifications_desc: 'Toggle desktop toasts and sounds for leads, orders, and landing approvals',
+    notifications_saved: 'Notification preferences saved',
+    save_notifications: 'Save notifications',
 };
