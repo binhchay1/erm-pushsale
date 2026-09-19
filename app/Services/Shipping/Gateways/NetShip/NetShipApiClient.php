@@ -68,11 +68,11 @@ class NetShipApiClient extends AbstractCarrierHttpClient
     }
 
     /**
-     * NetShip bind body vào struct `myRequest` và bắt buộc ShopID (ID shop trên trang cá nhân NetShip).
-     * Caller (NetShipProxyCarrier) đã resolve: warehouse.settings.netship.shop_id → credentials.shop_id.
+     * Live NetShip binds a flat JSON body (not `{ myRequest: ... }`).
+     * ShopID = NetShip personal shop id (warehouse settings → credentials fallback).
      *
      * @param  array<string, mixed>  $payload
-     * @return array{myRequest: array<string, mixed>}
+     * @return array<string, mixed>
      */
     private function wrapOrderPayload(array $payload): array
     {
@@ -91,7 +91,7 @@ class NetShipApiClient extends AbstractCarrierHttpClient
         $payload['ShopID'] = is_numeric($shopId) ? (int) $shopId : $shopId;
         unset($payload['shopId'], $payload['shop_id']);
 
-        return ['myRequest' => $payload];
+        return $payload;
     }
 
     /** @return array<string, mixed> */
@@ -170,7 +170,8 @@ class NetShipApiClient extends AbstractCarrierHttpClient
             ?? $merged['orderId']
             ?? $merged['order_id']
             ?? data_get($merged, 'data.id')
-            ?? data_get($merged, 'order.id');
+            ?? data_get($merged, 'order.id')
+            ?? data_get($merged, 'data.order.id');
 
         if ($id !== null && $id !== '') {
             $response['success'] = $response['success'] && true;
@@ -180,6 +181,9 @@ class NetShipApiClient extends AbstractCarrierHttpClient
                     ?? $merged['tracking_number']
                     ?? $merged['billCode']
                     ?? $merged['code']
+                    ?? $merged['linkId']
+                    ?? data_get($merged, 'order.linkId')
+                    ?? data_get($merged, 'data.order.linkId')
                     ?? (string) $id,
             ]);
         } elseif (($response['http_status'] ?? 0) >= 200 && ($response['http_status'] ?? 0) < 300 && $id === null) {

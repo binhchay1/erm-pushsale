@@ -140,9 +140,9 @@ class NetShipGatewayTest extends TestCase
 
         Http::assertSent(fn (Request $request) => str_contains($request->url(), '/api/third-party/order')
             && $request->method() === 'POST'
-            && data_get($request->data(), 'myRequest.carrierCode') === 'VTP'
-            && data_get($request->data(), 'myRequest.customerCode') === 'NS-ORDER-001'
-            && (int) data_get($request->data(), 'myRequest.ShopID') === 530);
+            && data_get($request->data(), 'carrierCode') === 'VTP'
+            && data_get($request->data(), 'customerCode') === 'NS-ORDER-001'
+            && (int) data_get($request->data(), 'ShopID') === 530);
     }
 
     public function test_netship_error_body_surfaces_as_create_failure_message(): void
@@ -260,7 +260,7 @@ class NetShipGatewayTest extends TestCase
 
         Http::assertSent(fn (Request $request) => str_contains($request->url(), '/api/third-party/order')
             && $request->method() === 'POST'
-            && (int) data_get($request->data(), 'myRequest.ShopID') === 9991);
+            && (int) data_get($request->data(), 'ShopID') === 9991);
     }
 
     public function test_create_shipment_requires_netship_shop_id_when_missing(): void
@@ -316,6 +316,56 @@ class NetShipGatewayTest extends TestCase
                 collect($e->errors())->flatten()->implode(' ')
             );
         }
+    }
+
+    public function test_api_client_rejects_missing_shop_id_before_http(): void
+    {
+        ShippingPartnerConnection::forProvider('netship')->update([
+            'credentials' => [
+                'token' => 'test-netship-token',
+                'base_url' => 'https://test.netship.vn',
+            ],
+        ]);
+
+        Http::fake();
+
+        try {
+            app(\App\Services\Shipping\Gateways\NetShip\NetShipApiClient::class)
+                ->createOrder(['carrierCode' => 'VTP', 'customerCode' => 'NS-NO-SHOP-API']);
+            $this->fail('Expected RuntimeException for missing ShopID');
+        } catch (\RuntimeException $e) {
+            $this->assertSame(__('messages.shipping_actions.netship_shop_id_required'), $e->getMessage());
+        }
+
+        Http::assertNothingSent();
+    }
+
+    public function test_api_client_forwards_missing_carrier_code_to_netship_error_body(): void
+    {
+        Http::fake([
+            '*/api/third-party/order' => Http::response([
+                'success' => false,
+                'error' => 'carrierCode is required',
+                'message' => 'carrierCode is required',
+            ], 200),
+        ]);
+
+        $result = app(\App\Services\Shipping\Gateways\NetShip\NetShipApiClient::class)
+            ->createOrder(['ShopID' => 530, 'customerCode' => 'NS-NO-CARRIER']);
+
+        $this->assertFalse($result['success']);
+        $this->assertSame('carrierCode is required', $result['message']);
+        Http::assertSent(fn (Request $request) => data_get($request->data(), 'ShopID') === 530
+            && data_get($request->data(), 'carrierCode') === null);
+    }
+
+    public function test_proxy_for_unmapped_provider_throws_without_carrier_code(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('NetShip không map được provider [unknown_carrier_xyz].');
+
+        app(\App\Services\Shipping\Gateways\NetShip\NetShipGateway::class)
+            ->proxyFor('unknown_carrier_xyz');
     }
 
     public function test_webhook_matches_by_customer_code_without_overwriting_business_provider(): void
