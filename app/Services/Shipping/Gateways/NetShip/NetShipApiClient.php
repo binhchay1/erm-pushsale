@@ -68,11 +68,12 @@ class NetShipApiClient extends AbstractCarrierHttpClient
     }
 
     /**
-     * Live NetShip binds a flat JSON body (not `{ myRequest: ... }`).
+     * Live create binds `{ myRequest: ... }` (Go validator key `myRequest.ShopID`).
+     * estimate-fee accepts flat OR myRequest; we keep the same wrap for both.
      * ShopID = NetShip personal shop id (warehouse settings → credentials fallback).
      *
      * @param  array<string, mixed>  $payload
-     * @return array<string, mixed>
+     * @return array{myRequest: array<string, mixed>}
      */
     private function wrapOrderPayload(array $payload): array
     {
@@ -91,7 +92,7 @@ class NetShipApiClient extends AbstractCarrierHttpClient
         $payload['ShopID'] = is_numeric($shopId) ? (int) $shopId : $shopId;
         unset($payload['shopId'], $payload['shop_id']);
 
-        return $payload;
+        return ['myRequest' => $payload];
     }
 
     /** @return array<string, mixed> */

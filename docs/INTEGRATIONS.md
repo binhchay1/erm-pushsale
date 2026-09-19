@@ -33,7 +33,7 @@ Config hold: `config/saleops.php` (`hold_seconds` / `max_hold_seconds`).
   - Staff still choose Viettel Post / GHTK / … on the order.
   - If that carrier’s UI/env credentials are ready → call the **direct** driver.
   - Else, if NetShip is enabled + token set and the provider is in `routed_providers` → create/sync/cancel via **NetShip proxy** (`carrierCode` mapped e.g. `viettel_post` → `VTP`).
-  - Create/estimate payloads are **flat JSON** (no `myRequest` wrapper). Live base: `https://netship.vn` (`test.netship.vn` only when `NETSHIP_USE_SANDBOX=true`).
+  - Live create binds `{ myRequest: {...} }` (validator key `myRequest.ShopID`). estimate-fee accepts flat or wrapped. Live base: `https://netship.vn` (`test.netship.vn` only when `NETSHIP_USE_SANDBOX=true`).
   - Shipment keeps business `provider`; `response_payload.gateway = netship` + `netship_order_id`.
   - Admin menu **1.4** configures NetShip token; NetShip does **not** appear in sale/warehouse carrier dropdowns.
   - Webhook provider key: `netship` — match by `customerCode` / NetShip `id`, do not overwrite business carrier.

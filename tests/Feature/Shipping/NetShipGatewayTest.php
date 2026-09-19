@@ -140,9 +140,9 @@ class NetShipGatewayTest extends TestCase
 
         Http::assertSent(fn (Request $request) => str_contains($request->url(), '/api/third-party/order')
             && $request->method() === 'POST'
-            && data_get($request->data(), 'carrierCode') === 'VTP'
-            && data_get($request->data(), 'customerCode') === 'NS-ORDER-001'
-            && (int) data_get($request->data(), 'ShopID') === 530);
+            && data_get($request->data(), 'myRequest.carrierCode') === 'VTP'
+            && data_get($request->data(), 'myRequest.customerCode') === 'NS-ORDER-001'
+            && (int) data_get($request->data(), 'myRequest.ShopID') === 530);
     }
 
     public function test_netship_error_body_surfaces_as_create_failure_message(): void
@@ -260,7 +260,7 @@ class NetShipGatewayTest extends TestCase
 
         Http::assertSent(fn (Request $request) => str_contains($request->url(), '/api/third-party/order')
             && $request->method() === 'POST'
-            && (int) data_get($request->data(), 'ShopID') === 9991);
+            && (int) data_get($request->data(), 'myRequest.ShopID') === 9991);
     }
 
     public function test_create_shipment_requires_netship_shop_id_when_missing(): void
@@ -355,8 +355,8 @@ class NetShipGatewayTest extends TestCase
 
         $this->assertFalse($result['success']);
         $this->assertSame('carrierCode is required', $result['message']);
-        Http::assertSent(fn (Request $request) => data_get($request->data(), 'ShopID') === 530
-            && data_get($request->data(), 'carrierCode') === null);
+        Http::assertSent(fn (Request $request) => data_get($request->data(), 'myRequest.ShopID') === 530
+            && data_get($request->data(), 'myRequest.carrierCode') === null);
     }
 
     public function test_proxy_for_unmapped_provider_throws_without_carrier_code(): void
