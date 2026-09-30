@@ -9,6 +9,17 @@ return [
 
     'webhook' => [
         'max_payload_kb' => (int) env('WEBHOOK_MAX_PAYLOAD_KB', 512),
+
+        /**
+         * Hãng vận chuyển không cho cấu hình secret/header trên URL callback thì xác thực
+         * bằng IP nguồn. Giá trị: IP đơn hoặc CIDR, phân tách bằng dấu phẩy.
+         */
+        'provider_ip_allowlist' => [
+            'netship' => array_values(array_filter(array_map(
+                'trim',
+                explode(',', (string) env('NETSHIP_WEBHOOK_IPS', '45.32.108.164'))
+            ))),
+        ],
     ],
 
     'auto_admin_login' => [

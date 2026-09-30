@@ -507,4 +507,62 @@ class NetShipGatewayTest extends TestCase
 
         app(CreateShipmentService::class)->createForOrder($order, 'viettel_post');
     }
+
+    public function test_address_resolver_maps_2025_two_level_address_to_old_structure(): void
+    {
+        // NetShip vẫn trả danh mục 3 cấp cũ: "Hòa Bình" là tỉnh riêng, chưa gộp vào Phú Thọ.
+        Http::fake(function (Request $request) {
+            $url = $request->url();
+            if (str_contains($url, '/api/address/provinces')) {
+                return Http::response([
+                    ['id' => 17, 'name' => 'Tỉnh Hoà Bình'],
+                    ['id' => 25, 'name' => 'Tỉnh Phú Thọ'],
+                ], 200);
+            }
+            if (str_contains($url, '/api/address/districts')) {
+                return Http::response(str_contains($url, 'provinceId=17')
+                    ? [['id' => 148, 'name' => 'Thành phố Hòa Bình']]
+                    : [['id' => 227, 'name' => 'Thành phố Việt Trì']], 200);
+            }
+            if (str_contains($url, '/api/address/ward')) {
+                return Http::response(str_contains($url, 'districtId=148')
+                    ? [['id' => 4825, 'name' => 'Xã Hòa Bình'], ['id' => 4807, 'name' => 'Phường Phương Lâm']]
+                    : [['id' => 9001, 'name' => 'Phường Gia Cẩm']], 200);
+            }
+
+            return Http::response([], 200);
+        });
+
+        $resolver = app(\App\Services\Shipping\Gateways\NetShip\NetShipAddressResolver::class);
+
+        // Kho 2 cấp: tỉnh mới "Phú Thọ", phường "Hòa Bình", district suy ra từ ward.
+        $this->assertSame(
+            ['provinceId' => 17, 'districtId' => 148, 'wardId' => 4825],
+            $resolver->resolve('Phú Thọ', 'Hòa Bình', 'Hòa Bình'),
+        );
+
+        // Địa chỉ 3 cấp hợp lệ trong chính tỉnh đó vẫn giữ nguyên kết quả.
+        $this->assertSame(
+            ['provinceId' => 25, 'districtId' => 227, 'wardId' => 9001],
+            $resolver->resolve('Phú Thọ', 'Thành phố Việt Trì', 'Phường Gia Cẩm'),
+        );
+    }
+
+    public function test_webhook_without_secret_is_accepted_only_from_netship_ip(): void
+    {
+        ShippingPartnerConnection::forProvider('netship')->update(['webhook_secret' => null]);
+        config(['security.webhook.provider_ip_allowlist.netship' => ['45.32.108.164']]);
+        // Local/testing có nhánh bỏ qua secret riêng — khoá lại để kiểm đúng hành vi production.
+        $this->app->detectEnvironment(fn () => 'production');
+
+        $payload = ['id' => 3461315, 'customerCode' => 'NS-IP-001', 'status' => 1, 'cod' => 200000, 'fee' => 20000];
+
+        $this->withServerVariables(['REMOTE_ADDR' => '203.0.113.9'])
+            ->postJson('/api/v1/shipping/webhooks/netship', $payload)
+            ->assertStatus(401);
+
+        $this->withServerVariables(['REMOTE_ADDR' => '45.32.108.164'])
+            ->postJson('/api/v1/shipping/webhooks/netship', $payload)
+            ->assertStatus(202);
+    }
 }

@@ -10,6 +10,8 @@ use App\Models\ShippingPartnerConnection;
 use App\Services\Inbound\InboundEventRecorder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Symfony\Component\HttpFoundation\IpUtils;
 
 class ShippingWebhookController extends Controller
 {
@@ -55,6 +57,12 @@ class ShippingWebhookController extends Controller
             return hash_equals($calculated, preg_replace('/^sha256=/i', '', (string) $signature));
         });
 
+        // NetShip chỉ gửi Content-Type trên callback và URL trong token không sửa được,
+        // nên khi không có secret thì xác thực bằng IP nguồn của hãng.
+        if (! $connection && $connections->count() === 1 && $this->ipAllowed($provider, $request->ip())) {
+            $connection = $connections->first();
+        }
+
         // Chỉ cho phép webhook không secret ở local/testing để hỗ trợ phát triển.
         if (! $connection
             && app()->environment(['local', 'testing'])
@@ -64,6 +72,13 @@ class ShippingWebhookController extends Controller
         }
 
         if (! $connection) {
+            Log::warning('shipping.webhook.rejected', [
+                'provider' => $provider,
+                'ip' => $request->ip(),
+                'has_secret_header' => filled($providedSecret),
+                'connections' => $connections->count(),
+            ]);
+
             return $this->error(__('messages.shipping.unauthorized'), $connections->isEmpty() ? 503 : 401);
         }
 
@@ -84,5 +99,22 @@ class ShippingWebhookController extends Controller
             __('messages.shipping.queued'),
             202,
         );
+    }
+
+    private function ipAllowed(string $provider, ?string $ip): bool
+    {
+        if (! filled($ip)) {
+            return false;
+        }
+
+        $allowed = (array) config("security.webhook.provider_ip_allowlist.{$provider}", []);
+
+        foreach ($allowed as $range) {
+            if (IpUtils::checkIp($ip, (string) $range)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

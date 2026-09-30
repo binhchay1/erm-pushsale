@@ -18,22 +18,113 @@ final class NetShipAddressResolver
     public function resolve(string $provinceName, string $districtName, string $wardName): array
     {
         $province = $this->matchOne($this->provinces(), $provinceName, 'tỉnh/thành');
-        $district = $this->matchOne(
-            $this->districts((int) $province['id']),
-            $districtName,
-            'quận/huyện',
-        );
-        $ward = $this->matchOne(
-            $this->wards((int) $district['id']),
-            $wardName,
-            'phường/xã',
-        );
+
+        try {
+            $district = $this->matchOne(
+                $this->districts((int) $province['id']),
+                $districtName,
+                'quận/huyện',
+            );
+            $ward = $this->matchOne(
+                $this->wards((int) $district['id']),
+                $wardName,
+                'phường/xã',
+            );
+        } catch (ValidationException $e) {
+            $merged = $this->resolveAcrossMergedProvinces($provinceName, $districtName, $wardName);
+            if ($merged === null) {
+                throw $e;
+            }
+
+            return $merged;
+        }
 
         return [
             'provinceId' => (int) $province['id'],
             'districtId' => (int) $district['id'],
             'wardId' => (int) $ward['id'],
         ];
+    }
+
+    /**
+     * Địa chỉ 2 cấp sau sáp nhập 2025 (tỉnh mới → phường/xã) không khớp danh mục 3 cấp cũ
+     * mà NetShip đang trả. Tìm lại trong các tỉnh cũ đã gộp vào tỉnh mới: quận/huyện cũ
+     * thường trùng tên với phường/xã mới (vd. Phú Thọ + "Hòa Bình" → Tỉnh Hoà Bình / TP Hòa Bình).
+     *
+     * @return array{provinceId: int, districtId: int, wardId: int}|null
+     */
+    private function resolveAcrossMergedProvinces(string $provinceName, string $districtName, string $wardName): ?array
+    {
+        $candidates = $this->mergedProvinceNames($provinceName);
+        if ($candidates === []) {
+            return null;
+        }
+
+        foreach ($this->provinces() as $province) {
+            if (! $this->matchesAny((string) ($province['name'] ?? ''), $candidates)) {
+                continue;
+            }
+
+            $districts = $this->districts((int) $province['id']);
+            foreach ([$districtName, $wardName] as $needle) {
+                $district = $this->tryMatch($districts, $needle);
+                if ($district === null) {
+                    continue;
+                }
+
+                $ward = $this->tryMatch($this->wards((int) $district['id']), $wardName);
+                if ($ward === null) {
+                    continue;
+                }
+
+                return [
+                    'provinceId' => (int) $province['id'],
+                    'districtId' => (int) $district['id'],
+                    'wardId' => (int) $ward['id'],
+                ];
+            }
+        }
+
+        return null;
+    }
+
+    /** @return list<string> */
+    private function mergedProvinceNames(string $provinceName): array
+    {
+        $needle = $this->normalize($provinceName);
+        foreach (config('vn_province_merges_2025', []) as $newName => $oldNames) {
+            if ($this->normalize((string) $newName) === $needle) {
+                return array_values(array_map('strval', $oldNames));
+            }
+        }
+
+        return [];
+    }
+
+    /** @param  list<string>  $candidates */
+    private function matchesAny(string $name, array $candidates): bool
+    {
+        $normalized = $this->normalize($name);
+        foreach ($candidates as $candidate) {
+            if ($normalized === $this->normalize($candidate)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param  list<array{id: int|string, name: string}>  $items
+     * @return array{id: int|string, name: string}|null
+     */
+    private function tryMatch(array $items, string $needle): ?array
+    {
+        try {
+            return $this->matchOne($items, $needle, 'x');
+        } catch (ValidationException) {
+            return null;
+        }
     }
 
     /** @return list<array{id: int|string, name: string}> */
