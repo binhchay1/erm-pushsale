@@ -571,7 +571,14 @@ class NetShipGatewayTest extends TestCase
                 ], 200);
             }
             if (str_ends_with($url, '/api/third-party/order') && $request->method() === 'POST') {
-                return Http::response(['data' => ['order' => ['id' => 771, 'linkId' => 'NSN771']]], 201);
+                return Http::response(['data' => ['order' => [
+                    'id' => 771,
+                    'linkId' => 'NSN771',
+                    'externalCode' => 'GYRDTEST',
+                    'billCode' => '151568815318',
+                    'codPrice' => 150000,
+                    'senderProvinceId' => 79,
+                ]]], 201);
             }
 
             return Http::response(['success' => false, 'message' => 'unexpected '.$url], 500);
@@ -612,6 +619,24 @@ class NetShipGatewayTest extends TestCase
             && data_get($request->data(), 'receiverProvinceId') === 79
             && data_get($request->data(), 'receiverDistrictId') === 764
             && data_get($request->data(), 'receiverWardId') === 26872);
+
+        $refs = $order->shipments()->first()?->response_payload['partner_refs'] ?? [];
+        $this->assertContains('NSN771', $refs);
+        $this->assertContains('GYRDTEST', $refs);
+        $this->assertContains('151568815318', $refs);
+        $this->assertContains('NS-GEO-CODE', $refs);
+        $this->assertNotContains('150000', $refs);
+        $this->assertNotContains('79', $refs);
+
+        $shipment = $order->shipments()->first();
+        $this->assertSame('GYRDTEST', $shipment?->tracking_number);
+        $this->assertSame('GYRDTEST', $order->fresh()->tracking_number);
+
+        $trace = \App\Models\ShippingGatewayTrace::query()->where('external_code', 'GYRDTEST')->first();
+        $this->assertNotNull($trace);
+        $this->assertSame('create_order', $trace->action);
+        $this->assertSame('771', $trace->gateway_order_id);
+        $this->assertSame($shipment?->id, $trace->shipment_id);
     }
 
     public function test_webhook_without_secret_is_accepted_only_from_netship_ip(): void

@@ -64,7 +64,10 @@ class NetShipProxyCarrier extends AbstractShippingCarrier
 
         $data = is_array($response['data'] ?? null) ? $response['data'] : [];
         $netshipId = (string) ($data['id'] ?? '');
-        $tracking = (string) ($data['tracking_number'] ?? $netshipId);
+        $external = trim((string) ($data['external_code'] ?? ''));
+        $linkId = trim((string) ($data['link_id'] ?? ''));
+        // Cột "Mã đơn" của file đối soát NetShip là externalCode, không phải id số.
+        $tracking = $external !== '' ? $external : (string) ($data['tracking_number'] ?? $netshipId);
 
         if ($netshipId === '' && $tracking === '') {
             $this->markFailed($shipment, __('messages.shipping_actions.netship_create_failed'), $response['raw'] ?? null);
@@ -80,11 +83,21 @@ class NetShipProxyCarrier extends AbstractShippingCarrier
             'response_payload' => array_merge($data, [
                 'gateway' => 'netship',
                 'netship_order_id' => $netshipId,
-                'netship_external_code' => (string) ($data['external_code'] ?? ''),
+                'netship_link_id' => $linkId,
+                'netship_external_code' => $external,
                 'netship_carrier_code' => $this->netshipCarrierCode,
                 'business_provider' => $this->businessProvider,
+                'partner_refs' => array_values(array_unique(array_filter(array_merge(
+                    NetShipPartnerRefs::collect([
+                        'raw' => $response['raw'] ?? null,
+                        'data' => $data,
+                    ]),
+                    [$this->customerCode($order), $tracking, $netshipId],
+                )))),
             ]),
         ], DeliveryStatus::PickingUp);
+
+        app(ShippingGatewayTraceRecorder::class)->attachShipment($order->id, $result->id, $external);
 
         ShippingPartnerConnection::forProvider('netship')->update(['last_synced_at' => now()]);
 
@@ -115,12 +128,20 @@ class NetShipProxyCarrier extends AbstractShippingCarrier
 
         $statusId = $match['status'] ?? $match['statusId'] ?? null;
         $mapped = NetShipStatusMapper::fromStatusId($statusId);
+        $existingPayload = is_array($shipment->response_payload) ? $shipment->response_payload : [];
         $shipment->update([
             'status_text' => $mapped['label'],
             'status_id' => is_numeric($statusId) ? (int) $statusId : $shipment->status_id,
             'response_payload' => array_merge(
-                is_array($shipment->response_payload) ? $shipment->response_payload : [],
-                ['gateway' => 'netship', 'last_query' => $match],
+                $existingPayload,
+                [
+                    'gateway' => 'netship',
+                    'last_query' => $match,
+                    'partner_refs' => array_values(array_unique(array_merge(
+                        is_array($existingPayload['partner_refs'] ?? null) ? $existingPayload['partner_refs'] : [],
+                        NetShipPartnerRefs::collect($match),
+                    ))),
+                ],
             ),
             'last_synced_at' => now(),
         ]);
@@ -300,6 +321,7 @@ class NetShipProxyCarrier extends AbstractShippingCarrier
 
         return array_values(array_unique(array_filter([
             (string) ($payload['netship_external_code'] ?? ''),
+            (string) ($payload['netship_link_id'] ?? ''),
             (string) $shipment->tracking_number,
         ], fn (string $key): bool => $key !== '')));
     }

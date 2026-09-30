@@ -7,7 +7,10 @@ use App\Services\Shipping\Support\PartnerCredentialResolver;
 
 class NetShipApiClient extends AbstractCarrierHttpClient
 {
-    public function __construct(private readonly PartnerCredentialResolver $credentials) {}
+    public function __construct(
+        private readonly PartnerCredentialResolver $credentials,
+        private readonly ShippingGatewayTraceRecorder $traces,
+    ) {}
 
     protected function provider(): string
     {
@@ -44,7 +47,7 @@ class NetShipApiClient extends AbstractCarrierHttpClient
      */
     public function createOrder(array $payload, ?int $orderId = null): array
     {
-        return $this->normalizeCreateResponse(
+        $response = $this->normalizeCreateResponse(
             $this->requestJson(
                 'POST',
                 '/api/third-party/order',
@@ -53,6 +56,9 @@ class NetShipApiClient extends AbstractCarrierHttpClient
                 orderId: $orderId,
             )
         );
+        $this->traces->record('create_order', $response, $orderId, (string) ($payload['customerCode'] ?? ''));
+
+        return $response;
     }
 
     /**
@@ -61,24 +67,30 @@ class NetShipApiClient extends AbstractCarrierHttpClient
      */
     public function estimateFee(array $payload, ?int $orderId = null): array
     {
-        return $this->requestJson(
+        $response = $this->requestJson(
             'POST',
             '/api/third-party/order/estimate-fee',
             json: $payload,
             action: 'estimate_fee',
             orderId: $orderId,
         );
+        $this->traces->record('estimate_fee', $response, $orderId);
+
+        return $response;
     }
 
     /** @return array<string, mixed> */
     public function cancelOrder(int|string $netshipOrderId, ?int $orderId = null): array
     {
-        return $this->requestJson(
+        $response = $this->requestJson(
             'POST',
             '/api/third-party/order/cancel/'.rawurlencode((string) $netshipOrderId),
             action: 'cancel_order',
             orderId: $orderId,
         );
+        $this->traces->record('cancel_order', $response, $orderId, (string) $netshipOrderId);
+
+        return $response;
     }
 
     /**
@@ -87,7 +99,11 @@ class NetShipApiClient extends AbstractCarrierHttpClient
      */
     public function queryOrders(array $query = [], ?int $orderId = null): array
     {
-        return $this->requestJson('GET', '/api/third-party/order', query: $query, action: 'query_orders', orderId: $orderId);
+        $response = $this->requestJson('GET', '/api/third-party/order', query: $query, action: 'query_orders', orderId: $orderId);
+        $search = trim((string) ($query['search'] ?? ''));
+        $this->traces->record('query_orders', $response, $orderId, $search !== '' ? $search : null);
+
+        return $response;
     }
 
     /** @return list<array<string, mixed>> */
@@ -153,6 +169,9 @@ class NetShipApiClient extends AbstractCarrierHttpClient
             $response['success'] = $response['success'] && true;
             $response['data'] = array_merge(is_array($response['data'] ?? null) ? $response['data'] : [], [
                 'id' => $id,
+                'link_id' => $merged['linkId']
+                    ?? data_get($merged, 'order.linkId')
+                    ?? data_get($merged, 'data.order.linkId'),
                 'tracking_number' => $merged['trackingNumber']
                     ?? $merged['tracking_number']
                     ?? $merged['billCode']
@@ -162,6 +181,7 @@ class NetShipApiClient extends AbstractCarrierHttpClient
                     ?? data_get($merged, 'data.order.linkId')
                     ?? (string) $id,
                 // `search` on query_orders only matches externalCode / linkId.
+                // File đối soát cột Mã đơn = externalCode.
                 'external_code' => $merged['externalCode']
                     ?? data_get($merged, 'order.externalCode')
                     ?? data_get($merged, 'data.order.externalCode'),

@@ -25,6 +25,7 @@ class ReconciliationBulkService
 
     public function __construct(
         private readonly BulkUpdateByCodeService $byCode,
+        private readonly ReconciliationSheetParser $sheets,
     ) {}
 
     /**
@@ -471,7 +472,10 @@ class ReconciliationBulkService
                     ->orWhereHas('shipments', function ($shipments) use ($code) {
                         $shipments->where('tracking_number', $code)
                             ->orWhere('partner_order_id', $code)
-                            ->orWhere('tracking_id', $code);
+                            ->orWhere('tracking_id', $code)
+                            ->orWhere('response_payload->netship_external_code', $code)
+                            ->orWhere('response_payload->netship_order_id', $code)
+                            ->orWhereJsonContains('response_payload->partner_refs', $code);
                     });
             })->when($isGhtk, function ($builder) {
                 $builder->where(function ($inner) {
@@ -490,91 +494,7 @@ class ReconciliationBulkService
      */
     private function parseSpreadsheetMatrix(array $matrix): array
     {
-        if ($matrix === []) {
-            return [];
-        }
-
-        $headerRow = array_map(fn ($cell) => Str::lower(trim((string) $cell)), $matrix[0]);
-        $map = $this->mapHeaderIndexes($headerRow);
-        $hasHeader = $map !== null;
-        $start = $hasHeader ? 1 : 0;
-        if (! $hasHeader) {
-            $map = [
-                'order_code' => 0,
-                'tracking_number' => 1,
-                'reconciliation_status' => 2,
-                'excel_total' => 3,
-                'excel_cod' => 4,
-                'note' => 5,
-            ];
-        }
-
-        $rows = [];
-        for ($i = $start; $i < count($matrix); $i++) {
-            $line = $matrix[$i];
-            $orderCode = trim((string) ($line[$map['order_code']] ?? ''));
-            $tracking = trim((string) ($line[$map['tracking_number']] ?? ''));
-            $status = trim((string) ($line[$map['reconciliation_status']] ?? ''));
-            $note = trim((string) ($line[$map['note']] ?? ''));
-            $excelTotal = $this->parseMoney($line[$map['excel_total']] ?? null);
-            $excelCod = $this->parseMoney($line[$map['excel_cod']] ?? null);
-            if ($orderCode === '' && $tracking === '') {
-                continue;
-            }
-            $rows[] = [
-                'order_code' => $orderCode !== '' ? $orderCode : null,
-                'tracking_number' => $tracking !== '' ? $tracking : null,
-                'reconciliation_status' => $status !== '' ? $status : null,
-                'excel_total' => $excelTotal,
-                'excel_cod' => $excelCod,
-                'note' => $note !== '' ? $note : null,
-            ];
-        }
-
-        return $rows;
-    }
-
-    /**
-     * @param  list<string>  $headerRow
-     * @return array{order_code:int,tracking_number:int,reconciliation_status:int,excel_total:int,excel_cod:int,note:int}|null
-     */
-    private function mapHeaderIndexes(array $headerRow): ?array
-    {
-        $aliases = [
-            'order_code' => ['mã đơn', 'ma don', 'order_code', 'madon', 'mã pushsale', 'ma pushsale'],
-            'tracking_number' => ['mã giao vận', 'ma giao van', 'tracking', 'tracking_number', 'mã vận đơn', 'ma van don'],
-            'reconciliation_status' => [
-                'trạng thái đối soát', 'trang thai doi soat', 'reconciliation_status',
-                'trạng thái cập nhật', 'trang thai cap nhat', 'đối soát', 'doi soat', 'dsnb',
-            ],
-            'excel_total' => ['tổng tiền', 'tong tien', 'tổng tiền đơn', 'tong tien don', 'total', 'order_total'],
-            'excel_cod' => ['tiền thu hộ', 'tien thu ho', 'cod', 'amount_to_collect', 'thu hộ', 'thu ho'],
-            'note' => ['ghi chú', 'ghi chu', 'note'],
-        ];
-
-        $map = [];
-        foreach ($aliases as $key => $names) {
-            foreach ($headerRow as $index => $label) {
-                $normalized = Str::of($label)->replaceMatches('/\s+/', ' ')->trim()->value();
-                if (in_array($normalized, $names, true)) {
-                    $map[$key] = $index;
-                    break;
-                }
-            }
-        }
-
-        if (! isset($map['order_code']) && ! isset($map['tracking_number'])) {
-            return null;
-        }
-
-        return [
-            'order_code' => $map['order_code'] ?? 999,
-            'tracking_number' => $map['tracking_number'] ?? 999,
-            'reconciliation_status' => $map['reconciliation_status'] ?? 999,
-            'excel_total' => $map['excel_total'] ?? 999,
-            'excel_cod' => $map['excel_cod'] ?? 999,
-            'note' => $map['note'] ?? 999,
-        ];
+        return $this->sheets->parse($matrix);
     }
 
     /**
@@ -582,14 +502,25 @@ class ReconciliationBulkService
      */
     private function resolveFromExcelRow(array $row, bool $isGhtk): ?Order
     {
-        if (filled($row['order_code'] ?? null)) {
-            $byCode = $this->resolveOrder((string) $row['order_code'], 'MHT', false);
+        $codes = [];
+        foreach (['order_code', 'tracking_number'] as $key) {
+            $value = trim((string) ($row[$key] ?? ''));
+            if ($value !== '' && ! in_array($value, $codes, true)) {
+                $codes[] = $value;
+            }
+        }
+
+        foreach ($codes as $code) {
+            $byCode = $this->resolveOrder($code, 'MHT', false);
             if ($byCode) {
                 return $byCode;
             }
         }
-        if (filled($row['tracking_number'] ?? null)) {
-            return $this->resolveOrder((string) $row['tracking_number'], 'MGV', $isGhtk);
+        foreach ($codes as $code) {
+            $byTracking = $this->resolveOrder($code, 'MGV', $isGhtk);
+            if ($byTracking) {
+                return $byTracking;
+            }
         }
 
         return null;
@@ -597,28 +528,15 @@ class ReconciliationBulkService
 
     private function normalizeStatus(?string $raw): ?string
     {
+        $normalized = $this->sheets->normalizeStatus($raw);
+        if ($normalized !== null) {
+            return $normalized;
+        }
         if (! filled($raw)) {
             return null;
         }
-        $value = trim((string) $raw);
-        if (ReconciliationStatus::tryFrom($value)) {
-            return $value;
-        }
 
-        $aliases = [
-            'đã đối soát' => ReconciliationStatus::Reconciled->value,
-            'da doi soat' => ReconciliationStatus::Reconciled->value,
-            'doi soat' => ReconciliationStatus::Reconciled->value,
-            'đối soát' => ReconciliationStatus::Reconciled->value,
-            'settled' => ReconciliationStatus::Reconciled->value,
-            'chưa đối soát' => ReconciliationStatus::Pending->value,
-            'chua doi soat' => ReconciliationStatus::Pending->value,
-        ];
-        $lower = Str::lower($value);
-        if (isset($aliases[$lower])) {
-            return $aliases[$lower];
-        }
-
+        $lower = Str::lower(trim((string) $raw));
         $matched = collect(ReconciliationStatus::cases())->first(
             fn (ReconciliationStatus $status) => Str::lower($status->label()) === $lower
                 || Str::lower($status->value) === $lower
@@ -693,30 +611,6 @@ class ReconciliationBulkService
             'excel_total' => isset($decoded['t']) && $decoded['t'] !== null ? (float) $decoded['t'] : null,
             'excel_cod' => isset($decoded['c']) && $decoded['c'] !== null ? (float) $decoded['c'] : null,
         ];
-    }
-
-    private function parseMoney(mixed $raw): ?float
-    {
-        if ($raw === null || $raw === '') {
-            return null;
-        }
-        if (is_numeric($raw)) {
-            return (float) $raw;
-        }
-        $normalized = preg_replace('/[^\d,.\-]/', '', str_replace(' ', '', (string) $raw));
-        if ($normalized === null || $normalized === '' || $normalized === '-' || $normalized === '.' || $normalized === ',') {
-            return null;
-        }
-        if (str_contains($normalized, ',') && str_contains($normalized, '.')) {
-            $normalized = str_replace(',', '', $normalized);
-        } elseif (str_contains($normalized, ',')) {
-            $normalized = str_replace(',', '.', $normalized);
-        }
-        if (! is_numeric($normalized)) {
-            return null;
-        }
-
-        return (float) $normalized;
     }
 
     /**

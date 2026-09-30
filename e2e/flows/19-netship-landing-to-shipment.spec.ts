@@ -44,9 +44,13 @@ type ShipmentProbe = {
     gateway: string | null;
     provider: string | null;
     tracking: string | null;
+    externalCode: string | null;
     netshipOrderId: string | null;
     message: string | null;
 };
+
+let createdExternalCode = '';
+let createdOrderCode = '';
 
 test.describe('19 — NetShip: landing webhook → chốt đơn → vận đơn', () => {
     test.use({ storageState: { cookies: [], origins: [] } });
@@ -142,6 +146,7 @@ test.describe('19 — NetShip: landing webhook → chốt đơn → vận đơn'
                 gateway: payload.gateway ?? null,
                 provider: shipment.provider ?? null,
                 tracking: shipment.trackingNumber ?? shipment.tracking_number ?? null,
+                externalCode: payload.netship_external_code ?? payload.netshipExternalCode ?? null,
                 netshipOrderId: payload.netship_order_id ?? null,
                 message: body.message ?? null,
             });
@@ -158,10 +163,15 @@ test.describe('19 — NetShip: landing webhook → chốt đơn → vận đơn'
         const row = page.locator('table.ps-wh-table tbody tr').filter({ hasText: PHONE }).first();
         await expect(row).toBeVisible({ timeout: 30_000 });
 
-        // Đơn đã đăng thì cột mã giao vận có link NetShip — chạy lại không đăng đè.
-        const tracking = row.locator('a').filter({ hasText: /^\d{6,}$/ }).first();
-        if (await tracking.count()) {
-            test.info().annotations.push({ type: 'netship', description: `đã đăng: ${await tracking.innerText()}` });
+        const orderCode = (await row.locator('button.ps-wh-order-code').first().innerText()).trim();
+        createdOrderCode = orderCode;
+
+        // Mã đối soát là externalCode (chữ+số), không còn là id số của NetShip.
+        const trackingButton = row.locator('button.item-mdgv').first();
+        const existingTracking = (await trackingButton.count()) ? (await trackingButton.innerText()).trim() : '';
+        if (/^[A-Za-z0-9]{6,}$/.test(existingTracking)) {
+            createdExternalCode = existingTracking;
+            test.info().annotations.push({ type: 'netship', description: `đã đăng: ${existingTracking}` });
             return;
         }
 
@@ -185,5 +195,45 @@ test.describe('19 — NetShip: landing webhook → chốt đơn → vận đơn'
         expect(created, `create-shipment lỗi: ${JSON.stringify(probes)}`).toBeTruthy();
         expect(created!.gateway).toBe('netship');
         expect(created!.netshipOrderId).toBeTruthy();
+        expect(created!.externalCode).toMatch(/^[A-Za-z0-9]{6,}$/);
+        expect(created!.tracking).toBe(created!.externalCode);
+        createdExternalCode = created!.externalCode!;
+    });
+
+    test('D. Kế toán upload file đối soát NetShip và khớp externalCode', async ({ page }) => {
+        expect(createdExternalCode, 'chưa có externalCode từ bước đăng đơn').toMatch(/^[A-Za-z0-9]{6,}$/);
+
+        const csv = [
+            'Đối soát,AUTO-E2E',
+            'Khách hàng,VIỆT THÀNH SHOP',
+            'STT,Mã đơn,Người nhận,SDT người nhận,Trạng thái,Giá trị đơn hàng,COD Gốc,COD Sau,Phí Ship,Tổng đối soát',
+            `1,${createdExternalCode},${NAME},${PHONE},Giao hàng thành công,10000,10000,10000,16000,-6000`,
+        ].join('\n');
+
+        await loginAs(page, DEMO.admin);
+        await page.goto('/admin/accounting', { waitUntil: 'domcontentloaded' });
+        await waitUiReady(page);
+
+        await page.getByPlaceholder(/Họ tên, số điện thoại/i).fill(PHONE);
+        await page.locator('button.btn-primary').filter({ hasText: 'Tìm kiếm' }).first().click();
+        await waitUiReady(page);
+
+        await openWarehouseFab(page);
+        await page.locator('button[title="Đối soát đơn bằng Excel"], button[fam-tooltip="Đối soát đơn bằng Excel"]').first().click();
+
+        const dialog = page.getByRole('dialog').filter({ hasText: 'Cập nhật đối soát Excel' }).first();
+        await expect(dialog).toBeVisible({ timeout: 20_000 });
+
+        await dialog.locator('input[type="file"]').setInputFiles({
+            name: 'netship-doi-soat.csv',
+            mimeType: 'text/csv',
+            buffer: Buffer.from(csv),
+        });
+        await dialog.getByRole('button', { name: 'Upload' }).click();
+
+        const matched = dialog.locator('.ps-recon-excel-history-row').filter({ hasText: createdOrderCode || createdExternalCode }).first();
+        await expect(matched).toBeVisible({ timeout: 20_000 });
+        await expect(matched).toContainText('Đã đối soát');
+        await expect(matched).not.toContainText('Chưa khớp đơn');
     });
 });
