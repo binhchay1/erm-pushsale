@@ -125,9 +125,8 @@ test.describe('19 — NetShip: landing webhook → chốt đơn → vận đơn'
 
         await dialog.getByRole('button', { name: 'Chốt đơn' }).click();
 
-        const toast = page.locator('[data-sonner-toast]').first();
-        await toast.waitFor({ state: 'visible', timeout: 60_000 });
-        expect(await toast.innerText()).toMatch(/Đã tạo và chốt đơn|Đã chốt đơn/i);
+        const toast = page.locator('[data-sonner-toast]').filter({ hasText: /Đã tạo và chốt đơn|Đã chốt đơn/i });
+        await expect(toast.first()).toBeVisible({ timeout: 60_000 });
         await expect(dialog).toBeHidden({ timeout: 30_000 });
     });
 
@@ -202,6 +201,7 @@ test.describe('19 — NetShip: landing webhook → chốt đơn → vận đơn'
 
     test('D. Kế toán upload file đối soát NetShip và khớp externalCode', async ({ page }) => {
         expect(createdExternalCode, 'chưa có externalCode từ bước đăng đơn').toMatch(/^[A-Za-z0-9]{6,}$/);
+        test.info().annotations.push({ type: 'order', description: `${createdOrderCode} ${createdExternalCode}` });
 
         const csv = [
             'Đối soát,AUTO-E2E',
@@ -231,9 +231,13 @@ test.describe('19 — NetShip: landing webhook → chốt đơn → vận đơn'
         });
         await dialog.getByRole('button', { name: 'Upload' }).click();
 
-        const matched = dialog.locator('.ps-recon-excel-history-row').filter({ hasText: createdOrderCode || createdExternalCode }).first();
+        const matched = dialog.locator('.ps-recon-excel-history-row').filter({ hasText: createdExternalCode }).first();
         await expect(matched).toBeVisible({ timeout: 20_000 });
         await expect(matched).toContainText('Đã đối soát');
         await expect(matched).not.toContainText('Chưa khớp đơn');
+        await expect(matched).toContainText('10.000');
+
+        await dialog.getByRole('button', { name: '2. Đối soát' }).click();
+        await expect(page.locator('[data-sonner-toast]').filter({ hasText: /Đã đối soát 1 đơn/ })).toBeVisible({ timeout: 20_000 });
     });
 });
