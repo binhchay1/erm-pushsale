@@ -110,9 +110,23 @@ return array (
       3 => 
       array (
         'title' => '1.4 Kết nối giao hàng',
-        'url' => '/admin/shipping-partners',
-        'area' => 'shipping',
-        'code' => '1.4',
+        'children' => 
+        array (
+          0 => 
+          array (
+            'title' => '1. Kết nối đối tác',
+            'url' => '/admin/shipping-partners',
+            'area' => 'shipping',
+            'code' => '1.4',
+          ),
+          1 => 
+          array (
+            'title' => '2. Nhật ký hành trình đơn',
+            'url' => '/admin/shipping/order-traces',
+            'area' => 'shipping',
+            'code' => '1.4.1',
+          ),
+        ),
       ),
       4 => 
       array (

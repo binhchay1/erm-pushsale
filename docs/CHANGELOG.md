@@ -4,6 +4,13 @@ Mới nhất trước. Living: [PROJECT_CONTRACT.md](./PROJECT_CONTRACT.md), [OP
 
 ---
 
+## 2026-10-01 — Nhật ký hành trình đơn
+
+- Landing, response NetShip và webhook trạng thái được ghi vào `order_traces` qua queue riêng `order-traces`. Request chỉ dispatch, không insert.
+- Màn tra cứu: menu 1.4.1 `/admin/shipping/order-traces`.
+
+---
+
 ## 2026-09-17 — Docs slim + dead-asset cleanup
 
 - Gom docs reporting/marketing packet/upsale vào `OPERATIONS.md` + `REPORTING.md`; xóa MD trùng/deprecated.

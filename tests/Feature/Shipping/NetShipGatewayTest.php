@@ -5,6 +5,7 @@ namespace Tests\Feature\Shipping;
 use App\Enums\DeliveryStatus;
 use App\Enums\InboundEventSource;
 use App\Enums\InboundEventStatus;
+use App\Jobs\Orders\RecordOrderTraceJob;
 use App\Jobs\Shipping\ProcessShippingWebhookJob;
 use App\Models\InboundEvent;
 use App\Models\Order;
@@ -19,6 +20,7 @@ use App\Support\TenantManager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
 
@@ -632,11 +634,19 @@ class NetShipGatewayTest extends TestCase
         $this->assertSame('GYRDTEST', $shipment?->tracking_number);
         $this->assertSame('GYRDTEST', $order->fresh()->tracking_number);
 
+        Queue::pushed(RecordOrderTraceJob::class)->each(fn (RecordOrderTraceJob $job) => $job->handle());
+
         $trace = \App\Models\ShippingGatewayTrace::query()->where('external_code', 'GYRDTEST')->first();
         $this->assertNotNull($trace);
         $this->assertSame('create_order', $trace->action);
         $this->assertSame('771', $trace->gateway_order_id);
         $this->assertSame($shipment?->id, $trace->shipment_id);
+        $this->assertDatabaseHas('order_traces', [
+            'stage' => 'gateway_response',
+            'action' => 'create_order',
+            'external_code' => 'GYRDTEST',
+            'shipment_id' => $shipment?->id,
+        ]);
     }
 
     public function test_webhook_without_secret_is_accepted_only_from_netship_ip(): void
@@ -655,6 +665,11 @@ class NetShipGatewayTest extends TestCase
         $this->withServerVariables(['REMOTE_ADDR' => '45.32.108.164'])
             ->postJson('/api/v1/shipping/webhooks/netship', $payload)
             ->assertStatus(202);
+
+        Queue::assertPushed(RecordOrderTraceJob::class, function (RecordOrderTraceJob $job): bool {
+            return ($job->event['stage'] ?? null) === 'webhook_received'
+                && ($job->event['gateway_order_id'] ?? null) === '3461315';
+        });
     }
 
     public function test_webhook_job_marks_the_inbound_event_processed(): void

@@ -97,6 +97,7 @@ return [
         'pancake_orders' => env('QUEUE_PANCAKE_ORDERS', 'pancake-orders'),
         'shipping_webhooks' => env('QUEUE_SHIPPING_WEBHOOKS', 'shipping-webhooks'),
         'shipments' => env('QUEUE_SHIPMENTS', 'shipments'),
+        'order_traces' => env('QUEUE_ORDER_TRACES', 'order-traces'),
         'messages' => env('QUEUE_MESSAGES', 'messages'),
         'internal_chat_broadcasts' => env('QUEUE_INTERNAL_CHAT_BROADCASTS', 'broadcasts-internal-chat'),
         'dashboard_broadcasts' => env('QUEUE_DASHBOARD_BROADCASTS', 'broadcasts-dashboard'),

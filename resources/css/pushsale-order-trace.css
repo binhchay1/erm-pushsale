@@ -1,0 +1,59 @@
+.ps-order-trace-page .ps-order-trace-search {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.ps-order-trace-page .ps-order-trace-search .form-control {
+    width: 280px;
+}
+
+.ps-order-trace-page .ps-order-trace-orders {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.ps-order-trace-page .ps-order-trace-order {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 8px 10px;
+    background: #f7fafc;
+    border: 1px solid #e5e7eb;
+}
+
+.ps-order-trace-page .ps-order-trace-table-wrap {
+    overflow-x: auto;
+}
+
+.ps-order-trace-page .ps-order-trace-table {
+    margin-bottom: 0;
+    background: #fff;
+}
+
+.ps-order-trace-page .ps-order-trace-time {
+    white-space: nowrap;
+}
+
+.ps-order-trace-page .ps-order-trace-empty {
+    text-align: center;
+    color: #6b7280;
+    padding: 24px 8px;
+}
+
+.ps-order-trace-page .ps-order-trace-toggle {
+    margin-top: 4px;
+}
+
+.ps-order-trace-page .ps-order-trace-payload {
+    margin: 0;
+    max-height: 240px;
+    overflow: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-size: 12px;
+    background: #f8fafc;
+    padding: 8px;
+}

@@ -2,16 +2,16 @@
 
 namespace App\Services\Shipping\Gateways\NetShip;
 
-use App\Models\Order;
-use App\Models\ShippingGatewayTrace;
-use App\Support\TenantManager;
+use App\Services\Orders\OrderTracePublisher;
 use Throwable;
 
 /**
- * Lưu response NetShip để truy lại theo externalCode (cột Mã đơn của file đối soát).
+ * Đẩy response NetShip sang queue hành trình. Không ghi database trên request tạo đơn.
  */
 class ShippingGatewayTraceRecorder
 {
+    public function __construct(private readonly OrderTracePublisher $traces) {}
+
     /**
      * @param  array<string, mixed>  $response
      */
@@ -23,20 +23,32 @@ class ShippingGatewayTraceRecorder
             $customer = $this->firstScalar($raw, 'customerCode');
             $gatewayId = $this->firstScalar($raw, 'id');
             $lookup = $lookupCode !== null && trim($lookupCode) !== '' ? trim($lookupCode) : $external;
+            $payload = $raw !== [] ? $raw : ($response['data'] ?? null);
 
-            ShippingGatewayTrace::query()->create([
-                'company_id' => $this->companyId($orderId),
-                'order_id' => $orderId,
-                'gateway' => 'netship',
+            $this->traces->publish([
+                'stage' => 'gateway_response',
+                'source' => 'netship',
                 'action' => $action,
+                'order_id' => $orderId,
+                'order_code' => $customer,
                 'external_code' => $external,
                 'partner_order_code' => $customer,
                 'gateway_order_id' => $gatewayId,
                 'lookup_code' => $lookup,
+                'status_code' => isset($response['http_status']) ? (string) $response['http_status'] : null,
                 'http_status' => $response['http_status'] ?? null,
                 'success' => (bool) ($response['success'] ?? false),
-                'request_payload' => null,
-                'response_payload' => $raw !== [] ? $raw : ($response['data'] ?? null),
+                'summary' => $action,
+                'payload' => is_array($payload) ? $payload : null,
+                'gateway_log' => true,
+                'dedupe_key' => substr(hash('sha256', implode('|', [
+                    $action,
+                    (string) $orderId,
+                    (string) $external,
+                    (string) $gatewayId,
+                    (string) ($response['http_status'] ?? ''),
+                    json_encode($payload),
+                ])), 0, 40),
             ]);
         } catch (Throwable) {
             // Vết truy không được làm fail tạo đơn.
@@ -45,32 +57,17 @@ class ShippingGatewayTraceRecorder
 
     public function attachShipment(int $orderId, int $shipmentId, string $externalCode): void
     {
-        $trace = ShippingGatewayTrace::query()
-            ->where('order_id', $orderId)
-            ->where('action', 'create_order')
-            ->latest('id')
-            ->first();
-        if ($trace === null) {
-            return;
+        try {
+            $this->traces->publish([
+                'stage' => 'shipment_link',
+                'order_id' => $orderId,
+                'shipment_id' => $shipmentId,
+                'external_code' => $externalCode !== '' ? $externalCode : null,
+                'dedupe_key' => substr('link:'.$orderId.':'.$shipmentId, 0, 40),
+            ]);
+        } catch (Throwable) {
+            // Gắn shipment chỉ để tra cứu, không chặn vận đơn đã tạo.
         }
-        $trace->forceFill([
-            'shipment_id' => $shipmentId,
-            'external_code' => $trace->external_code ?: ($externalCode !== '' ? $externalCode : null),
-        ])->save();
-    }
-
-    private function companyId(?int $orderId): ?int
-    {
-        if ($orderId) {
-            $companyId = Order::query()->whereKey($orderId)->value('company_id');
-            if ($companyId) {
-                return (int) $companyId;
-            }
-        }
-
-        $tenantId = app(TenantManager::class)->id();
-
-        return $tenantId !== null ? (int) $tenantId : null;
     }
 
     /** @param  array<mixed>  $node */

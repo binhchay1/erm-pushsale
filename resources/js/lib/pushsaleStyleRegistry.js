@@ -23,6 +23,7 @@ export const PUSHSALE_CSS_MODULES = [
     { file: 'pushsale-combo-page.css', layer: 'page-fix', load: () => import('../../css/pushsale-combo-page.css') },
     { file: 'pushsale-discount-cod-page.css', layer: 'page-fix', load: () => import('../../css/pushsale-discount-cod-page.css') },
     { file: 'pushsale-login-history.css', layer: 'page-fix', load: () => import('../../css/pushsale-login-history.css') },
+    { file: 'pushsale-order-trace.css', layer: 'page-fix', load: () => import('../../css/pushsale-order-trace.css') },
     { file: 'pushsale-operation-categories.css', layer: 'page-fix', load: () => import('../../css/pushsale-operation-categories.css') },
     { file: 'pushsale-users-frame-toast.css', layer: 'page-fix', load: () => import('../../css/pushsale-users-frame-toast.css') },
     { file: 'pushsale-teams-page.css', layer: 'page-fix', load: () => import('../../css/pushsale-teams-page.css') },

@@ -8,6 +8,7 @@ use App\Http\Traits\ApiResponds;
 use App\Jobs\Shipping\ProcessShippingWebhookJob;
 use App\Models\ShippingPartnerConnection;
 use App\Services\Inbound\InboundEventRecorder;
+use App\Services\Orders\OrderTracePublisher;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -91,6 +92,27 @@ class ShippingWebhookController extends Controller
         );
         $event->update(['company_id' => $connection->company_id]);
         $event->markQueued();
+
+        $customerCode = is_scalar($payload['customerCode'] ?? null) ? (string) $payload['customerCode'] : null;
+        app(OrderTracePublisher::class)->publish([
+            'stage' => 'webhook_received',
+            'source' => $provider,
+            'company_id' => $connection->company_id,
+            'order_code' => $customerCode,
+            'partner_order_code' => $customerCode,
+            'gateway_order_id' => is_scalar($payload['id'] ?? null) ? (string) $payload['id'] : null,
+            'status_code' => is_scalar($payload['status'] ?? null) ? (string) $payload['status'] : null,
+            'summary' => 'webhook_received',
+            'payload' => array_filter([
+                'id' => $payload['id'] ?? null,
+                'customerCode' => $payload['customerCode'] ?? null,
+                'status' => $payload['status'] ?? null,
+                'cod' => $payload['cod'] ?? null,
+                'fee' => $payload['fee'] ?? null,
+                'reason' => $payload['reason'] ?? null,
+            ], static fn (mixed $value): bool => $value !== null && is_scalar($value)),
+            'dedupe_key' => 'wh-in:'.$event->id,
+        ]);
 
         ProcessShippingWebhookJob::dispatch($provider, $payload, $event->id, $connection->company_id);
 

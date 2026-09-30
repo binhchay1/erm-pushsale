@@ -9,7 +9,7 @@ Stack, layers, roles. UI/CSS rules: [PROJECT_CONTRACT.md](./PROJECT_CONTRACT.md)
 | Backend | Laravel, Sanctum, Inertia, Reverb |
 | Frontend | React, Vite, Radix/shadcn, Echo |
 | DB | MySQL / PostgreSQL / SQLite |
-| Queue | Redis + Horizon |
+| Queue | Redis + Horizon. Hành trình đơn: queue `order-traces` |
 | Realtime | Reverb + Echo |
 
 ```bash

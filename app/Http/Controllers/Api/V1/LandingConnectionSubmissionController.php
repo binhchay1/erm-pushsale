@@ -15,6 +15,7 @@ use App\Models\MarketingSource;
 use App\Models\Order;
 use App\Services\Inbound\InboundEventRecorder;
 use App\Services\Leads\LeadIngestionService;
+use App\Services\Orders\OrderTracePublisher;
 use App\Services\Marketing\LandingConnectionPayloadMapper;
 use App\Support\TenantManager;
 use Illuminate\Http\JsonResponse;
@@ -150,6 +151,7 @@ class LandingConnectionSubmissionController extends Controller
                 }
 
                 $orderId = $lead->order_id ?: $lead->related_order_id ?: $session?->order_id;
+                $order = null;
                 if ($orderId) {
                     $order = Order::query()->whereKey($orderId)->first();
                     if ($order) {
@@ -172,11 +174,31 @@ class LandingConnectionSubmissionController extends Controller
                     'order_id' => $orderId,
                     'status' => $lead->status instanceof LeadIngestionStatus ? $lead->status->value : (string) $lead->status,
                     'requires_review' => (bool) $lead->requires_review,
+                    'trace_phone' => $phone,
+                    'trace_order_code' => $order?->order_code,
+                    'trace_name' => is_scalar($normalized['customer_name'] ?? null) ? (string) $normalized['customer_name'] : null,
                 ];
                 });
             });
 
             $event->markProcessed();
+            app(OrderTracePublisher::class)->publish([
+                'stage' => 'landing_received',
+                'source' => 'landing',
+                'company_id' => (int) $connection->company_id,
+                'order_id' => $result['order_id'] ?? null,
+                'order_code' => $result['trace_order_code'] ?? null,
+                'phone' => $result['trace_phone'] ?? null,
+                'status_code' => (string) ($result['status'] ?? ''),
+                'summary' => trim(((string) ($result['trace_name'] ?? '')).' · '.((string) ($result['status'] ?? ''))),
+                'payload' => [
+                    'lead_id' => $result['lead_id'] ?? null,
+                    'status' => $result['status'] ?? null,
+                    'requires_review' => (bool) ($result['requires_review'] ?? false),
+                    'customer_name' => $result['trace_name'] ?? null,
+                ],
+                'dedupe_key' => 'landing:'.($result['lead_id'] ?? '0').':'.($result['status'] ?? ''),
+            ]);
 
             if ($request->expectsJson() || $request->wantsJson()) {
                 return response()->json([

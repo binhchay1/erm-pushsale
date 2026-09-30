@@ -7,6 +7,7 @@ $queues = [
     'pancake_orders' => env('QUEUE_PANCAKE_ORDERS', 'pancake-orders'),
     'shipping_webhooks' => env('QUEUE_SHIPPING_WEBHOOKS', 'shipping-webhooks'),
     'shipments' => env('QUEUE_SHIPMENTS', 'shipments'),
+    'order_traces' => env('QUEUE_ORDER_TRACES', 'order-traces'),
     'messages' => env('QUEUE_MESSAGES', 'messages'),
     'internal_chat_broadcasts' => env('QUEUE_INTERNAL_CHAT_BROADCASTS', 'broadcasts-internal-chat'),
     'dashboard_broadcasts' => env('QUEUE_DASHBOARD_BROADCASTS', 'broadcasts-dashboard'),
@@ -68,6 +69,17 @@ $production = [
         $queues['shipping_webhooks'],
         $queues['shipments'],
     ], (int) env('HORIZON_SHIPPING_MIN_PROCESSES', 1), (int) env('HORIZON_SHIPPING_MAX_PROCESSES', 5), 240, 192),
+
+    // Order journey inserts only. Lower priority so a burst of traces never delays webhook processing.
+    'supervisor-order-traces' => $supervisor(
+        [$queues['order_traces']],
+        (int) env('HORIZON_ORDER_TRACE_MIN_PROCESSES', 1),
+        (int) env('HORIZON_ORDER_TRACE_MAX_PROCESSES', 2),
+        20,
+        128,
+        4,
+        8,
+    ),
 
     // Broadcasts are short jobs. Grouping them removes three always-idle supervisors.
     'supervisor-broadcasts' => $supervisor([
@@ -136,6 +148,7 @@ return [
         'redis:'.$queues['pancake_orders'] => 20,
         'redis:'.$queues['shipping_webhooks'] => 20,
         'redis:'.$queues['shipments'] => 30,
+        'redis:'.$queues['order_traces'] => 60,
         'redis:'.$queues['messages'] => 15,
         'redis:'.$queues['internal_chat_broadcasts'] => 10,
         'redis:'.$queues['dashboard_broadcasts'] => 10,

@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\Ecommerce\EcommerceController;
 use App\Http\Controllers\Admin\Integrations\LeadImportPageController;
 use App\Http\Controllers\Admin\Integrations\UnitFacebookPageController;
 use App\Http\Controllers\Admin\IntegrationsController;
+use App\Http\Controllers\Admin\Shipping\OrderTraceController;
 use App\Http\Controllers\Admin\ShippingOrderController;
 use App\Http\Controllers\Admin\ShippingPartnersController;
 use App\Http\Controllers\Admin\ShippingPartnerTestController;
@@ -32,8 +33,9 @@ Route::match(['put', 'patch'], 'integrations/facebook-pages/records/{record}', [
 Route::delete('integrations/facebook-pages/records/{record}', [UnitFacebookPageController::class, 'destroy'])->whereNumber('record')->name('integrations.facebook-pages.destroy');
 
 Route::middleware('role:'.User::ROLE_ADMIN)->group(function (): void {
-    // 1.4 Kết nối giao hàng
+    // 1.4 Kết nối giao hàng · 1.4.1 Nhật ký hành trình đơn
     Route::get('shipping-partners', [ShippingPartnersController::class, 'index'])->name('shipping-partners.index');
+    Route::get('shipping/order-traces', OrderTraceController::class)->name('shipping.order-traces');
     Route::put('shipping-partners/{provider}', [ShippingPartnersController::class, 'update'])->name('shipping-partners.update');
     Route::put('shipping-default', [ShippingPartnersController::class, 'updateDefault'])->name('shipping-partners.default');
     Route::post('shipping-partners/{provider}/test/{action}', ShippingPartnerTestController::class)->name('shipping-partners.test');
