@@ -80,6 +80,7 @@ class NetShipProxyCarrier extends AbstractShippingCarrier
             'response_payload' => array_merge($data, [
                 'gateway' => 'netship',
                 'netship_order_id' => $netshipId,
+                'netship_external_code' => (string) ($data['external_code'] ?? ''),
                 'netship_carrier_code' => $this->netshipCarrierCode,
                 'business_provider' => $this->businessProvider,
             ]),
@@ -94,29 +95,20 @@ class NetShipProxyCarrier extends AbstractShippingCarrier
     {
         $shipment ??= $this->requireShipment($order);
         $netshipId = $this->netshipIdFrom($shipment);
-        $search = $netshipId !== '' ? null : $this->customerCode($order);
 
-        $query = array_filter([
-            'search' => $search,
-        ]);
-        $response = $this->client->queryOrders($query, $order->id);
-        if (! $response['success']) {
-            throw new RuntimeException($response['message'] ?? __('messages.shipping_actions.netship_sync_failed'));
-        }
-
-        $rows = $this->extractOrderRows($response);
         $match = null;
-        foreach ($rows as $row) {
-            if ($netshipId !== '' && (string) ($row['id'] ?? '') === $netshipId) {
-                $match = $row;
-                break;
+        foreach ($this->searchKeys($shipment) as $search) {
+            $response = $this->client->queryOrders(['search' => $search], $order->id);
+            if (! $response['success']) {
+                throw new RuntimeException($response['message'] ?? __('messages.shipping_actions.netship_sync_failed'));
             }
-            if ((string) ($row['customerCode'] ?? $row['customer_code'] ?? '') === $this->customerCode($order)) {
-                $match = $row;
+
+            $match = $this->matchOrderRow($this->extractOrderRows($response), $netshipId, $order);
+            if ($match !== null) {
                 break;
             }
         }
-        $match ??= $rows[0] ?? null;
+
         if (! is_array($match)) {
             throw new RuntimeException(__('messages.shipping_actions.netship_sync_failed'));
         }
@@ -272,6 +264,40 @@ class NetShipProxyCarrier extends AbstractShippingCarrier
             ?? $payload['id']
             ?? $shipment->tracking_id
             ?? '');
+    }
+
+    /**
+     * `search` on NetShip query_orders only matches externalCode and linkId —
+     * customerCode and the NetShip id are not searchable.
+     *
+     * @return list<string>
+     */
+    private function searchKeys(Shipment $shipment): array
+    {
+        $payload = is_array($shipment->response_payload) ? $shipment->response_payload : [];
+
+        return array_values(array_unique(array_filter([
+            (string) ($payload['netship_external_code'] ?? ''),
+            (string) $shipment->tracking_number,
+        ], fn (string $key): bool => $key !== '')));
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $rows
+     * @return array<string, mixed>|null
+     */
+    private function matchOrderRow(array $rows, string $netshipId, Order $order): ?array
+    {
+        foreach ($rows as $row) {
+            if ($netshipId !== '' && (string) ($row['id'] ?? '') === $netshipId) {
+                return $row;
+            }
+            if ((string) ($row['customerCode'] ?? $row['customer_code'] ?? '') === $this->customerCode($order)) {
+                return $row;
+            }
+        }
+
+        return null;
     }
 
     /**

@@ -144,6 +144,79 @@ class NetShipGatewayTest extends TestCase
             && ! array_key_exists('myRequest', $request->data()));
     }
 
+    public function test_sync_status_searches_by_external_code_not_customer_code(): void
+    {
+        Http::fake(function (Request $request) {
+            $url = $request->url();
+            if (str_contains($url, '/api/address/provinces')) {
+                return Http::response([['id' => 1, 'name' => 'Hà Nội']], 200);
+            }
+            if (str_contains($url, '/api/address/districts')) {
+                return Http::response([['id' => 10, 'name' => 'Quận Cầu Giấy']], 200);
+            }
+            if (str_contains($url, '/api/address/ward')) {
+                return Http::response([['id' => 100, 'name' => 'Phường Dịch Vọng']], 200);
+            }
+            if (str_ends_with($url, '/api/third-party/order') && $request->method() === 'POST') {
+                return Http::response([
+                    'data' => ['order' => [
+                        'id' => 3461315,
+                        'linkId' => 'NSN3461315',
+                        'externalCode' => 'GYRDVHFF',
+                        'status' => 0,
+                    ]],
+                ], 201);
+            }
+            if (str_contains($url, '/api/third-party/order') && $request->method() === 'GET') {
+                // NetShip `search` only matches externalCode / linkId.
+                $rows = str_contains($url, 'search=GYRDVHFF')
+                    ? [['id' => 3461315, 'linkId' => 'NSN3461315', 'externalCode' => 'GYRDVHFF', 'status' => 2]]
+                    : [];
+
+                return Http::response(['data' => ['data' => $rows, 'total' => count($rows)]], 200);
+            }
+
+            return Http::response(['success' => false, 'message' => 'unexpected '.$url], 500);
+        });
+
+        config([
+            'shipping_partners.pickup.province' => 'Hà Nội',
+            'shipping_partners.pickup.district' => 'Quận Cầu Giấy',
+            'shipping_partners.pickup.ward' => 'Phường Dịch Vọng',
+            'shipping_partners.default_geo.province' => 'Hà Nội',
+            'shipping_partners.default_geo.district' => 'Quận Cầu Giấy',
+            'shipping_partners.default_geo.ward' => 'Phường Dịch Vọng',
+        ]);
+
+        $order = Order::query()->create([
+            'order_code' => 'NS-SYNC-001',
+            'customer_name' => 'Khách Sync',
+            'customer_phone' => '0901234567',
+            'receiver_name' => 'Khách Sync',
+            'receiver_phone' => '0901234567',
+            'shipping_address' => '1 Nguyễn Huệ',
+            'shipping_provider' => 'viettel_post',
+            'shipping_geo' => [
+                'province' => 'Hà Nội',
+                'district' => 'Quận Cầu Giấy',
+                'ward' => 'Phường Dịch Vọng',
+            ],
+            'closed_at' => now(),
+            'total' => 150_000,
+            'amount_to_collect' => 150_000,
+        ]);
+
+        $shipment = app(CreateShipmentService::class)->createForOrder($order, 'viettel_post');
+        $this->assertSame('GYRDVHFF', $shipment->response_payload['netship_external_code'] ?? null);
+
+        $synced = app(CarrierRegistry::class)->get('viettel_post')->syncStatus($order->fresh(), $shipment);
+
+        $this->assertSame('Đang giao hàng', $synced->status_text);
+        $this->assertSame(DeliveryStatus::Delivering->value, $order->fresh()->delivery_status);
+        Http::assertSent(fn (Request $request) => $request->method() === 'GET'
+            && str_contains($request->url(), 'search=GYRDVHFF'));
+    }
+
     public function test_netship_error_body_surfaces_as_create_failure_message(): void
     {
         Http::fake(function (Request $request) {

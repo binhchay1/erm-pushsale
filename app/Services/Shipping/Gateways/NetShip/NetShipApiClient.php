@@ -161,6 +161,10 @@ class NetShipApiClient extends AbstractCarrierHttpClient
                     ?? data_get($merged, 'order.linkId')
                     ?? data_get($merged, 'data.order.linkId')
                     ?? (string) $id,
+                // `search` on query_orders only matches externalCode / linkId.
+                'external_code' => $merged['externalCode']
+                    ?? data_get($merged, 'order.externalCode')
+                    ?? data_get($merged, 'data.order.externalCode'),
             ]);
         } elseif (($response['http_status'] ?? 0) >= 200 && ($response['http_status'] ?? 0) < 300 && $id === null) {
             // Một số API trả 200 nhưng body lỗi — giữ success theo client.
