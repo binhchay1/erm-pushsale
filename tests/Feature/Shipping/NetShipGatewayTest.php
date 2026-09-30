@@ -548,6 +548,67 @@ class NetShipGatewayTest extends TestCase
         );
     }
 
+    public function test_receiver_ids_prefer_stored_gso_codes_over_name_matching(): void
+    {
+        Http::fake(function (Request $request) {
+            $url = $request->url();
+            if (str_contains($url, '/api/address/provinces')) {
+                return Http::response([['id' => 79, 'name' => 'Thành phố Hồ Chí Minh']], 200);
+            }
+            if (str_contains($url, '/api/address/districts')) {
+                return Http::response([['id' => 764, 'name' => 'Quận Gò Vấp']], 200);
+            }
+            if (str_contains($url, '/api/address/ward')) {
+                // Trùng tên "Phường 15" — dò theo tên sẽ lấy nhầm phường đầu tiên.
+                return Http::response([
+                    ['id' => 26869, 'name' => 'Phường 15'],
+                    ['id' => 26872, 'name' => 'Phường 15'],
+                ], 200);
+            }
+            if (str_ends_with($url, '/api/third-party/order') && $request->method() === 'POST') {
+                return Http::response(['data' => ['order' => ['id' => 771, 'linkId' => 'NSN771']]], 201);
+            }
+
+            return Http::response(['success' => false, 'message' => 'unexpected '.$url], 500);
+        });
+
+        config([
+            'shipping_partners.pickup.province' => 'Thành phố Hồ Chí Minh',
+            'shipping_partners.pickup.district' => 'Quận Gò Vấp',
+            'shipping_partners.pickup.ward' => 'Phường 15',
+        ]);
+
+        $order = Order::query()->create([
+            'order_code' => 'NS-GEO-CODE',
+            'customer_name' => 'KH Code',
+            'customer_phone' => '0901234567',
+            'receiver_name' => 'KH Code',
+            'receiver_phone' => '0901234567',
+            'shipping_address' => '884/26 Lê Đức Thọ',
+            'shipping_provider' => 'viettel_post',
+            'shipping_geo' => [
+                'mode' => 'old',
+                'province' => 'Thành phố Hồ Chí Minh',
+                'district' => 'Quận Gò Vấp',
+                'ward' => 'Phường 15',
+                'province_code' => '79',
+                'district_code' => '764',
+                'ward_code' => '26872',
+            ],
+            'closed_at' => now(),
+            'total' => 150_000,
+            'amount_to_collect' => 150_000,
+        ]);
+
+        app(CreateShipmentService::class)->createForOrder($order, 'viettel_post');
+
+        Http::assertSent(fn (Request $request) => str_ends_with($request->url(), '/api/third-party/order')
+            && $request->method() === 'POST'
+            && data_get($request->data(), 'receiverProvinceId') === 79
+            && data_get($request->data(), 'receiverDistrictId') === 764
+            && data_get($request->data(), 'receiverWardId') === 26872);
+    }
+
     public function test_webhook_without_secret_is_accepted_only_from_netship_ip(): void
     {
         ShippingPartnerConnection::forProvider('netship')->update(['webhook_secret' => null]);

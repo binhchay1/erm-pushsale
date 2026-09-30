@@ -206,11 +206,7 @@ class NetShipProxyCarrier extends AbstractShippingCarrier
             (string) $pickup['pick_district'],
             (string) ($pickup['pick_ward'] ?: config('shipping_partners.default_geo.ward')),
         );
-        $receiverIds = $this->addresses->resolve(
-            $delivery['province'],
-            $delivery['district'],
-            $delivery['ward'] ?: config('shipping_partners.default_geo.ward'),
-        );
+        $receiverIds = $this->receiverIds($order, $delivery);
 
         $productName = $order->items
             ->map(fn ($item) => trim((string) $item->product_name))
@@ -264,6 +260,32 @@ class NetShipProxyCarrier extends AbstractShippingCarrier
             ?? $payload['id']
             ?? $shipment->tracking_id
             ?? '');
+    }
+
+    /**
+     * `shipping_geo` giữ sẵn mã hành chính GSO (`province_code`/`district_code`/`ward_code`),
+     * đúng bộ mã NetShip dùng. Ưu tiên mã để khỏi dò theo tên — tên trùng nhau
+     * (vd. "Phường 15") có thể khớp nhầm phường của quận khác.
+     *
+     * @param  array{province: string, district: string, ward: string, hamlet: string, address: string}  $delivery
+     * @return array{provinceId: int, districtId: int, wardId: int}
+     */
+    private function receiverIds(Order $order, array $delivery): array
+    {
+        $geo = is_array($order->shipping_geo) ? $order->shipping_geo : [];
+        $province = (int) ($geo['province_code'] ?? 0);
+        $district = (int) ($geo['district_code'] ?? 0);
+        $ward = (int) ($geo['ward_code'] ?? 0);
+
+        if (($geo['mode'] ?? 'old') === 'old' && $province > 0 && $district > 0 && $ward > 0) {
+            return ['provinceId' => $province, 'districtId' => $district, 'wardId' => $ward];
+        }
+
+        return $this->addresses->resolve(
+            $delivery['province'],
+            $delivery['district'] ?: $delivery['ward'],
+            $delivery['ward'] ?: config('shipping_partners.default_geo.ward'),
+        );
     }
 
     /**

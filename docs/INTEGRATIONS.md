@@ -36,6 +36,8 @@ Config hold: `config/saleops.php` (`hold_seconds` / `max_hold_seconds`).
   - Create/estimate body is **flat JSON** with exactly the fields in the [NetShip docs](https://steplap.gitbook.io/netship/tao-don-hang) — no `myRequest`, no `ShopID`, no `carrierCode`. The token must be a **shop** "Bên thứ ba" token (the shop and shipping unit come from the token); a master-account token fails with `myRequest.ShopID required`. Live base: `https://netship.vn` (`test.netship.vn` only when `NETSHIP_USE_SANDBOX=true`).
   - Cancel: `POST /api/third-party/order/cancel/{id}` (NetShip status becomes `8`). Webhook callbacks only send `Content-Type`, so the callback URL must carry `?secret=<webhook_secret>`.
   - Sync reads `GET /api/third-party/order`, whose `search` param only matches `externalCode` / `linkId` — not `customerCode` or the NetShip id. Store `externalCode` on create and search with it.
+  - Address IDs are GSO codes of the **pre-2025** 63-province structure. Receiver IDs come straight from `shipping_geo.*_code`; only the warehouse falls back to name lookup, where `config/vn_province_merges_2025.php` maps a merged province back to its old one.
+  - NetShip callbacks carry no secret and the URL inside their token cannot be edited, so `security.webhook.provider_ip_allowlist.netship` (env `NETSHIP_WEBHOOK_IPS`) authorises them by source IP; rejects are logged as `shipping.webhook.rejected`.
   - Shipment keeps business `provider`; `response_payload.gateway = netship` + `netship_order_id`.
   - Admin menu **1.4** configures NetShip token; NetShip does **not** appear in sale/warehouse carrier dropdowns.
   - Webhook provider key: `netship` — match by `customerCode` / NetShip `id`, do not overwrite business carrier.
