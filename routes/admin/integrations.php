@@ -33,7 +33,7 @@ Route::match(['put', 'patch'], 'integrations/facebook-pages/records/{record}', [
 Route::delete('integrations/facebook-pages/records/{record}', [UnitFacebookPageController::class, 'destroy'])->whereNumber('record')->name('integrations.facebook-pages.destroy');
 
 Route::middleware('role:'.User::ROLE_ADMIN)->group(function (): void {
-    // 1.4 Kết nối giao hàng · 1.4.1 Nhật ký hành trình đơn
+    // 1.4 Kết nối giao hàng · 10.1.6 Nhật ký hành trình đơn
     Route::get('shipping-partners', [ShippingPartnersController::class, 'index'])->name('shipping-partners.index');
     Route::get('shipping/order-traces', OrderTraceController::class)->name('shipping.order-traces');
     Route::put('shipping-partners/{provider}', [ShippingPartnersController::class, 'update'])->name('shipping-partners.update');

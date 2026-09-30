@@ -53,20 +53,25 @@ class OrderTraceSearch
                 'phone' => $order->customer_phone,
                 'trackingNumber' => $order->tracking_number,
             ])->all(),
-            'events' => $events->map(fn (OrderTrace $trace): array => [
-                'id' => $trace->id,
-                'at' => $trace->occurred_at?->toIso8601String(),
-                'stage' => $trace->stage,
-                'source' => $trace->source,
-                'action' => $trace->action,
-                'orderCode' => $trace->order_code,
-                'phone' => $trace->phone,
-                'externalCode' => $trace->external_code,
-                'gatewayOrderId' => $trace->gateway_order_id,
-                'statusCode' => $trace->status_code,
-                'summary' => $trace->summary,
-                'payload' => $trace->payload,
-            ])->all(),
+            'events' => $events->map(function (OrderTrace $trace) use ($orders): array {
+                $order = $orders->firstWhere('id', $trace->order_id);
+
+                return [
+                    'id' => $trace->id,
+                    'at' => $trace->occurred_at?->timezone(config('app.timezone'))->format('d/m/Y H:i:s'),
+                    'stage' => $trace->stage,
+                    'source' => $trace->source,
+                    'action' => $trace->action,
+                    'orderCode' => $trace->order_code ?: $order?->order_code,
+                    'customerName' => $order?->effectiveReceiverName(),
+                    'phone' => $trace->phone ?: $order?->effectiveReceiverPhone() ?: $order?->customer_phone,
+                    'externalCode' => $trace->external_code ?: $order?->tracking_number,
+                    'gatewayOrderId' => $trace->gateway_order_id,
+                    'statusCode' => $trace->status_code,
+                    'summary' => $trace->summary,
+                    'payload' => $trace->payload,
+                ];
+            })->all(),
         ];
     }
 

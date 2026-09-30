@@ -304,7 +304,7 @@ class NavigationService
                     $group['children'] = array_values(array_merge(
                         is_array($group['children'] ?? null) ? $group['children'] : [],
                         [[
-                            'title' => '5. Định danh đăng nhập',
+                            'title' => '6. Định danh đăng nhập',
                             'url' => '/platform/settings',
                             'icon' => 'cog',
                             'code' => '10.1.5',

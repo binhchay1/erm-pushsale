@@ -1,29 +1,94 @@
 import { Head, router } from '@inertiajs/react';
-import { Fragment, useState } from 'react';
+import { Eye } from 'lucide-react';
+import { useState } from 'react';
 
+import { PushsaleSearchButton } from '@/components/actions/PushsaleSearchButton';
 import { PushsalePageShell } from '@/components/layout/PushsalePageShell';
 import AppLayout from '@/layouts/AppLayout';
 import { useT } from '@/providers/I18nProvider';
 
-function formatWhen(value) {
-    if (!value) return '';
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return String(value);
+function payloadRows(payload) {
+    if (!payload || typeof payload !== 'object') return [];
 
-    return new Intl.DateTimeFormat('vi-VN', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-    }).format(date);
+    return Object.entries(payload).map(([key, value]) => ({
+        label: key,
+        value: value !== null && typeof value === 'object' ? JSON.stringify(value) : String(value ?? ''),
+    }));
 }
 
-export default function OrderTraces({ q = '', orders = [], events = [] }) {
+function TraceDetailModal({ selected, onClose, t }) {
+    if (!selected) return null;
+
+    const rows = [
+        { label: t('shipping.order_trace.col_time'), value: selected.at },
+        { label: t('shipping.order_trace.col_stage'), value: t(`shipping.order_trace.stage.${selected.stage}`) },
+        { label: t('shipping.order_trace.col_order'), value: selected.orderCode },
+        { label: t('shipping.order_trace.col_customer'), value: selected.customerName },
+        { label: t('shipping.order_trace.col_phone'), value: selected.phone },
+        { label: t('shipping.order_trace.col_bill'), value: selected.externalCode },
+        { label: t('shipping.order_trace.col_gateway'), value: selected.gatewayOrderId },
+        { label: t('shipping.order_trace.col_status'), value: selected.statusCode },
+        { label: t('shipping.order_trace.col_detail'), value: selected.summary || selected.action },
+    ].filter((row) => row.value);
+
+    const rawRows = payloadRows(selected.payload);
+
+    return (
+        <>
+            <div className="modal-backdrop fade in ps-activity-modal-backdrop" onClick={onClose} />
+            <div className="modal fade modal-common in ps-activity-detail-modal" role="dialog" aria-modal="true" style={{ display: 'block' }}>
+                <div className="modal-dialog modal-lg">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <button type="button" className="close" aria-label={t('shipping.order_trace.close')} onClick={onClose}>×</button>
+                            <h4 className="modal-title">{t(`shipping.order_trace.stage.${selected.stage}`)}</h4>
+                        </div>
+                        <div className="modal-body">
+                            <section className="ps-activity-detail-section">
+                                <h5>{t('shipping.order_trace.section_order')}</h5>
+                                <table className="table table-bordered table-condensed ps-activity-detail-table">
+                                    <tbody>
+                                        {rows.map((row) => (
+                                            <tr key={row.label}>
+                                                <th>{row.label}</th>
+                                                <td>{row.value}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </section>
+                            <section className="ps-activity-detail-section">
+                                <h5>{t('shipping.order_trace.section_payload')}</h5>
+                                {rawRows.length ? (
+                                    <table className="table table-bordered table-condensed ps-activity-detail-table">
+                                        <tbody>
+                                            {rawRows.map((row) => (
+                                                <tr key={row.label}>
+                                                    <th>{row.label}</th>
+                                                    <td>{row.value}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                ) : (
+                                    <div className="ps-activity-empty-detail">{t('shipping.order_trace.payload_empty')}</div>
+                                )}
+                            </section>
+                        </div>
+                        <div className="modal-footer">
+                            <button type="button" className="btn btn-sm btn-default" onClick={onClose}>{t('shipping.order_trace.close')}</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </>
+    );
+}
+
+export default function OrderTraces({ q = '', events = [] }) {
     const t = useT();
     const [term, setTerm] = useState(q);
-    const [openId, setOpenId] = useState(null);
+    const [selected, setSelected] = useState(null);
 
     const submit = (event) => {
         event.preventDefault();
@@ -33,19 +98,16 @@ export default function OrderTraces({ q = '', orders = [], events = [] }) {
         });
     };
 
-    const searchForm = (
-        <form id="order-trace-search" className="ps-order-trace-search" onSubmit={submit}>
+    const filters = (
+        <form className="ps-sale-search-wrap ps-order-trace-search" onSubmit={submit}>
             <input
                 className="form-control input-sm"
                 value={term}
                 placeholder={t('shipping.order_trace.search_placeholder')}
+                aria-label={t('shipping.order_trace.search_placeholder')}
                 onChange={(event) => setTerm(event.target.value)}
             />
-            <button type="submit" className="btn btn-sm btn-primary">
-                <i className="fa fa-search" />
-                {' '}
-                {t('shipping.order_trace.search')}
-            </button>
+            <PushsaleSearchButton type="submit" label={t('shipping.order_trace.search')} />
         </form>
     );
 
@@ -54,84 +116,55 @@ export default function OrderTraces({ q = '', orders = [], events = [] }) {
             <Head title={t('shipping.order_trace.title')} />
             <PushsalePageShell
                 title={t('shipping.order_trace.title')}
-                subtitle={t('shipping.order_trace.subtitle')}
-                actions={searchForm}
-                pageCode="1.4.1"
+                filters={filters}
+                pageCode="10.1.6"
                 className="ps-order-trace-page pushsale-page"
+                collapsible={false}
             >
-                {orders.length > 0 ? (
-                    <div className="ps-order-trace-orders">
-                        {orders.map((order) => (
-                            <div className="ps-order-trace-order" key={order.id}>
-                                <strong>{order.orderCode}</strong>
-                                <span>{order.customerName}</span>
-                                <span>{order.phone}</span>
-                                <span>{order.trackingNumber || '—'}</span>
-                            </div>
-                        ))}
-                    </div>
-                ) : null}
-
-                <div className="ps-order-trace-table-wrap">
+                <div className="ps-table-scroll">
                     <table className="table table-bordered table-condensed ps-order-trace-table">
                         <thead>
                             <tr>
                                 <th>{t('shipping.order_trace.col_time')}</th>
                                 <th>{t('shipping.order_trace.col_stage')}</th>
-                                <th>{t('shipping.order_trace.col_code')}</th>
+                                <th>{t('shipping.order_trace.col_order')}</th>
+                                <th>{t('shipping.order_trace.col_customer')}</th>
+                                <th>{t('shipping.order_trace.col_phone')}</th>
+                                <th>{t('shipping.order_trace.col_bill')}</th>
                                 <th>{t('shipping.order_trace.col_status')}</th>
                                 <th>{t('shipping.order_trace.col_detail')}</th>
+                                <th>{t('activity.view_detail')}</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {events.length === 0 ? (
-                                <tr>
-                                    <td colSpan={5} className="ps-order-trace-empty">
-                                        {q
-                                            ? t('shipping.order_trace.empty_result')
-                                            : t('shipping.order_trace.empty_prompt')}
+                            {events.length ? events.map((row) => (
+                                <tr key={row.id} onDoubleClick={() => setSelected(row)}>
+                                    <td className="nowrap">{row.at || '—'}</td>
+                                    <td>{t(`shipping.order_trace.stage.${row.stage}`)}</td>
+                                    <td>{row.orderCode || '—'}</td>
+                                    <td>{row.customerName || '—'}</td>
+                                    <td>{row.phone || '—'}</td>
+                                    <td>{row.externalCode || row.gatewayOrderId || '—'}</td>
+                                    <td>{row.statusCode || '—'}</td>
+                                    <td className="ps-order-trace-detail">{row.summary || row.action || '—'}</td>
+                                    <td className="ps-activity-action-btn-cell">
+                                        <button type="button" className="btn btn-xs btn-default" onClick={() => setSelected(row)}>
+                                            <Eye className="size-3" /> {t('activity.view_detail')}
+                                        </button>
                                     </td>
                                 </tr>
-                            ) : events.map((row) => {
-                                const open = openId === row.id;
-                                const code = row.externalCode || row.orderCode || row.gatewayOrderId || row.phone || '—';
-
-                                return (
-                                    <Fragment key={row.id}>
-                                        <tr>
-                                            <td className="ps-order-trace-time">{formatWhen(row.at)}</td>
-                                            <td>{t(`shipping.order_trace.stage.${row.stage}`)}</td>
-                                            <td>{code}</td>
-                                            <td>{row.statusCode || '—'}</td>
-                                            <td>
-                                                <div>{row.summary || row.action || '—'}</div>
-                                                {row.payload ? (
-                                                    <button
-                                                        type="button"
-                                                        className="btn btn-xs btn-default ps-order-trace-toggle"
-                                                        onClick={() => setOpenId(open ? null : row.id)}
-                                                    >
-                                                        {open
-                                                            ? t('shipping.order_trace.hide_payload')
-                                                            : t('shipping.order_trace.show_payload')}
-                                                    </button>
-                                                ) : null}
-                                            </td>
-                                        </tr>
-                                        {open ? (
-                                            <tr className="ps-order-trace-payload-row">
-                                                <td colSpan={5}>
-                                                    <pre className="ps-order-trace-payload">{JSON.stringify(row.payload, null, 2)}</pre>
-                                                </td>
-                                            </tr>
-                                        ) : null}
-                                    </Fragment>
-                                );
-                            })}
+                            )) : (
+                                <tr>
+                                    <td colSpan={9} className="ps-empty">
+                                        {q ? t('shipping.order_trace.empty_result') : t('shipping.order_trace.empty_prompt')}
+                                    </td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
                 </div>
             </PushsalePageShell>
+            <TraceDetailModal selected={selected} onClose={() => setSelected(null)} t={t} />
         </AppLayout>
     );
 }

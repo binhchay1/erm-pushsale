@@ -7,7 +7,7 @@ Mới nhất trước. Living: [PROJECT_CONTRACT.md](./PROJECT_CONTRACT.md), [OP
 ## 2026-10-01 — Nhật ký hành trình đơn
 
 - Landing, response NetShip và webhook trạng thái được ghi vào `order_traces` qua queue riêng `order-traces`. Request chỉ dispatch, không insert.
-- Màn tra cứu: menu 1.4.1 `/admin/shipping/order-traces`.
+- Màn tra cứu: menu 10.1.6 `/admin/shipping/order-traces`, cùng khung header và bảng với nhật ký hoạt động.
 
 ---
 

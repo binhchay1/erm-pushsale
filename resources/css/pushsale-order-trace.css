@@ -1,59 +1,77 @@
-.ps-order-trace-page .ps-order-trace-search {
-    display: flex;
-    gap: 6px;
-    align-items: center;
+/* Ô tìm nằm trong header portal, nên style phải bám .ps-page-header. */
+html body.pushsale-app-body .ps-page-header .ps-order-trace-search.ps-sale-search-wrap {
+    grid-template-columns: minmax(280px, 420px) auto !important;
+    align-items: center !important;
 }
 
-.ps-order-trace-page .ps-order-trace-search .form-control {
-    width: 280px;
+html body.pushsale-app-body .ps-page-header .ps-order-trace-search.ps-sale-search-wrap > .form-control,
+html body.pushsale-app-body .ps-page-header .ps-order-trace-search.ps-sale-search-wrap > .ps-btn {
+    height: var(--ps-header-control-h) !important;
+    min-height: var(--ps-header-control-h) !important;
+    margin: 0 !important;
 }
 
-.ps-order-trace-page .ps-order-trace-orders {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    margin-bottom: 12px;
+html body.pushsale-app-body .ps-page-header .ps-order-trace-search.ps-sale-search-wrap > .form-control {
+    width: 100% !important;
+    min-width: 280px !important;
+    max-width: none !important;
 }
 
-.ps-order-trace-page .ps-order-trace-order {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    padding: 8px 10px;
-    background: #f7fafc;
-    border: 1px solid #e5e7eb;
+html body.pushsale-app-body .ps-order-trace-page .ps-table-scroll {
+    margin: 0 !important;
+    overflow: auto !important;
 }
 
-.ps-order-trace-page .ps-order-trace-table-wrap {
-    overflow-x: auto;
+html body.pushsale-app-body .ps-order-trace-table {
+    width: 100% !important;
+    min-width: 1100px !important;
+    margin: 0 !important;
+    border-collapse: collapse !important;
 }
 
-.ps-order-trace-page .ps-order-trace-table {
-    margin-bottom: 0;
-    background: #fff;
+html body.pushsale-app-body .ps-order-trace-table th {
+    height: 31px !important;
+    padding: 6px 8px !important;
+    border: 1px solid #2b70b8 !important;
+    background: #3f86d6 !important;
+    color: #fff !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
 }
 
-.ps-order-trace-page .ps-order-trace-time {
-    white-space: nowrap;
+html body.pushsale-app-body .ps-order-trace-table td {
+    height: 36px !important;
+    padding: 6px 8px !important;
+    border: 1px solid #d7dce0 !important;
+    color: #000 !important;
+    vertical-align: middle !important;
+    font-size: 12px !important;
 }
 
-.ps-order-trace-page .ps-order-trace-empty {
-    text-align: center;
-    color: #6b7280;
-    padding: 24px 8px;
+html body.pushsale-app-body .ps-order-trace-table tbody tr:nth-child(odd) td {
+    background: #f3f3f3 !important;
 }
 
-.ps-order-trace-page .ps-order-trace-toggle {
-    margin-top: 4px;
+html body.pushsale-app-body .ps-order-trace-table tbody tr:nth-child(even) td {
+    background: #fff !important;
 }
 
-.ps-order-trace-page .ps-order-trace-payload {
-    margin: 0;
-    max-height: 240px;
-    overflow: auto;
-    white-space: pre-wrap;
-    word-break: break-word;
-    font-size: 12px;
-    background: #f8fafc;
-    padding: 8px;
+html body.pushsale-app-body .ps-order-trace-table tbody tr:hover td {
+    background: #e4f1ff !important;
+}
+
+html body.pushsale-app-body .ps-order-trace-table .ps-order-trace-detail {
+    max-width: 280px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+
+html body.pushsale-app-body .ps-order-trace-table .ps-empty {
+    height: 72px !important;
+    color: #7c8795 !important;
+    text-align: center !important;
+    background: #fff !important;
 }
