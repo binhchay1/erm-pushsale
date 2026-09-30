@@ -33,7 +33,7 @@ class ProcessShippingWebhookJob implements ShouldQueue
         try {
             $tenant->forCompany($this->companyId, fn () => $service->process($this->provider, $this->payload));
             if ($this->inboundEventId) {
-                InboundEvent::query()->withoutTenant()->find($this->inboundEventId)?->markProcessed();
+                InboundEvent::query()->find($this->inboundEventId)?->markProcessed();
             }
         } catch (Throwable $e) {
             Log::error('[Shipping] Lỗi xử lý webhook', [
@@ -48,7 +48,7 @@ class ProcessShippingWebhookJob implements ShouldQueue
     public function failed(?Throwable $e): void
     {
         if ($this->inboundEventId) {
-            InboundEvent::query()->withoutTenant()->find($this->inboundEventId)?->markFailed($e?->getMessage() ?? 'Job failed');
+            InboundEvent::query()->find($this->inboundEventId)?->markFailed($e?->getMessage() ?? 'Job failed');
         }
     }
 }

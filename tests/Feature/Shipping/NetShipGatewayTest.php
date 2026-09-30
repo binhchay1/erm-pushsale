@@ -3,6 +3,10 @@
 namespace Tests\Feature\Shipping;
 
 use App\Enums\DeliveryStatus;
+use App\Enums\InboundEventSource;
+use App\Enums\InboundEventStatus;
+use App\Jobs\Shipping\ProcessShippingWebhookJob;
+use App\Models\InboundEvent;
 use App\Models\Order;
 use App\Models\Shipment;
 use App\Models\ShippingPartnerConnection;
@@ -11,6 +15,7 @@ use App\Services\Shipping\CreateShipmentService;
 use App\Services\Shipping\Gateways\NetShip\NetShipProxyCarrier;
 use App\Services\Shipping\ShippingWebhookService;
 use App\Support\ShippingProviders;
+use App\Support\TenantManager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
@@ -625,5 +630,26 @@ class NetShipGatewayTest extends TestCase
         $this->withServerVariables(['REMOTE_ADDR' => '45.32.108.164'])
             ->postJson('/api/v1/shipping/webhooks/netship', $payload)
             ->assertStatus(202);
+    }
+
+    public function test_webhook_job_marks_the_inbound_event_processed(): void
+    {
+        $event = InboundEvent::query()->create([
+            'company_id' => 1,
+            'source' => InboundEventSource::ShippingWebhook,
+            'channel' => 'netship',
+            'status' => InboundEventStatus::Queued,
+            'payload' => [],
+            'headers' => [],
+            'correlation_id' => (string) \Illuminate\Support\Str::uuid(),
+        ]);
+
+        (new ProcessShippingWebhookJob('netship', [
+            'id' => '222',
+            'customerCode' => 'NS-JOB-001',
+            'status' => 1,
+        ], $event->id, 1))->handle(app(ShippingWebhookService::class), app(TenantManager::class));
+
+        $this->assertSame(InboundEventStatus::Processed, $event->fresh()->status);
     }
 }
