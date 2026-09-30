@@ -36,6 +36,9 @@ class NetShipApiClient extends AbstractCarrierHttpClient
     }
 
     /**
+     * Body must be flat JSON (no `myRequest` wrapper): the shop is derived from the token,
+     * a wrapped body is read as empty fields (e.g. "phường gửi \"\"").
+     *
      * @param  array<string, mixed>  $payload
      * @return array<string, mixed>
      */
@@ -45,7 +48,7 @@ class NetShipApiClient extends AbstractCarrierHttpClient
             $this->requestJson(
                 'POST',
                 '/api/third-party/order',
-                json: $this->wrapOrderPayload($payload),
+                json: $payload,
                 action: 'create_order',
                 orderId: $orderId,
             )
@@ -61,38 +64,10 @@ class NetShipApiClient extends AbstractCarrierHttpClient
         return $this->requestJson(
             'POST',
             '/api/third-party/order/estimate-fee',
-            json: $this->wrapOrderPayload($payload),
+            json: $payload,
             action: 'estimate_fee',
             orderId: $orderId,
         );
-    }
-
-    /**
-     * Live create binds `{ myRequest: ... }` (Go validator key `myRequest.ShopID`).
-     * estimate-fee accepts flat OR myRequest; we keep the same wrap for both.
-     * ShopID = NetShip personal shop id (warehouse settings → credentials fallback).
-     *
-     * @param  array<string, mixed>  $payload
-     * @return array{myRequest: array<string, mixed>}
-     */
-    private function wrapOrderPayload(array $payload): array
-    {
-        $creds = $this->credentials->credentials('netship')['credentials'];
-        $shopId = $payload['ShopID']
-            ?? $payload['shopId']
-            ?? $payload['shop_id']
-            ?? $creds['shop_id']
-            ?? $creds['ShopID']
-            ?? null;
-
-        if ($shopId === null || $shopId === '') {
-            throw new \RuntimeException(__('messages.shipping_actions.netship_shop_id_required'));
-        }
-
-        $payload['ShopID'] = is_numeric($shopId) ? (int) $shopId : $shopId;
-        unset($payload['shopId'], $payload['shop_id']);
-
-        return ['myRequest' => $payload];
     }
 
     /** @return array<string, mixed> */

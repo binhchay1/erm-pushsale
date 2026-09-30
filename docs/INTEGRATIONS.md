@@ -33,7 +33,8 @@ Config hold: `config/saleops.php` (`hold_seconds` / `max_hold_seconds`).
   - Staff still choose Viettel Post / GHTK / … on the order.
   - If that carrier’s UI/env credentials are ready → call the **direct** driver.
   - Else, if NetShip is enabled + token set and the provider is in `routed_providers` → create/sync/cancel via **NetShip proxy** (`carrierCode` mapped e.g. `viettel_post` → `VTP`).
-  - Live create binds `{ myRequest: {...} }` (validator key `myRequest.ShopID`). estimate-fee accepts flat or wrapped. Live base: `https://netship.vn` (`test.netship.vn` only when `NETSHIP_USE_SANDBOX=true`).
+  - Create/estimate body is **flat JSON** with exactly the fields in the [NetShip docs](https://steplap.gitbook.io/netship/tao-don-hang) — no `myRequest`, no `ShopID`, no `carrierCode`. The token must be a **shop** "Bên thứ ba" token (the shop and shipping unit come from the token); a master-account token fails with `myRequest.ShopID required`. Live base: `https://netship.vn` (`test.netship.vn` only when `NETSHIP_USE_SANDBOX=true`).
+  - Cancel: `POST /api/third-party/order/cancel/{id}` (NetShip status becomes `8`). Webhook callbacks only send `Content-Type`, so the callback URL must carry `?secret=<webhook_secret>`.
   - Shipment keeps business `provider`; `response_payload.gateway = netship` + `netship_order_id`.
   - Admin menu **1.4** configures NetShip token; NetShip does **not** appear in sale/warehouse carrier dropdowns.
   - Webhook provider key: `netship` — match by `customerCode` / NetShip `id`, do not overwrite business carrier.
