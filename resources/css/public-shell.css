@@ -2,7 +2,32 @@ body.public-app-body {
     min-height: 100vh;
     margin: 0;
     overflow-x: hidden;
-    background: #f8fafc;
+    background: var(--background);
+    color: var(--foreground);
+}
+
+/*
+ * Marketing/public dark palette — one cool zinc + blue family (avoids purple hero / gray primary clash).
+ * Set on body so it overrides html inline theme colors for public pages only.
+ */
+html.dark body.public-app-body {
+    --background: oklch(0.17 0.018 264);
+    --foreground: oklch(0.96 0.008 264);
+    --card: oklch(0.21 0.02 264);
+    --card-foreground: oklch(0.96 0.008 264);
+    --popover: oklch(0.21 0.02 264);
+    --popover-foreground: oklch(0.96 0.008 264);
+    --muted: oklch(0.23 0.018 264);
+    --muted-foreground: oklch(0.72 0.028 264);
+    --accent: oklch(0.25 0.022 264);
+    --accent-foreground: oklch(0.96 0.008 264);
+    --border: oklch(0.55 0.04 264 / 22%);
+    --input: oklch(0.55 0.04 264 / 28%);
+    --primary: oklch(0.64 0.165 262);
+    --primary-foreground: oklch(0.99 0 0);
+    --ring: oklch(0.64 0.165 262);
+    --public-surface-elevated: oklch(0.24 0.022 264);
+    --public-glow: oklch(0.45 0.12 262 / 35%);
 }
 
 body.public-app-body .public-auth-shell {
@@ -266,21 +291,181 @@ body.public-app-body .public-login-demo > button {
 body.public-app-body .public-login-demo > button svg { width: 15px; height: 15px; }
 
 body.public-app-body .public-site-shell {
-    background: #fff;
+    background: var(--background);
+    color: var(--foreground);
 }
 
 body.public-app-body .public-site-header {
-    box-shadow: 0 1px 0 rgba(15,23,42,.04);
+    box-shadow: none;
+    border-bottom: 1px solid var(--border);
 }
 
 body.public-app-body .public-home-page > section:first-of-type {
-    min-height: 620px;
     display: flex;
     align-items: center;
+    min-height: min(72dvh, 36rem);
 }
 
 body.public-app-body .public-site-footer {
-    background: #f8fafc;
+    background: color-mix(in oklch, var(--muted) 55%, var(--background));
+}
+
+body.public-app-body .public-stat-value {
+    color: oklch(0.48 0.19 262);
+}
+
+html.dark body.public-app-body .public-stat-value {
+    color: oklch(0.74 0.13 262);
+}
+
+body.public-app-body .public-home-hero-bg {
+    background: linear-gradient(
+        180deg,
+        color-mix(in oklch, var(--primary) 7%, var(--background)) 0%,
+        var(--background) 55%
+    );
+}
+
+html.dark body.public-app-body .public-home-hero-bg {
+    background:
+        radial-gradient(ellipse 80% 55% at 85% 15%, var(--public-glow), transparent 60%),
+        radial-gradient(ellipse 60% 45% at 10% 0%, oklch(0.35 0.08 262 / 22%), transparent 55%),
+        linear-gradient(180deg, oklch(0.19 0.022 264) 0%, var(--background) 62%);
+}
+
+body.public-app-body .public-home-stats {
+    background: color-mix(in oklch, var(--muted) 45%, var(--background));
+    border-color: var(--border);
+}
+
+html.dark body.public-app-body .public-home-stats {
+    background: var(--public-surface-elevated);
+}
+
+body.public-app-body .public-home-steps {
+    background: color-mix(in oklch, var(--muted) 35%, var(--background));
+}
+
+html.dark body.public-app-body .public-home-steps {
+    background: color-mix(in oklch, var(--card) 55%, var(--background));
+}
+
+body.public-app-body .public-step-index {
+    color: color-mix(in oklch, var(--primary) 28%, transparent);
+}
+
+html.dark body.public-app-body .public-step-index {
+    color: color-mix(in oklch, var(--primary) 42%, transparent);
+}
+
+body.public-app-body .public-feature-card {
+    background: var(--card);
+    border-color: var(--border);
+    box-shadow: 0 1px 0 color-mix(in oklch, var(--foreground) 4%, transparent);
+}
+
+html.dark body.public-app-body .public-feature-card {
+    background: var(--card);
+    box-shadow:
+        0 0 0 1px color-mix(in oklch, var(--foreground) 6%, transparent),
+        0 12px 32px oklch(0 0 0 / 28%);
+}
+
+html.dark body.public-app-body .public-feature-card:hover {
+    border-color: color-mix(in oklch, var(--primary) 35%, var(--border));
+}
+
+body.public-app-body .public-highlight-card {
+    background: var(--card);
+    border-color: var(--border);
+}
+
+html.dark body.public-app-body .public-highlight-card {
+    background: linear-gradient(
+        165deg,
+        color-mix(in oklch, var(--card) 94%, var(--primary) 6%) 0%,
+        var(--card) 100%
+    );
+    box-shadow: 0 16px 40px oklch(0 0 0 / 22%);
+}
+
+body.public-app-body .public-hero-secondary-btn {
+    border-color: var(--border);
+    background: color-mix(in oklch, var(--card) 80%, transparent);
+}
+
+html.dark body.public-app-body .public-hero-secondary-btn {
+    border-color: color-mix(in oklch, var(--foreground) 18%, transparent);
+    background: color-mix(in oklch, var(--card) 65%, transparent);
+    color: var(--foreground);
+}
+
+html.dark body.public-app-body .public-hero-secondary-btn:hover {
+    background: var(--muted);
+    color: var(--foreground);
+}
+
+body.public-app-body .public-marketing-cta {
+    background: linear-gradient(
+        135deg,
+        oklch(0.48 0.2 262.881) 0%,
+        oklch(0.42 0.18 255) 100%
+    );
+    color: oklch(0.985 0 0);
+    box-shadow: 0 20px 50px color-mix(in oklch, var(--primary) 28%, transparent);
+}
+
+html.dark body.public-app-body .public-marketing-cta {
+    background: linear-gradient(
+        135deg,
+        oklch(0.44 0.155 262) 0%,
+        oklch(0.36 0.13 258) 100%
+    );
+    box-shadow:
+        0 0 0 1px color-mix(in oklch, var(--primary) 25%, transparent),
+        0 24px 56px oklch(0.12 0.06 262 / 55%);
+}
+
+body.public-app-body .public-marketing-cta h2,
+body.public-app-body .public-marketing-cta p {
+    color: oklch(0.985 0 0);
+}
+
+body.public-app-body .public-marketing-cta p {
+    opacity: 0.9;
+}
+
+body.public-app-body .public-hero-panel {
+    border: 1px solid var(--border);
+    background: color-mix(in oklch, var(--card) 92%, var(--primary) 8%);
+    box-shadow: 0 20px 44px color-mix(in oklch, var(--foreground) 6%, transparent);
+}
+
+html.dark body.public-app-body .public-hero-panel {
+    background: linear-gradient(
+        160deg,
+        var(--public-surface-elevated) 0%,
+        var(--card) 48%,
+        color-mix(in oklch, var(--background) 88%, var(--primary) 12%) 100%
+    );
+    border-color: color-mix(in oklch, var(--primary) 22%, var(--border));
+    box-shadow:
+        0 0 0 1px color-mix(in oklch, var(--primary) 10%, transparent),
+        0 22px 48px oklch(0 0 0 / 38%);
+}
+
+html.dark body.public-app-body .public-hero-panel-item {
+    border-color: color-mix(in oklch, var(--border) 85%, var(--primary) 15%);
+    background: color-mix(in oklch, var(--background) 55%, var(--card) 45%);
+}
+
+html.dark body.public-app-body .public-site-header {
+    background: color-mix(in oklch, var(--background) 82%, transparent);
+    border-bottom-color: var(--border);
+}
+
+html.dark body.public-app-body .public-site-footer {
+    background: color-mix(in oklch, var(--card) 40%, var(--background));
 }
 
 @media (max-width: 960px) {

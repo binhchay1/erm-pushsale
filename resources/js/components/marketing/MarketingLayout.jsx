@@ -3,6 +3,7 @@ import { LayoutDashboard, Menu, X } from 'lucide-react';
 import { useState } from 'react';
 
 import { LanguageToggle } from '@/components/layout/LanguageToggle';
+import { ThemeToggle } from '@/components/layout/ThemeToggle';
 import { LocaleSync } from '@/components/layout/LocaleSync';
 import { Button } from '@/components/ui/button';
 import { useT } from '@/providers/I18nProvider';
@@ -63,6 +64,7 @@ export function MarketingLayout({ children }) {
                     </nav>
 
                     <div className="hidden items-center gap-2 md:flex">
+                        <ThemeToggle />
                         <LanguageToggle />
                         <Button asChild>
                             <Link href={isAuthed ? '/' : '/login'}>
@@ -72,6 +74,7 @@ export function MarketingLayout({ children }) {
                     </div>
 
                     <div className="flex items-center gap-1 md:hidden">
+                        <ThemeToggle />
                         <LanguageToggle />
                         <Button
                             variant="ghost"

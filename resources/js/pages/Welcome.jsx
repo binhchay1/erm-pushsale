@@ -42,7 +42,7 @@ const STEPS = [
 function Highlight({ icon: Icon, title, desc, points }) {
     const t = useT();
     return (
-        <div className="rounded-2xl border border-border/70 bg-card p-6 sm:p-8">
+        <div className="public-highlight-card rounded-2xl border p-6 sm:p-8">
             <div className="flex size-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <Icon className="size-6" />
             </div>
@@ -69,49 +69,67 @@ export default function Welcome({ seo }) {
             <div className="public-home-page">
 
             {/* Hero */}
-            <section className="relative overflow-hidden">
-                <div
-                    className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-primary/5 via-background to-background"
-                    aria-hidden
-                />
-                <div
-                    className="pointer-events-none absolute -top-32 left-1/2 -z-10 h-96 w-[42rem] -translate-x-1/2 rounded-full bg-primary/10 blur-3xl"
-                    aria-hidden
-                />
-                <div className="mx-auto max-w-4xl px-4 pb-16 pt-20 text-center sm:pt-28">
-                    <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary">
-                        <Sparkles className="size-3.5" />
-                        {t('marketing.badge')}
-                    </span>
-                    <h1 className="mt-6 text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
-                        {t('welcome.hero_title')}
-                    </h1>
-                    <p className="mx-auto mt-5 max-w-2xl text-lg text-muted-foreground">{t('welcome.hero_desc')}</p>
-                    <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-                        <Button size="lg" asChild>
-                            <Link href="/login">
-                                {t('welcome.cta_login')}
-                                <ArrowRight className="size-4" />
-                            </Link>
-                        </Button>
-                        <Button size="lg" variant="outline" asChild>
-                            <Link href="/features">{t('marketing.explore_features')}</Link>
-                        </Button>
+            <section className="public-home-hero-bg relative w-full overflow-hidden">
+                <div className="mx-auto grid w-full max-w-6xl items-center gap-10 px-4 py-12 lg:grid-cols-2 lg:gap-12 lg:py-16">
+                    <div className="text-center lg:text-left">
+                        <span className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+                            <Sparkles className="size-3.5" aria-hidden />
+                            {t('marketing.badge')}
+                        </span>
+                        <h1 className="mt-5 text-balance text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-[2.75rem] lg:leading-[1.08]">
+                            {t('welcome.hero_title')}
+                        </h1>
+                        <p className="mx-auto mt-4 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg lg:mx-0">
+                            {t('welcome.hero_desc')}
+                        </p>
+                        <div className="mt-8 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
+                            <Button size="lg" asChild>
+                                <Link href="/login">
+                                    {t('welcome.cta_login')}
+                                    <ArrowRight className="size-4" aria-hidden />
+                                </Link>
+                            </Button>
+                            <Button size="lg" variant="outline" className="public-hero-secondary-btn" asChild>
+                                <Link href="/features">{t('marketing.explore_features')}</Link>
+                            </Button>
+                        </div>
                     </div>
-                    <p className="mt-6 text-sm text-muted-foreground">{t('marketing.trust')}</p>
+
+                    <div className="public-hero-panel relative mx-auto w-full max-w-md rounded-2xl p-6 sm:p-8 lg:max-w-none">
+                        <p className="text-sm font-semibold text-foreground">{t('marketing.modules_title')}</p>
+                        <ul className="mt-4 space-y-3">
+                            {MODULES.slice(0, 4).map(({ icon: Icon, title, desc }) => (
+                                <li
+                                    key={title}
+                                    className="public-hero-panel-item flex gap-3 rounded-xl border p-3"
+                                >
+                                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">
+                                        <Icon className="size-4" aria-hidden />
+                                    </div>
+                                    <div className="min-w-0">
+                                        <p className="text-sm font-medium leading-snug text-foreground">{t(title)}</p>
+                                        <p className="mt-0.5 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
+                                            {t(desc)}
+                                        </p>
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
                 </div>
             </section>
 
             {/* Stats */}
-            <section className="border-y border-border/60 bg-muted/30">
+            <section className="public-home-stats border-y">
                 <div className="mx-auto grid max-w-6xl grid-cols-2 gap-6 px-4 py-10 lg:grid-cols-4">
                     {STATS.map((s) => (
                         <div key={s.label} className="text-center">
-                            <div className="text-2xl font-bold tracking-tight text-primary sm:text-3xl">{t(s.value)}</div>
+                            <div className="public-stat-value text-2xl font-bold tracking-tight sm:text-3xl">{t(s.value)}</div>
                             <div className="mt-1 text-sm text-muted-foreground">{t(s.label)}</div>
                         </div>
                     ))}
                 </div>
+                <p className="mx-auto max-w-2xl px-4 pb-8 text-center text-sm text-muted-foreground">{t('marketing.trust')}</p>
             </section>
 
             {/* Modules */}
@@ -124,7 +142,7 @@ export default function Welcome({ seo }) {
                     {MODULES.map(({ icon: Icon, title, desc }) => (
                         <div
                             key={title}
-                            className="group rounded-2xl border border-border/70 bg-card p-6 transition-colors hover:border-primary/40"
+                            className="public-feature-card group rounded-2xl border p-6 transition-colors"
                         >
                             <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
                                 <Icon className="size-5" />
@@ -137,13 +155,13 @@ export default function Welcome({ seo }) {
             </section>
 
             {/* Steps */}
-            <section className="border-t border-border/60 bg-muted/30">
+            <section className="public-home-steps border-t border-border/60">
                 <div className="mx-auto max-w-6xl px-4 py-20">
                     <h2 className="text-center text-3xl font-bold tracking-tight">{t('marketing.steps_title')}</h2>
                     <div className="mt-12 grid gap-8 md:grid-cols-3">
                         {STEPS.map((s) => (
                             <div key={s.n} className="relative">
-                                <span className="text-4xl font-bold text-primary/25">{s.n}</span>
+                                <span className="public-step-index text-4xl font-bold">{s.n}</span>
                                 <h3 className="mt-2 text-lg font-semibold">{t(s.title)}</h3>
                                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{t(s.desc)}</p>
                             </div>
@@ -176,17 +194,17 @@ export default function Welcome({ seo }) {
 
             {/* CTA */}
             <section className="px-4 pb-20">
-                <div className="mx-auto max-w-5xl overflow-hidden rounded-3xl bg-primary px-6 py-14 text-center text-primary-foreground sm:px-12">
+                <div className="public-marketing-cta mx-auto max-w-5xl overflow-hidden rounded-3xl px-6 py-14 text-center sm:px-12">
                     <h2 className="text-3xl font-bold tracking-tight">{t('marketing.cta_title')}</h2>
-                    <p className="mx-auto mt-3 max-w-xl text-primary-foreground/85">{t('marketing.cta_desc')}</p>
+                    <p className="mx-auto mt-3 max-w-xl">{t('marketing.cta_desc')}</p>
                     <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-                        <Button size="lg" variant="secondary" asChild>
+                        <Button size="lg" variant="secondary" className="text-foreground" asChild>
                             <Link href="/contact">{t('marketing.cta_button')}</Link>
                         </Button>
                         <Button
                             size="lg"
                             variant="outline"
-                            className="border-primary-foreground/30 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"
+                            className="border-white/35 bg-white/10 text-white hover:bg-white/20 hover:text-white"
                             asChild
                         >
                             <Link href="/features">{t('marketing.cta_secondary')}</Link>
