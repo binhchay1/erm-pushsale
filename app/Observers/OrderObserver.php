@@ -37,6 +37,7 @@ class OrderObserver
             'sale_user_id',
             'team_id',
             'warehouse_id',
+            'tracking_number',
             'created_at',
             'data_arrived_at',
             'closed_at',
@@ -45,6 +46,10 @@ class OrderObserver
 
         if (! $order->wasChanged($watched)) {
             return;
+        }
+
+        if ($order->wasChanged(['tracking_number', 'delivery_status'])) {
+            \App\Jobs\Pancake\SyncOrderToPancakeJob::dispatch($order->id);
         }
 
         $this->dispatchAffectedDates($order);

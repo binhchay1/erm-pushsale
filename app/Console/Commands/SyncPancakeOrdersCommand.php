@@ -34,6 +34,13 @@ class SyncPancakeOrdersCommand extends Command
         }
 
         return $tenant->forCompany((int) $companyId, function () use ($connections, $importer) {
+            $connection = $connections->connection();
+            if (! $connection->is_enabled || empty($connection->credentials['api_key'])) {
+                $this->info('Kết nối Pancake chưa được kích hoạt hoặc chưa có API key. Bỏ qua đồng bộ.');
+
+                return self::SUCCESS;
+            }
+
             $params = [
                 'page' => (int) $this->option('page'),
                 'search' => $this->option('search'),

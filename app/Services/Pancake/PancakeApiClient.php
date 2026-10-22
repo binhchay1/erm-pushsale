@@ -41,6 +41,47 @@ class PancakeApiClient
     }
 
     /** @return array<string, mixed> */
+    public function updateOrder(string|int $orderId, array $data): array
+    {
+        $shopId = $this->requireShopId();
+
+        return $this->put("/shops/{$shopId}/orders/{$orderId}", $data);
+    }
+
+    /** @return array<string, mixed> */
+    public function updateVariationQuantity(string|int $variationId, int $quantity, ?int $warehouseId = null): array
+    {
+        $shopId = $this->requireShopId();
+        $payload = ['quantity' => $quantity];
+        if ($warehouseId) {
+            $payload['warehouse_id'] = $warehouseId;
+        }
+
+        return $this->post("/shops/{$shopId}/variations/{$variationId}/update_quantity", $payload);
+    }
+
+    /**
+     * @param  array<int, array{variation_id: string|int, quantity: int, warehouse_id?: int|null}>  $variations
+     * @return array<string, mixed>
+     */
+    public function updateVariationsQuantity(array $variations): array
+    {
+        $shopId = $this->requireShopId();
+
+        return $this->post("/shops/{$shopId}/variations/update_quantity", [
+            'variations' => $variations,
+        ]);
+    }
+
+    /** @return array<string, mixed> */
+    public function warehouses(): array
+    {
+        $shopId = $this->requireShopId();
+
+        return $this->get("/shops/{$shopId}/warehouses");
+    }
+
+    /** @return array<string, mixed> */
     public function conversationMessages(?string $pageId, string $conversationId, array $params = []): array
     {
         $pageId = $this->resolvePageId($pageId);
@@ -83,6 +124,58 @@ class PancakeApiClient
         if ($response->failed()) {
             throw new RuntimeException(sprintf(
                 'Pancake POS API lỗi HTTP %s: %s',
+                $response->status(),
+                str($response->body())->limit(500)->value(),
+            ));
+        }
+
+        $json = $response->json();
+
+        return is_array($json) ? $json : ['raw' => $response->body()];
+    }
+
+    /** @return array<string, mixed> */
+    protected function put(string $path, array $payload = [], array $params = []): array
+    {
+        $url = ltrim($path, '/');
+        $queryParams = array_filter([
+            ...$params,
+            'api_key' => $this->requireApiKey(),
+        ], fn ($value) => $value !== null && $value !== '');
+
+        $response = $this->http()
+            ->withQueryParameters($queryParams)
+            ->put($url, $payload);
+
+        if ($response->failed()) {
+            throw new RuntimeException(sprintf(
+                'Pancake POS API PUT lỗi HTTP %s: %s',
+                $response->status(),
+                str($response->body())->limit(500)->value(),
+            ));
+        }
+
+        $json = $response->json();
+
+        return is_array($json) ? $json : ['raw' => $response->body()];
+    }
+
+    /** @return array<string, mixed> */
+    protected function post(string $path, array $payload = [], array $params = []): array
+    {
+        $url = ltrim($path, '/');
+        $queryParams = array_filter([
+            ...$params,
+            'api_key' => $this->requireApiKey(),
+        ], fn ($value) => $value !== null && $value !== '');
+
+        $response = $this->http()
+            ->withQueryParameters($queryParams)
+            ->post($url, $payload);
+
+        if ($response->failed()) {
+            throw new RuntimeException(sprintf(
+                'Pancake POS API POST lỗi HTTP %s: %s',
                 $response->status(),
                 str($response->body())->limit(500)->value(),
             ));

@@ -19,29 +19,31 @@ export function CredentialField({ id, field, value, onChange, className, fieldLa
 
     return (
         <div className={cn('space-y-1.5', className)}>
-            <Label htmlFor={id}>{fieldLabel}</Label>
-
-            <div
-                className={cn(
-                    'rounded-md border px-3 py-2 text-xs',
-                    configured
-                        ? 'border-emerald-200 bg-emerald-50/80 text-emerald-900 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-200'
-                        : 'border-amber-200 bg-amber-50/80 text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200',
-                )}
-            >
-                {configured ? (
-                    <>
-                        <span className="font-medium">{t('integrations.configured')}</span>
-                        {source && <span className="text-muted-foreground"> — {source}</span>}
-                        <p className="mt-0.5 font-mono text-[11px] break-all">
-                            {field.is_secret
-                                ? field.masked ?? '••••••••'
-                                : field.value ?? '—'}
-                        </p>
-                    </>
-                ) : (
-                    <span className="font-medium">{t('integrations.not_configured_env')}</span>
-                )}
+            <div className="flex items-center justify-between gap-2">
+                <Label htmlFor={id} className="text-xs font-semibold text-slate-700">
+                    {fieldLabel}
+                    {field.required && <span className="ml-0.5 text-rose-500">*</span>}
+                </Label>
+                <div className="flex items-center gap-1.5 text-[11px]">
+                    {configured ? (
+                        <span className="inline-flex items-center gap-1 rounded bg-emerald-50 px-1.5 py-0.5 font-medium text-emerald-700 border border-emerald-200">
+                            <span className="inline-block rounded-full bg-emerald-500" style={{ width: 6, height: 6 }} />
+                            <span>{source || t('integrations.configured')}</span>
+                            {field.is_secret ? (
+                                <span className="font-mono text-slate-400">({field.masked ?? '••••••••'})</span>
+                            ) : field.value ? (
+                                <span className="max-w-[130px] truncate font-mono text-slate-600" title={String(field.value)}>
+                                    ({field.value})
+                                </span>
+                            ) : null}
+                        </span>
+                    ) : (
+                        <span className="inline-flex items-center gap-1 rounded bg-slate-100 px-1.5 py-0.5 font-medium text-slate-500 border border-slate-200">
+                            <span className="inline-block rounded-full bg-slate-400" style={{ width: 6, height: 6 }} />
+                            <span>{t('integrations.not_configured')}</span>
+                        </span>
+                    )}
+                </div>
             </div>
 
             <Input
@@ -51,10 +53,11 @@ export function CredentialField({ id, field, value, onChange, className, fieldLa
                 onChange={onChange}
                 placeholder={
                     configured
-                        ? t('integrations.placeholder_keep')
+                        ? (field.is_secret ? '•••••••• (' + t('integrations.placeholder_keep') + ')' : String(field.value ?? t('integrations.placeholder_keep')))
                         : t('integrations.placeholder_enter', { label: fieldLabel.toLowerCase() })
                 }
                 autoComplete="off"
+                className="h-8.5 font-mono text-xs bg-white text-slate-900 border-slate-300 shadow-none focus-visible:border-blue-500 focus-visible:ring-1 focus-visible:ring-blue-500"
             />
         </div>
     );
@@ -65,33 +68,31 @@ export function SecretField({ id, label, isSet, masked, value, onChange, placeho
 
     return (
         <div className="space-y-1.5">
-            <Label htmlFor={id}>{label}</Label>
-            <div
-                className={cn(
-                    'rounded-md border px-3 py-2 text-xs',
-                    isSet
-                        ? 'border-emerald-200 bg-emerald-50/80 text-emerald-900 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-200'
-                        : 'border-amber-200 bg-amber-50/80 text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200',
-                )}
-            >
-                {isSet ? (
-                    <>
-                        <span className="font-medium">{t('integrations.configured')}</span>
-                        {masked && (
-                            <p className="mt-0.5 font-mono text-[11px]">{masked}</p>
-                        )}
-                    </>
-                ) : (
-                    <span className="font-medium">{t('integrations.not_configured')}</span>
-                )}
+            <div className="flex items-center justify-between gap-2">
+                <Label htmlFor={id} className="text-xs font-semibold text-slate-700">{label}</Label>
+                <div className="flex items-center gap-1.5 text-[11px]">
+                    {isSet ? (
+                        <span className="inline-flex items-center gap-1 rounded bg-emerald-50 px-1.5 py-0.5 font-medium text-emerald-700 border border-emerald-200">
+                            <span className="inline-block rounded-full bg-emerald-500" style={{ width: 6, height: 6 }} />
+                            <span>{t('integrations.configured')}</span>
+                            {masked && <span className="font-mono text-slate-400">({masked})</span>}
+                        </span>
+                    ) : (
+                        <span className="inline-flex items-center gap-1 rounded bg-slate-100 px-1.5 py-0.5 font-medium text-slate-500 border border-slate-200">
+                            <span className="inline-block rounded-full bg-slate-400" style={{ width: 6, height: 6 }} />
+                            <span>{t('integrations.not_configured')}</span>
+                        </span>
+                    )}
+                </div>
             </div>
             <Input
                 id={id}
                 type="password"
                 value={value}
                 onChange={onChange}
-                placeholder={isSet ? t('integrations.placeholder_keep') : placeholderEmpty}
+                placeholder={isSet ? '•••••••• (' + t('integrations.placeholder_keep') + ')' : placeholderEmpty}
                 autoComplete="off"
+                className="h-8.5 font-mono text-xs bg-white text-slate-900 border-slate-300 shadow-none focus-visible:border-blue-500 focus-visible:ring-1 focus-visible:ring-blue-500"
             />
         </div>
     );

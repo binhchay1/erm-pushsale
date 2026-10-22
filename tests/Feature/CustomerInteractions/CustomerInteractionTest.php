@@ -223,7 +223,11 @@ class CustomerInteractionTest extends TestCase
 
     private function makeOrder(User $sales, string $code = 'ORD-CUSTOMER-001', string $phone = '0912345678'): Order
     {
+        $shop = app(\App\Services\Shops\ShopProvisioningService::class)->ensureDefaultShop($sales->company);
+
         return Order::query()->create([
+            'company_id' => $sales->company_id,
+            'shop_id' => $shop->id,
             'order_code' => $code,
             'sale_user_id' => $sales->id,
             'customer_name' => 'Nguyễn Văn Khách',

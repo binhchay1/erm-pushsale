@@ -13,11 +13,52 @@ Landing webhooks, Pancake chat, queues. Ops: [OPERATIONS.md](./OPERATIONS.md). P
 
 Config hold: `config/saleops.php` (`hold_seconds` / `max_hold_seconds`).
 
-## Pancake
+## Pancake (Hệ sinh thái Pancake POS & Pages)
 
-- Assignment + customer chat realtime (Echo/Reverb).
-- Keep channel auth + policy scoped to conversation owners.
-- Details live in code under `app/Services` / listeners — do not fork one-off MD per tweak.
+Hệ thống hỗ trợ đồng bộ tự động 2 chiều toàn diện giữa **ERM Pushsale** và **Pancake** (gồm Pancake POS `pos.pages.fm` và Pancake Pages `pages.fm`):
+
+### 1. Luồng nhận dữ liệu vào Pushsale (Inbound Flow)
+- **Webhook Đơn hàng (Khuyên dùng)**:
+  - Endpoint: `POST /api/v1/webhooks/pancake/{webhook_token}`
+  - Nhận sự kiện `order.create` hoặc `order.update` từ Pancake POS.
+  - Driver: `PancakeLeadDriver` chuẩn hóa tự động thông tin khách, địa chỉ, sản phẩm/biến thể, chiết khấu, tiền cọc, ghi chú.
+  - Phân bổ Sale: `PancakeAssignmentResolver` gán theo mapping nhân viên (`pancake_user_mappings`), chủ hội thoại chat cũ, hoặc round-robin theo luật LeadIngestion.
+  - Vết đồng bộ: Lưu lại trong `pancake_sync_records` (`external_id = pancake_order_id`, `external_type = 'order'`).
+- **Chrome Extension (Bán tự động / Test nhanh)**:
+  - Thư mục: `extensions/pancake-saleops`
+  - Nhân viên trực chat trên Pancake mở khung chat/đơn, bấm "Đẩy về Pushsale".
+  - Endpoint: `POST /api/v1/pancake/extension/orders` (yêu cầu Sanctum Bearer token).
+  - Tự động gán sale theo tài khoản đang đăng nhập Extension.
+- **Manual Sync (Đồng bộ tức thời trên UI)**:
+  - Endpoint: `POST /admin/integrations/pancake/sync-now`
+  - Thao tác: Bấm nút "Đồng bộ đơn ngay" tại menu **1.4 / Quản trị > Kết nối nền tảng** (`/admin/integrations`).
+  - Kéo ngay tối đa 20 đơn mới nhất từ Pancake POS Open API (`GET /shops/{shop_id}/orders`), không cần chờ webhook.
+- **Scheduler Fallback (Chống rớt đơn)**:
+  - Command: `php artisan pancake:sync-orders --limit=50`
+  - Chạy ngầm định kỳ mỗi 10 phút (`routes/console.php`), quét và gom bù bất kỳ đơn hàng nào bị gián đoạn mạng.
+
+### 2. Luồng đồng bộ ngược sang Pancake POS (Outbound Flow)
+- **Mã vận đơn & Trạng thái giao hàng (Kho 5.1 / Vận chuyển)**:
+  - Kích hoạt: Tự động qua `OrderObserver` khi đơn hàng có cập nhật `tracking_number` hoặc `delivery_status`.
+  - Job xử lý: `SyncOrderToPancakeJob` (hàng đợi `pancake-orders`).
+  - Service: `PancakeOutboundSyncService::syncOrderShipping($order)`.
+  - Endpoint Pancake gọi: `PUT https://pos.pages.fm/api/v1/shops/{shop_id}/orders/{pancake_order_id}?api_key={api_key}`.
+  - Payload đẩy sang: `tracking_number`, `bill_code`, `partner_order_id`, `shipping_partner`, và mã trạng thái tương ứng (`status`: 2 Đang giao, 3 Hoàn thành/Đã giao, 4 Đang hoàn/Đã hoàn, 5 Đã huỷ).
+  - Cập nhật thời điểm `last_synced_at` và log payload vào metadata của `pancake_sync_records`.
+- **Biến động tồn kho (Kho 5.3)**:
+  - Kích hoạt: Tự động khi hoàn thành phiếu nhập/xuất kho (5.3) hoặc xuất kho theo đơn (`WarehouseInventoryMovement::created`).
+  - Job xử lý: `SyncInventoryToPancakeJob`.
+  - Service: `PancakeOutboundSyncService::syncInventoryMovement($movement)`.
+  - Endpoint Pancake gọi: `POST https://pos.pages.fm/api/v1/shops/{shop_id}/variations/{variation_id}/update_quantity`.
+  - Tự động khớp SKU sản phẩm nội bộ với biến thể trên Pancake POS và đồng bộ tồn kho thực tế.
+
+### 3. Hội thoại & Chat trực tiếp khách hàng (Pancake Pages)
+- Direct customer chat không phụ thuộc Extension. Webhook đơn hàng hoặc Extension lưu `page_id` + `conversation_id` vào `pancake_sync_records` / `pancake_customer_messages`.
+- Dialog đơn hàng khách đọc tin nhắn tại: `GET /customers/orders/{order}/pancake-messages`.
+- Gửi tin nhắn phản hồi: `POST /customers/orders/{order}/pancake-messages` (yêu cầu quyền `customer_chat:full`).
+- Runtime gọi Pancake Page API: `https://pages.fm/api/public_api/v2` với query parameter `page_access_token`.
+- Webhook tin nhắn đến: `POST /api/v1/pancake/messages/{webhook_token}` (phát sự kiện Echo/Reverb `PancakeCustomerMessageCreated` realtime).
+- Quản trị & kiểm tra hệ thống chat: `php artisan pancake:doctor --json`. Map tài khoản chat: `php artisan pancake:map-user`.
 
 ## Horizon / Redis
 

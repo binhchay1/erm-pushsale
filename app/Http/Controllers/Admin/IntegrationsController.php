@@ -150,4 +150,67 @@ class IntegrationsController extends Controller
             ], 422);
         }
     }
+
+    public function syncNow(
+        Request $request,
+        string $platform,
+        IntegrationConfigService $config,
+        PancakeConnectionResolver $pancakeConnections,
+        \App\Services\Pancake\PancakeOrderImportService $importer,
+    ): JsonResponse {
+        $enum = IntegrationPlatform::tryFrom($platform);
+
+        if ($enum !== IntegrationPlatform::Pancake) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Chỉ hỗ trợ đồng bộ thủ công cho Pancake POS.',
+            ], 422);
+        }
+
+        try {
+            $client = $pancakeConnections->client();
+            $response = $client->orders(['page' => 1]);
+            $orders = \Illuminate\Support\Arr::get($response, 'data')
+                ?? \Illuminate\Support\Arr::get($response, 'orders')
+                ?? \Illuminate\Support\Arr::get($response, 'items')
+                ?? [];
+
+            if (! is_array($orders) || empty($orders)) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Không tìm thấy đơn hàng mới nào trên Pancake POS.',
+                    'count' => 0,
+                    'orders' => [],
+                ]);
+            }
+
+            $synced = [];
+            $limit = min(20, count($orders));
+            foreach (array_slice($orders, 0, $limit) as $order) {
+                if (! is_array($order)) {
+                    continue;
+                }
+                $res = $importer->import($order, $request->user());
+                $synced[] = [
+                    'order_code' => $res['order']?->order_code ?? ('lead#'.$res['lead']->id),
+                    'customer_name' => $res['lead']->customer_name,
+                    'customer_phone' => $res['lead']->customer_phone,
+                ];
+            }
+
+            $config->touchSynced($enum);
+
+            return response()->json([
+                'success' => true,
+                'message' => sprintf('Đã đồng bộ thành công %d đơn hàng từ Pancake POS!', count($synced)),
+                'count' => count($synced),
+                'orders' => $synced,
+            ]);
+        } catch (Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi đồng bộ từ Pancake POS: '.$e->getMessage(),
+            ], 422);
+        }
+    }
 }

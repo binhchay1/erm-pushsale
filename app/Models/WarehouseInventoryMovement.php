@@ -42,6 +42,13 @@ class WarehouseInventoryMovement extends Model
         ];
     }
 
+    protected static function booted(): void
+    {
+        static::created(function (WarehouseInventoryMovement $movement): void {
+            \App\Jobs\Pancake\SyncInventoryToPancakeJob::dispatch($movement->id);
+        });
+    }
+
     public static function typeLabel(string $type): string
     {
         return match ($type) {

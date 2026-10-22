@@ -65,6 +65,7 @@ class PancakeAssignmentTest extends TestCase
     {
         $sale = User::factory()->create(['role' => UserRole::Sales]);
         $connection = IntegrationConnection::forPlatform(IntegrationPlatform::Pancake);
+        $connection->update(['is_enabled' => true]);
 
         PancakeUserMapping::query()->create([
             'company_id' => $connection->company_id,
@@ -82,10 +83,10 @@ class PancakeAssignmentTest extends TestCase
             'assignee' => ['id' => 'agent-001', 'name' => 'Agent Pancake'],
         ])->assertAccepted();
 
-        $this->artisan('queue:work', [
-            '--queue' => config('saleops.queues.pancake_orders', 'pancake-orders'),
-            '--once' => true,
-        ])->assertExitCode(0);
+        $records = \Illuminate\Support\Facades\Queue::pushed(\App\Jobs\Leads\ProcessLeadIngestionJob::class);
+        $job = $records->last();
+        $this->assertNotNull($job, 'Endpoint phải dispatch ProcessLeadIngestionJob.');
+        app()->call([$job, 'handle']);
 
         $record = PancakeSyncRecord::query()->where('external_id', 'PK-WEBHOOK-1')->first();
 

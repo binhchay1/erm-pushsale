@@ -69,6 +69,7 @@ Route::middleware('role:'.User::ROLE_ADMIN)->group(function (): void {
     Route::get('integrations', [IntegrationsController::class, 'index'])->name('integrations.index');
     Route::put('integrations/{platform}', [IntegrationsController::class, 'update'])->name('integrations.update');
     Route::post('integrations/{platform}/test', [IntegrationsController::class, 'testWebhook'])->name('integrations.test');
+    Route::post('integrations/{platform}/sync-now', [IntegrationsController::class, 'syncNow'])->name('integrations.sync-now');
     Route::get('system-monitor', [SystemMonitorController::class, 'index'])->name('system-monitor.index');
     Route::get('system-monitor/events/{inboundEvent}', [SystemMonitorController::class, 'show'])->name('system-monitor.show');
 });

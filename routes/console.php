@@ -79,3 +79,9 @@ Schedule::command('reports:prune-snapshots --limit=5000 --queue')
 
 // Populate Horizon throughput/runtime graphs. The scheduler itself should run every minute.
 Schedule::command('horizon:snapshot')->everyFiveMinutes()->withoutOverlapping();
+
+// Quét định kỳ bù đơn Pancake POS chống rớt đơn (Fallback cho Webhook).
+Schedule::command('pancake:sync-orders --limit=50')
+    ->everyTenMinutes()
+    ->withoutOverlapping(10)
+    ->onOneServer();
