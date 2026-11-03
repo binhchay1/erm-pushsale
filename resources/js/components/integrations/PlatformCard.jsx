@@ -241,6 +241,12 @@ export function PlatformCard({ platform }) {
                                 <div className="space-y-1 text-slate-700 text-xs leading-relaxed pl-1">
                                     <p>1. Vào <strong>Pancake POS</strong> (<code className="rounded bg-white border border-blue-200 px-1 py-0.5 font-mono text-blue-900">pos.pages.fm</code>) &rarr; <strong>Cài đặt</strong> &rarr; <strong>Nâng cao</strong> &rarr; <strong>Kết nối bên thứ 3 (Webhook/API)</strong>.</p>
                                     <p>2. Dán <strong>Webhook URL</strong> ở trên và tích chọn: <em>Đơn hàng (Tạo mới, Cập nhật)</em>.</p>
+                                    {platform.pancake_chat_webhook_url && (
+                                        <p>
+                                            Webhook tin nhắn Pages (cấu hình riêng trên Pancake Pages, thường cần Pancake bật tính năng):{' '}
+                                            <code className="rounded bg-white border border-blue-200 px-1 py-0.5 font-mono text-slate-800 break-all">{platform.pancake_chat_webhook_url}</code>
+                                        </p>
+                                    )}
                                     {platform.pancake_extension_url && (
                                         <p className="pt-0.5 border-t border-blue-200/60 text-slate-600">
                                             3. Nếu dùng Chrome Extension, cấu hình endpoint: <code className="rounded bg-white border border-blue-200 px-1 py-0.5 font-mono text-slate-800">{platform.pancake_extension_url}</code>

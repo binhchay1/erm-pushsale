@@ -149,6 +149,9 @@ class IntegrationConfigService
             'webhook_url' => $connection->webhookUrl(),
             'api_leads_url' => url('/api/v1/leads'),
             'pancake_extension_url' => $key === 'pancake' ? url('/api/v1/pancake/extension/orders') : null,
+            'pancake_chat_webhook_url' => $key === 'pancake'
+                ? url('/api/v1/pancake/messages/'.$connection->webhook_token)
+                : null,
             'last_synced_at' => $connection->last_synced_at?->toIso8601String(),
             'docs_url' => $meta['docs'] ?? null,
             'verify_token_set' => filled($verifyValue),
