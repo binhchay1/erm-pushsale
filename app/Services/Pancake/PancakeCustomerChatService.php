@@ -373,15 +373,32 @@ class PancakeCustomerChatService
     /** @param array<string, mixed> $payload @return list<array<string, mixed>> */
     protected function messageRows(array $payload): array
     {
+        foreach ([
+            Arr::get($payload, 'data.message'),
+            Arr::get($payload, 'message'),
+        ] as $single) {
+            if (is_array($single) && $this->looksLikeMessageRow($single)) {
+                return [$single];
+            }
+        }
+
         $candidate = Arr::get($payload, 'data.messages')
             ?? Arr::get($payload, 'data.items')
             ?? Arr::get($payload, 'messages')
             ?? Arr::get($payload, 'items')
             ?? Arr::get($payload, 'data')
-            ?? Arr::get($payload, 'message')
             ?? $payload;
 
         if (! is_array($candidate)) {
+            return [];
+        }
+
+        if (Arr::has($candidate, 'conversation') && is_array(Arr::get($candidate, 'message'))) {
+            $nested = Arr::get($candidate, 'message');
+            if (is_array($nested) && $this->looksLikeMessageRow($nested)) {
+                return [$nested];
+            }
+
             return [];
         }
 
@@ -530,6 +547,8 @@ class PancakeCustomerChatService
             Arr::get($payload, 'data.customer.phone'),
             Arr::get($payload, 'conversation.customer.phone'),
             Arr::get($payload, 'data.conversation.customer.phone'),
+            Arr::get($payload, 'data.conversation.from.phone'),
+            Arr::get($payload, 'data.message.from.phone'),
             Arr::get($payload, 'sender.phone'),
             Arr::get($payload, 'from.phone'),
         ]);
