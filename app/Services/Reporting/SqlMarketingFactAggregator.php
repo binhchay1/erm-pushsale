@@ -212,12 +212,7 @@ LEFT JOIN (
    AND revenue_agg.marketing_source_id = lead_agg.marketing_source_id
    AND revenue_agg.utm_campaign = lead_agg.utm_campaign
    AND revenue_agg.status = lead_agg.status
-ON DUPLICATE KEY UPDATE
-    total_leads = VALUES(total_leads),
-    total_valid_leads = VALUES(total_valid_leads),
-    total_revenue = VALUES(total_revenue),
-    last_aggregated_at = VALUES(last_aggregated_at),
-    updated_at = VALUES(updated_at)
+{$this->marketingFactsUpsertSuffix()}
 SQL;
     }
 
@@ -412,6 +407,35 @@ GROUP BY
     base.utm_term,
     base.utm_content,
     base.status
+{$this->marketingPacketFactsUpsertSuffix()}
+SQL;
+    }
+
+    private function marketingFactsUpsertSuffix(): string
+    {
+        if (DB::connection()->getDriverName() !== 'mysql') {
+            return '';
+        }
+
+        return <<<'SQL'
+
+ON DUPLICATE KEY UPDATE
+    total_leads = VALUES(total_leads),
+    total_valid_leads = VALUES(total_valid_leads),
+    total_revenue = VALUES(total_revenue),
+    last_aggregated_at = VALUES(last_aggregated_at),
+    updated_at = VALUES(updated_at)
+SQL;
+    }
+
+    private function marketingPacketFactsUpsertSuffix(): string
+    {
+        if (DB::connection()->getDriverName() !== 'mysql') {
+            return '';
+        }
+
+        return <<<'SQL'
+
 ON DUPLICATE KEY UPDATE
     packet_count = VALUES(packet_count),
     primary_packet_count = VALUES(primary_packet_count),

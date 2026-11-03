@@ -17,9 +17,10 @@ trait DispatchesSqlDailyFacts
 
         $factDate = CarbonImmutable::parse($date, config('reporting.timezone'))->toDateString();
 
-        UpdateDailyFactJob::dispatch($companyId, $factDate)
-            ->delay(now()->addSeconds(20))
-            ->afterCommit();
+        DB::afterCommit(function () use ($companyId, $factDate): void {
+            UpdateDailyFactJob::dispatch($companyId, $factDate)
+                ->delay(now()->addSeconds(20));
+        });
     }
 
     protected function dispatchCurrentAndOriginalDate(Model $model, int $companyId, string $dateColumn = 'created_at'): void
