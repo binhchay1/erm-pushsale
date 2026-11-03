@@ -11,6 +11,7 @@ Agent mới: đọc [`AGENTS.md`](./AGENTS.md) trước, rồi living docs dư�
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | Stack, layer, role, API overview |
 | [OPERATIONS.md](./OPERATIONS.md) | Luồng nghiệp vụ + packet/landing rules |
 | [INTEGRATIONS.md](./INTEGRATIONS.md) | Landing webhook, Pancake, queue/Horizon, carriers |
+| [PANCAKE_E2E.md](./PANCAKE_E2E.md) | Pancake: cấu hình + test E2E dev (webhook → UI) |
 | [REPORTING.md](./REPORTING.md) | Fact tables, hybrid read, lệnh aggregate |
 | [DEPLOY.md](./DEPLOY.md) | Deploy salesloop.vn, quyền build, lệnh nhanh |
 | [CHANGELOG.md](./CHANGELOG.md) | Milestone gần đây (ngắn) |

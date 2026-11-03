@@ -31,7 +31,7 @@ Hệ thống hỗ trợ đồng bộ tự động 2 chiều toàn diện giữa 
   - Tự động gán sale theo tài khoản đang đăng nhập Extension.
 - **Manual Sync (Đồng bộ tức thời trên UI)**:
   - Endpoint: `POST /admin/integrations/pancake/sync-now`
-  - Thao tác: Bấm nút "Đồng bộ đơn ngay" tại menu **1.4 / Quản trị > Kết nối nền tảng** (`/admin/integrations`).
+  - Thao tác: Bấm nút **Đồng bộ đơn ngay** tại hub **Quản trị → Kết nối nền tảng** ([`/admin/integrations`](http://127.0.0.1:8000/admin/integrations) — filter POS / Omnichannel).
   - Kéo ngay tối đa 20 đơn mới nhất từ Pancake POS Open API (`GET /shops/{shop_id}/orders`), không cần chờ webhook.
 - **Scheduler Fallback (Chống rớt đơn)**:
   - Command: `php artisan pancake:sync-orders --limit=50`
@@ -92,3 +92,7 @@ Hệ thống hỗ trợ đồng bộ tự động 2 chiều toàn diện giữa 
 - Incoming chat webhook endpoint: `/api/v1/pancake/messages/{webhook_token}`. The tokened URL is baseline auth; optional HMAC/API-key headers are accepted when `webhook_secret` is configured.
 - Required production setup per tenant/page: enable Pancake connection, store `page_id`, `page_access_token`, webhook token/secret, and map Pancake agent/user to internal sale users where possible.
 - If the dialog shows no Pancake history, run `php artisan pancake:doctor --json` and inspect whether the order has a linked conversation record, page token, active user mapping, and running queues.
+
+### Test E2E (config → UI)
+
+Hướng dẫn từng bước cấu hình, curl webhook, queue, và màn hình xác nhận (workspace / system monitor): **[PANCAKE_E2E.md](./PANCAKE_E2E.md)**.
