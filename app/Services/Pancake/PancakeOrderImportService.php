@@ -10,6 +10,7 @@ use App\Models\LeadIngestion;
 use App\Models\MarketingSource;
 use App\Models\Order;
 use App\Models\PancakeSyncRecord;
+use App\Models\Shop;
 use App\Models\User;
 use App\Services\Leads\LeadIngestionService;
 use Illuminate\Support\Arr;
@@ -68,6 +69,7 @@ class PancakeOrderImportService
 
         $lead->load('order.items', 'order.saleUser', 'order.marketingSource');
         $order = $lead->order;
+        $this->ensureShopScope($connection, $lead, $order);
         $syncRecord = $this->upsertSyncRecord($connection, $payload, $normalized, $lead, $order, $actor, $assignment);
 
         return [
@@ -118,6 +120,8 @@ class PancakeOrderImportService
         }
 
         return MarketingSource::query()->create([
+            'company_id' => $connection->company_id,
+            'shop_id' => $this->defaultShopId($connection),
             'name' => 'Pancake — '.$sourceLabel,
             'ad_channel' => IntegrationPlatform::Pancake->value,
             'utm_source' => $normalized['utm_source'] ?? 'pancake',
@@ -255,5 +259,31 @@ class PancakeOrderImportService
             fn (string $item): string => trim($item),
             explode(',', $value),
         )));
+    }
+
+    protected function ensureShopScope(IntegrationConnection $connection, LeadIngestion $lead, ?Order $order): void
+    {
+        $shopId = $lead->shop_id ?: $order?->shop_id ?: $this->defaultShopId($connection);
+        if (! $shopId) {
+            return;
+        }
+
+        if (! $lead->shop_id) {
+            $lead->forceFill(['shop_id' => $shopId])->save();
+        }
+
+        if ($order && ! $order->shop_id) {
+            $order->forceFill(['shop_id' => $shopId])->save();
+        }
+    }
+
+    protected function defaultShopId(IntegrationConnection $connection): ?int
+    {
+        $id = Shop::query()
+            ->where('company_id', $connection->company_id)
+            ->orderBy('id')
+            ->value('id');
+
+        return $id ? (int) $id : null;
     }
 }
